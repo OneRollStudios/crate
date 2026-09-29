@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "thinking",
+  "title": "Thinking",
+  "author": "One Roll Studios",
+  "description": "Pulsing dots with time-based thinking and cancel states.",
+  "files": [
+    {
+      "path": "components/agent-wait-states/thinking.tsx",
+      "content": "import { cx, duoBackground, type WaitStateProps } from \"./types\";\n\nexport type ThinkingProps = WaitStateProps & {\n  elapsedMs?: number;\n  onCancel?: () => void;\n  label?: string;\n};\n\nexport function Thinking({\n  className,\n  duotone = false,\n  elapsedMs = 0,\n  onCancel,\n  label,\n}: ThinkingProps) {\n  const message = label ?? (elapsedMs >= 8000 ? \"Still thinking…\" : \"Thinking…\");\n  const visibleLabel = elapsedMs >= 2000 || Boolean(label);\n  const canCancel = elapsedMs >= 20000 && Boolean(onCancel);\n\n  return (\n    <div\n      className={cx(\n        \"inline-flex min-h-10 items-center gap-3 rounded-[16px] border border-border bg-background px-4 py-2.5 text-sm text-muted-foreground shadow-[0_12px_30px_-20px_color-mix(in_srgb,var(--primary)_35%,transparent)]\",\n        className,\n      )}\n      aria-live=\"polite\"\n      aria-label={message}\n    >\n      <span className=\"flex items-center gap-1.5\" aria-hidden=\"true\">\n        {[0, 1, 2].map((index) => (\n          <span\n            key={index}\n            className=\"size-1.5 rounded-full bg-primary motion-safe:animate-bounce motion-reduce:opacity-70\"\n            style={{\n              animationDelay: `${index * 140}ms`,\n              background: duotone ? duoBackground : undefined,\n            }}\n          />\n        ))}\n      </span>\n      {visibleLabel ? <span>{message}</span> : <span className=\"sr-only\">{message}</span>}\n      {canCancel ? (\n        <button\n          type=\"button\"\n          onClick={onCancel}\n          className=\"ml-1 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary\"\n        >\n          Cancel\n        </button>\n      ) : null}\n    </div>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/thinking.tsx"
+    },
+    {
+      "path": "components/agent-wait-states/types.ts",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"tool\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  duotone?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n\nexport const duoBackground =\n  \"linear-gradient(120deg, #9E8CF2 0%, #6FB6F0 100%)\";\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/types.ts"
+    }
+  ],
+  "type": "registry:ui"
+}

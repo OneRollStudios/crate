@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "stalled",
+  "title": "Stalled",
+  "author": "One Roll Studios",
+  "description": "A calm state for streams with no new content.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "files": [
+    {
+      "path": "components/agent-wait-states/stalled.tsx",
+      "content": "import { Clock3 } from \"lucide-react\";\nimport { cx, duoBackground, type WaitStateProps } from \"./types\";\n\nexport type StalledProps = WaitStateProps & { message?: string };\n\nexport function Stalled({ className, duotone = false, message = \"Still working…\" }: StalledProps) {\n  return (\n    <div\n      className={cx(\n        \"inline-flex items-center gap-2.5 rounded-[16px] border border-border bg-background px-4 py-2.5 text-sm text-muted-foreground shadow-[0_12px_30px_-22px_color-mix(in_srgb,var(--primary)_40%,transparent)]\",\n        className,\n      )}\n      aria-live=\"polite\"\n    >\n      <span\n        className=\"grid size-6 place-items-center rounded-lg bg-muted text-primary motion-safe:animate-pulse motion-reduce:opacity-80\"\n        style={duotone ? { background: duoBackground, color: \"white\" } : undefined}\n        aria-hidden=\"true\"\n      >\n        <Clock3 className=\"size-3.5\" />\n      </span>\n      {message}\n    </div>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/stalled.tsx"
+    },
+    {
+      "path": "components/agent-wait-states/types.ts",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"tool\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  duotone?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n\nexport const duoBackground =\n  \"linear-gradient(120deg, #9E8CF2 0%, #6FB6F0 100%)\";\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/types.ts"
+    }
+  ],
+  "type": "registry:ui"
+}

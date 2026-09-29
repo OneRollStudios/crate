@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "error",
+  "title": "Error",
+  "author": "One Roll Studios",
+  "description": "An error message with an accessible retry action.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "files": [
+    {
+      "path": "components/agent-wait-states/error-state.tsx",
+      "content": "import { AlertCircle, RotateCcw } from \"lucide-react\";\nimport { cx, type WaitStateProps } from \"./types\";\n\nexport type ErrorStateProps = WaitStateProps & {\n  message?: string;\n  onRetry?: () => void;\n};\n\nexport function ErrorState({\n  className,\n  message = \"Something went wrong.\",\n  onRetry,\n}: ErrorStateProps) {\n  return (\n    <div\n      className={cx(\n        \"flex w-full max-w-sm items-center gap-3 rounded-[16px] border border-border bg-background p-3 text-sm shadow-[0_12px_30px_-22px_color-mix(in_srgb,var(--primary)_35%,transparent)]\",\n        className,\n      )}\n      role=\"status\"\n      aria-live=\"polite\"\n    >\n      <AlertCircle className=\"size-4 shrink-0 text-muted-foreground\" aria-hidden=\"true\" />\n      <span className=\"min-w-0 flex-1 text-foreground\">{message}</span>\n      {onRetry ? (\n        <button\n          type=\"button\"\n          onClick={onRetry}\n          className=\"inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary\"\n        >\n          <RotateCcw className=\"size-3\" aria-hidden=\"true\" /> Retry\n        </button>\n      ) : null}\n    </div>\n  );\n}\n\nexport { ErrorState as Error };\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/error-state.tsx"
+    },
+    {
+      "path": "components/agent-wait-states/types.ts",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"tool\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  duotone?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n\nexport const duoBackground =\n  \"linear-gradient(120deg, #9E8CF2 0%, #6FB6F0 100%)\";\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/types.ts"
+    }
+  ],
+  "type": "registry:ui"
+}

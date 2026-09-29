@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "./lib/tokens/tokens.css";
+
+/* Map Latent tokens into Tailwind's theme so utilities like
+   bg-surface / text-muted / font-display / rounded-lt work. */
+@theme inline {
+  --color-bg: var(--lt-bg);
+  --color-surface: var(--lt-surface);
+  --color-surface-2: var(--lt-surface-2);
+  --color-line: var(--lt-line);
+  --color-line-2: var(--lt-line-2);
+  --color-text: var(--lt-text);
+  --color-muted: var(--lt-muted);
+  --color-faint: var(--lt-faint);
+  --color-accent: var(--lt-accent);
+  --color-accent-2: var(--lt-accent-2);
+  --color-on-accent: var(--lt-on-accent);
+
+  --font-display: var(--lt-display);
+  --font-body: var(--lt-body);
+  --font-mono: var(--lt-mono);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--lt-bg);
+  color: var(--lt-text);
+  font-family: var(--lt-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition: background .3s, color .3s;
+}
+
+::selection { background: var(--lt-accent); color: var(--lt-on-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* shared keyframes used by primitives */
+@keyframes lt-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--lt-accent) 70%, transparent); }
+  70%  { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes lt-blink { 50% { opacity: 0; } }

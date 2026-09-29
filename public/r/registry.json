@@ -1,0 +1,126 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "crate-wait-states",
+  "homepage": "https://crate.onerollstudios.com",
+  "items": [
+    {
+      "name": "thinking",
+      "type": "registry:ui",
+      "title": "Thinking",
+      "description": "Pulsing dots with time-based thinking and cancel states.",
+      "author": "One Roll Studios",
+      "files": [
+        { "path": "components/agent-wait-states/thinking.tsx", "type": "registry:ui", "target": "components/agent-wait-states/thinking.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "streaming",
+      "type": "registry:ui",
+      "title": "Streaming",
+      "description": "Streaming text with a soft glowing cursor.",
+      "author": "One Roll Studios",
+      "files": [
+        { "path": "components/agent-wait-states/streaming.tsx", "type": "registry:ui", "target": "components/agent-wait-states/streaming.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "tool-call",
+      "type": "registry:ui",
+      "title": "ToolCall",
+      "description": "Animated single or multi-step tool activity.",
+      "author": "One Roll Studios",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/agent-wait-states/tool-call.tsx", "type": "registry:ui", "target": "components/agent-wait-states/tool-call.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "stalled",
+      "type": "registry:ui",
+      "title": "Stalled",
+      "description": "A calm state for streams with no new content.",
+      "author": "One Roll Studios",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/agent-wait-states/stalled.tsx", "type": "registry:ui", "target": "components/agent-wait-states/stalled.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "error",
+      "type": "registry:ui",
+      "title": "Error",
+      "description": "An error message with an accessible retry action.",
+      "author": "One Roll Studios",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/agent-wait-states/error-state.tsx", "type": "registry:ui", "target": "components/agent-wait-states/error-state.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "done",
+      "type": "registry:ui",
+      "title": "Done",
+      "description": "A quiet completion check that fades away.",
+      "author": "One Roll Studios",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/agent-wait-states/done.tsx", "type": "registry:ui", "target": "components/agent-wait-states/done.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "agent-state",
+      "type": "registry:ui",
+      "title": "AgentState",
+      "description": "A state wrapper that renders and transitions the complete wait-state set.",
+      "author": "One Roll Studios",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/agent-wait-states/agent-state.tsx", "type": "registry:ui", "target": "components/agent-wait-states/agent-state.tsx" },
+        { "path": "components/agent-wait-states/thinking.tsx", "type": "registry:ui", "target": "components/agent-wait-states/thinking.tsx" },
+        { "path": "components/agent-wait-states/streaming.tsx", "type": "registry:ui", "target": "components/agent-wait-states/streaming.tsx" },
+        { "path": "components/agent-wait-states/tool-call.tsx", "type": "registry:ui", "target": "components/agent-wait-states/tool-call.tsx" },
+        { "path": "components/agent-wait-states/stalled.tsx", "type": "registry:ui", "target": "components/agent-wait-states/stalled.tsx" },
+        { "path": "components/agent-wait-states/error-state.tsx", "type": "registry:ui", "target": "components/agent-wait-states/error-state.tsx" },
+        { "path": "components/agent-wait-states/done.tsx", "type": "registry:ui", "target": "components/agent-wait-states/done.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "use-agent-status",
+      "type": "registry:hook",
+      "title": "useAgentStatus",
+      "description": "Maps Vercel AI SDK useChat state and message parts to wait states.",
+      "author": "One Roll Studios",
+      "files": [
+        { "path": "hooks/use-agent-status.ts", "type": "registry:hook", "target": "hooks/use-agent-status.ts" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" }
+      ]
+    },
+    {
+      "name": "all",
+      "type": "registry:item",
+      "title": "Crate Wait States",
+      "description": "Every wait-state component and the useAgentStatus hook.",
+      "author": "One Roll Studios",
+      "dependencies": ["lucide-react"],
+      "files": [
+        { "path": "components/agent-wait-states/agent-state.tsx", "type": "registry:ui", "target": "components/agent-wait-states/agent-state.tsx" },
+        { "path": "components/agent-wait-states/thinking.tsx", "type": "registry:ui", "target": "components/agent-wait-states/thinking.tsx" },
+        { "path": "components/agent-wait-states/streaming.tsx", "type": "registry:ui", "target": "components/agent-wait-states/streaming.tsx" },
+        { "path": "components/agent-wait-states/tool-call.tsx", "type": "registry:ui", "target": "components/agent-wait-states/tool-call.tsx" },
+        { "path": "components/agent-wait-states/stalled.tsx", "type": "registry:ui", "target": "components/agent-wait-states/stalled.tsx" },
+        { "path": "components/agent-wait-states/error-state.tsx", "type": "registry:ui", "target": "components/agent-wait-states/error-state.tsx" },
+        { "path": "components/agent-wait-states/done.tsx", "type": "registry:ui", "target": "components/agent-wait-states/done.tsx" },
+        { "path": "components/agent-wait-states/types.ts", "type": "registry:ui", "target": "components/agent-wait-states/types.ts" },
+        { "path": "components/agent-wait-states/index.ts", "type": "registry:ui", "target": "components/agent-wait-states/index.ts" },
+        { "path": "hooks/use-agent-status.ts", "type": "registry:hook", "target": "hooks/use-agent-status.ts" }
+      ]
+    }
+  ]
+}

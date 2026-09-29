@@ -1,0 +1,82 @@
+/* ============================================================
+   Latent design tokens — "Glass".
+   Vivid violet on a rich gradient field, frosted-glass surfaces.
+   Shared by the component library and the marketing site.
+   ============================================================ */
+
+@font-face{font-family:"Bricolage Grotesque";src:url("/fonts/bricolage-grotesque-800.woff2") format("woff2");font-weight:800;font-style:normal;font-display:swap;}
+@font-face{font-family:"Bricolage Grotesque";src:url("/fonts/bricolage-grotesque-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:"Hanken Grotesk";src:url("/fonts/hanken-grotesk-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:"Hanken Grotesk";src:url("/fonts/hanken-grotesk-600.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:"Spline Sans Mono";src:url("/fonts/spline-sans-mono-400.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:"Spline Sans Mono";src:url("/fonts/spline-sans-mono-500.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap;}
+
+/* ---- light (default) ---- */
+:root{
+  --lt-bg:#FFFFFF; --lt-surface:#FFFFFF; --lt-surface-2:#F4F1FC;
+  --lt-line:rgba(40,18,90,.10); --lt-line-2:rgba(40,18,90,.18);
+  --lt-text:#231540; --lt-ink-2:#9E93C4; --lt-muted:#6A6088; --lt-faint:#9A93B4;
+  --lt-accent:#7B2FF7; --lt-accent-2:#6620D6; --lt-on-accent:#FFFFFF; --lt-accent-dim:rgba(123,47,247,.12);
+  --lt-shadow:0 30px 70px rgba(80,30,160,.20);
+  /* glass */
+  --lt-glass:rgba(255,255,255,.60); --lt-glass-2:rgba(255,255,255,.42); --lt-glass-border:rgba(255,255,255,.65);
+  --lt-blur:20px;
+  /* rich page field */
+  --lt-page:
+    radial-gradient(90% 55% at 10% 2%, rgba(123,47,247,.55), transparent 55%),
+    radial-gradient(80% 50% at 92% 100%, rgba(157,78,221,.45), transparent 60%),
+    linear-gradient(180deg,#efe7fd 0%,#f4effe 34%,#efe6fc 68%,#e6d7fb 100%);
+  --lt-glow:rgba(123,47,247,.28);
+  --lt-display:"Bricolage Grotesque",Georgia,serif;
+  --lt-body:"Hanken Grotesk",system-ui,sans-serif;
+  --lt-mono:"Spline Sans Mono",ui-monospace,monospace;
+  --lt-maxw:1240px; --lt-gut:clamp(20px,4vw,44px);
+  --lt-radius:16px;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --lt-bg:#140C24; --lt-surface:#1B1230; --lt-surface-2:#241839;
+    --lt-line:rgba(255,255,255,.10); --lt-line-2:rgba(255,255,255,.18);
+    --lt-text:#F1ECFB; --lt-ink-2:#6E5F9A; --lt-muted:#AEA4CE; --lt-faint:#6B5F93;
+    --lt-accent:#9D5CF5; --lt-accent-2:#B487F8; --lt-on-accent:#12081F; --lt-accent-dim:rgba(157,92,245,.18);
+    --lt-shadow:0 30px 80px rgba(0,0,0,.55);
+    --lt-glass:rgba(30,18,54,.55); --lt-glass-2:rgba(30,18,54,.4); --lt-glass-border:rgba(255,255,255,.14);
+    --lt-blur:20px;
+    --lt-page:
+      radial-gradient(90% 55% at 10% 2%, rgba(123,47,247,.5), transparent 55%),
+      radial-gradient(80% 50% at 92% 100%, rgba(90,40,180,.5), transparent 60%),
+      linear-gradient(180deg,#1a0f30 0%,#130b22 50%,#0e0819 100%);
+    --lt-glow:rgba(157,92,245,.3);
+  }
+}
+
+:root[data-theme="light"]{
+  --lt-bg:#FFFFFF; --lt-surface:#FFFFFF; --lt-surface-2:#F4F1FC;
+  --lt-line:rgba(40,18,90,.10); --lt-line-2:rgba(40,18,90,.18);
+  --lt-text:#231540; --lt-ink-2:#9E93C4; --lt-muted:#6A6088; --lt-faint:#9A93B4;
+  --lt-accent:#7B2FF7; --lt-accent-2:#6620D6; --lt-on-accent:#FFFFFF; --lt-accent-dim:rgba(123,47,247,.12);
+  --lt-shadow:0 30px 70px rgba(80,30,160,.20);
+  --lt-glass:rgba(255,255,255,.60); --lt-glass-2:rgba(255,255,255,.42); --lt-glass-border:rgba(255,255,255,.65);
+  --lt-blur:20px;
+  --lt-page:
+    radial-gradient(90% 55% at 10% 2%, rgba(123,47,247,.55), transparent 55%),
+    radial-gradient(80% 50% at 92% 100%, rgba(157,78,221,.45), transparent 60%),
+    linear-gradient(180deg,#efe7fd 0%,#f4effe 34%,#efe6fc 68%,#e6d7fb 100%);
+  --lt-glow:rgba(123,47,247,.28);
+}
+
+:root[data-theme="dark"]{
+  --lt-bg:#140C24; --lt-surface:#1B1230; --lt-surface-2:#241839;
+  --lt-line:rgba(255,255,255,.10); --lt-line-2:rgba(255,255,255,.18);
+  --lt-text:#F1ECFB; --lt-ink-2:#6E5F9A; --lt-muted:#AEA4CE; --lt-faint:#6B5F93;
+  --lt-accent:#9D5CF5; --lt-accent-2:#B487F8; --lt-on-accent:#12081F; --lt-accent-dim:rgba(157,92,245,.18);
+  --lt-shadow:0 30px 80px rgba(0,0,0,.55);
+  --lt-glass:rgba(30,18,54,.55); --lt-glass-2:rgba(30,18,54,.4); --lt-glass-border:rgba(255,255,255,.14);
+  --lt-blur:20px;
+  --lt-page:
+    radial-gradient(90% 55% at 10% 2%, rgba(123,47,247,.5), transparent 55%),
+    radial-gradient(80% 50% at 92% 100%, rgba(90,40,180,.5), transparent 60%),
+    linear-gradient(180deg,#1a0f30 0%,#130b22 50%,#0e0819 100%);
+  --lt-glow:rgba(157,92,245,.3);
+}
