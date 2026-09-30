@@ -164,37 +164,53 @@ async function runReducedMotion(browser, baseURL) {
   }
 }
 
-async function captureDemoSequence(browser, baseURL) {
-  console.log("Capturing the complete demo sequence (~20 seconds)…");
-  const context = await browser.newContext({ viewport: { width: 1000, height: 760 } });
+async function captureHeroStates(browser, baseURL) {
+  console.log("Capturing every waiting-room hero state…");
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   try {
     const page = await context.newPage();
-    page.setDefaultTimeout(10000);
+    page.setDefaultTimeout(15000);
     await page.goto(baseURL, { waitUntil: "networkidle" });
-    await page.locator(".chat-card").scrollIntoViewIfNeeded();
-    const expected = new Set(["Thinking", "Using tools", "Streaming", "Stream paused", "Recovering", "Retrying", "Done"]);
-    const captured = new Set();
-    const started = Date.now();
-    let frame = 0;
+    const room = page.locator(".waiting-room");
+    await room.scrollIntoViewIfNeeded();
+    const captured = [];
 
-    while (Date.now() - started < 31000 && captured.size < expected.size) {
-      const label = ((await page.locator(".phase-label").textContent()) ?? "").trim();
-      if (expected.has(label) && !captured.has(label)) {
-        captured.add(label);
-        const slug = label.toLowerCase().replaceAll(" ", "-");
-        await page.locator(".chat-card").screenshot({
-          path: `${screenshotDir}/demo-${String(frame).padStart(2, "0")}-${slug}.png`,
-        });
-        frame += 1;
-        console.log(`Captured ${label}`);
-      }
-      await page.waitForTimeout(250);
+    async function shot(name) {
+      await room.screenshot({ path: screenshotDir + "/hero-" + name + ".png" });
+      captured.push(name);
+    }
+    async function waitState(name) {
+      await page.locator('[data-agent-state="' + name + '"]').waitFor();
+      await shot(name);
     }
 
-    if (captured.size !== expected.size) {
-      throw new Error(`Demo sequence missed: ${[...expected].filter((item) => !captured.has(item)).join(", ")}`);
-    }
-    results.push(`PASS demo sequence: ${[...captured].join(", ")}`);
+    await waitState("thinking");
+    await page.getByRole("button", { name: "take a number" }).click();
+    await waitState("reasoning");
+    await waitState("tool");
+    await waitState("streaming");
+    await waitState("sources");
+    await waitState("done");
+
+    await page.getByRole("button", { name: "slow it down" }).click();
+    await waitState("stalled");
+    await page.getByRole("button", { name: "break it" }).click();
+    await waitState("error");
+    await page.getByRole("button", { name: "break it" }).click();
+    await page.getByRole("button", { name: "break it" }).click();
+    await page.getByText("okay, now you're just doing this on purpose.").waitFor();
+    await shot("error-third-break");
+    await page.getByRole("button", { name: "ask permission" }).click();
+    await waitState("approval");
+    await page.getByRole("button", { name: "join the queue" }).click();
+    await waitState("queue");
+    await page.getByRole("button", { name: "without crate" }).click();
+    await waitState("waiting");
+
+    const expected = ["thinking", "reasoning", "tool", "streaming", "sources", "done", "stalled", "error", "approval", "queue", "waiting"];
+    const missing = expected.filter((state) => !captured.includes(state));
+    if (missing.length) throw new Error("Hero sequence missed: " + missing.join(", "));
+    results.push("PASS hero states: " + captured.join(", "));
   } finally {
     await context.close();
   }
@@ -215,7 +231,7 @@ async function main() {
     await runViewport(browser, baseURL, "mobile", { width: 390, height: 844 }, "light");
     await runViewport(browser, baseURL, "mobile", { width: 390, height: 844 }, "dark");
     await runReducedMotion(browser, baseURL);
-    await captureDemoSequence(browser, baseURL);
+    await captureHeroStates(browser, baseURL);
     console.log(results.join("\n"));
   } finally {
     if (browser) await browser.close();

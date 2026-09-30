@@ -1,350 +1,246 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowRight, Check, Copy, PackageOpen, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, Copy, Ticket } from "lucide-react";
 import {
-  AgentState,
-  AgentPlan,
-  Approval,
-  Done,
-  FileProcessing,
-  Queue,
-  ReasoningTrace,
-  Sources,
-  ErrorState,
-  Stalled,
-  Streaming,
-  Thinking,
-  ToolCall,
+  AgentPlan, AgentState, Approval, Done, ErrorState, FileProcessing, Queue,
+  ReasoningTrace, Sources, Stalled, Streaming, Thinking, ToolCall,
   type AgentStatus,
 } from "@/components/agent-wait-states";
 import { DISCOVERY_URL, STUDIO_URL, installCommand } from "@/lib/config";
 
-const STREAM_TEXT =
-  "I found three patterns worth carrying into the next release: shorter prompts, visible tool progress, and calmer recovery states.";
-
-const phases: Array<{ state: AgentStatus; duration: number; label: string }> = [
-  { state: "thinking", duration: 2300, label: "Thinking" },
-  { state: "tool", duration: 3000, label: "Using tools" },
-  { state: "streaming", duration: 4300, label: "Streaming" },
-  { state: "stalled", duration: 2200, label: "Stream paused" },
-  { state: "error", duration: 2500, label: "Recovering" },
-  { state: "thinking", duration: 1700, label: "Retrying" },
-  { state: "done", duration: 2600, label: "Done" },
+const reply = "give me a second. i’m checking the useful bits.";
+const streamReply = "found it. the short version is surprisingly sensible.";
+const sourceItems = [
+  { domain: "docs.ai", title: "streaming reference" },
+  { domain: "patterns.dev", title: "interface notes" },
+  { domain: "example.com", title: "product brief" },
+  { domain: "status.test", title: "service status" },
+  { domain: "paper.dev", title: "research summary" },
+  { domain: "news.test", title: "recent update" },
 ];
+const planSteps = [
+  { label: "read the request", state: "complete" as const },
+  { label: "check the sources", state: "active" as const },
+  { label: "write the answer", state: "pending" as const },
+];
+const stateLabels: Record<AgentStatus, string> = {
+  thinking: "thinking", reasoning: "reasoning", sources: "sources", tool: "tool call",
+  plan: "planning", approval: "approval", queue: "queued", file: "reading file",
+  streaming: "streaming", stalled: "stalled", error: "error", done: "done",
+};
+type BoardRow = { number: number; prompt: string; status: string; startedAt: number };
+type Mode = "without" | "with";
 
-function CopyButton({ value, label = "Copy" }: { value: string; label?: string }) {
+function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
-  const copy = async () => {
+  return <button type="button" className="copy-button" aria-label="copy install command" onClick={async () => {
     await navigator.clipboard.writeText(value);
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
-  };
-
-  return (
-    <button className="copy-button" type="button" onClick={copy} aria-label={`${label}: ${value}`}>
-      {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-      <span>{copied ? "Copied" : label}</span>
-    </button>
-  );
+    window.setTimeout(() => setCopied(false), 1400);
+  }}>{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}<span>{copied ? "copied" : "copy"}</span></button>;
 }
 
-function InstallPill({ name, compact = false }: { name: string; compact?: boolean }) {
-  const command = installCommand(name);
-  return (
-    <div className={compact ? "install-pill compact" : "install-pill"}>
-      <code>{command}</code>
-      <CopyButton value={command} />
-    </div>
-  );
+function SplitStatus({ value }: { value: string }) {
+  return <span className="flap-status" key={value} aria-label={value}>
+    {value.split("").map((letter, index) => <span className="flap-letter" key={index} aria-hidden="true">{letter === " " ? " " : letter}</span>)}
+  </span>;
 }
 
-function SimulatedChat() {
-  const [phaseIndex, setPhaseIndex] = useState(0);
-  const [streamed, setStreamed] = useState("");
-  const phase = phases[phaseIndex];
-
-  useEffect(() => {
-    setStreamed(phase.state === "stalled" ? STREAM_TEXT.slice(0, 61) : "");
-    const next = window.setTimeout(
-      () => setPhaseIndex((index) => (index + 1) % phases.length),
-      phase.duration,
-    );
-    return () => window.clearTimeout(next);
-  }, [phase.duration, phase.state, phaseIndex]);
-
-  useEffect(() => {
-    if (phase.state !== "streaming") return;
-    let index = 0;
-    const stream = window.setInterval(() => {
-      index += 2;
-      setStreamed(STREAM_TEXT.slice(0, index));
-      if (index >= STREAM_TEXT.length) window.clearInterval(stream);
-    }, 56);
-    return () => window.clearInterval(stream);
-  }, [phase.state, phaseIndex]);
-
-  const retry = useCallback(() => setPhaseIndex(5), []);
-  const steps = useMemo(
-    () => [
-      { label: "Searching the web…", toolName: "search", state: "complete" as const },
-      { label: "Reading product notes…", toolName: "read_file", state: "active" as const },
-    ],
-    [],
-  );
-
-  return (
-    <div className="chat-card" aria-label="Simulated AI conversation">
-      <div className="chat-topline">
-        <span className="window-dots" aria-hidden="true"><i /><i /><i /></span>
-        <span>live simulation</span>
-        <span className="phase-label"><i />{phase.label}</span>
-      </div>
-      <div className="chat-body">
-        <div className="message user-message">What should we improve before launch?</div>
-        <div className="assistant-row">
-          <div className="assistant-mark" aria-hidden="true"><PackageOpen /></div>
-          <div className="assistant-content">
-            {phase.state === "stalled" ? (
-              <>
-                <p className="partial-copy">{streamed}</p>
-                <AgentState status="stalled" accent />
-              </>
-            ) : (
-              <AgentState
-                status={phase.state}
-                accent
-                text={streamed}
-                steps={phase.state === "tool" ? steps : undefined}
-                errorMessage="The stream dropped. Your prompt is safe."
-                onRetry={retry}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="timeline" aria-hidden="true">
-        {phases.map((item, index) => (
-          <span key={`${item.label}-${index}`} className={index === phaseIndex ? "active" : index < phaseIndex ? "past" : ""} />
-        ))}
-      </div>
-    </div>
-  );
+function SignalStrip({ state, plain }: { state: AgentStatus; plain: boolean }) {
+  const signalState = plain ? "waiting" : state;
+  return <div className={"signal-strip signal-" + signalState} aria-label={"token signal: " + signalState}>
+    {Array.from({ length: 42 }, (_, index) => <i key={index} style={{ "--bar": index } as React.CSSProperties} />)}
+  </div>;
 }
 
-type ComponentCard = {
-  name: string;
-  slug: string;
-  description: string;
-  preview: React.ReactNode;
-  snippet: string;
-};
-
-const componentCards: ComponentCard[] = [
-  {
-    name: "Thinking",
-    slug: "thinking",
-    description: "A quiet signal for the gap before the first token arrives.",
-    preview: <Thinking accent elapsedMs={9000} />,
-    snippet: `<Thinking accent elapsedMs={elapsedMs} />`,
-  },
-  {
-    name: "Streaming",
-    slug: "streaming",
-    description: "Text arrives with a soft cursor that stays out of the way.",
-    preview: <Streaming accent text="Here’s what I found" />,
-    snippet: `<Streaming text={content} accent />`,
-  },
-  {
-    name: "ToolCall",
-    slug: "tool-call",
-    description: "One tool or a full sequence, with active and completed steps.",
-    preview: (
-      <ToolCall accent steps={[
-        { label: "Searching the web…", toolName: "search", state: "complete" },
-        { label: "Reading file…", toolName: "read_file", state: "active" },
-      ]} />
-    ),
-    snippet: `<ToolCall steps={steps} accent />`,
-  },
-  {
-    name: "Stalled",
-    slug: "stalled",
-    description: "Reassures people when a live response goes quiet for five seconds.",
-    preview: <Stalled accent />,
-    snippet: `<Stalled message="Still working…" />`,
-  },
-  {
-    name: "Error",
-    slug: "error",
-    description: "A compact recovery state with a retry action built in.",
-    preview: <ErrorState message="The stream dropped." onRetry={() => undefined} />,
-    snippet: `<ErrorState message={error.message} onRetry={retry} />`,
-  },
-  {
-    name: "Done",
-    slug: "done",
-    description: "A quiet confirmation that acknowledges completion, then recedes.",
-    preview: <Done accent />,
-    snippet: `<Done accent />`,
-  },
-  {
-    name: "ReasoningTrace",
-    slug: "reasoning-trace",
-    description: "Streams reasoning in a panel, then collapses to the time spent.",
-    preview: <ReasoningTrace accent text="Checking the constraints and comparing the options…" />,
-    snippet: `<ReasoningTrace text={reasoning} done={done} accent />`,
-  },
-  {
-    name: "Sources",
-    slug: "sources",
-    description: "Citation chips arrive with the answer and keep overflow tidy.",
-    preview: <Sources accent sources={[{ domain: "example.com", title: "Useful source" }, { domain: "docs.ai", title: "API reference" }, { domain: "paper.dev", title: "Research notes" }, { domain: "news.test", title: "Latest update" }]} />,
-    snippet: `<Sources sources={sources} accent />`,
-  },
-  {
-    name: "AgentPlan",
-    slug: "agent-plan",
-    description: "A step list that marks progress, active work, and failures.",
-    preview: <AgentPlan accent steps={[{ label: "Read the brief", state: "complete" }, { label: "Draft the answer", state: "active" }, { label: "Check the facts", state: "pending" }]} />,
-    snippet: `<AgentPlan steps={steps} accent />`,
-  },
-  {
-    name: "Approval",
-    slug: "approval",
-    description: "A clear human checkpoint before an agent takes action.",
-    preview: <Approval accent preview="To: hello@example.com · Subject: quick follow-up" expiresIn={30} />,
-    snippet: `<Approval preview={action} onAllow={allow} onDeny={deny} />`,
-  },
-  {
-    name: "Queue",
-    slug: "queue",
-    description: "A live place in line or a rate-limit countdown.",
-    preview: <Queue accent position={3} />,
-    snippet: `<Queue position={3} accent />`,
-  },
-  {
-    name: "FileProcessing",
-    slug: "file-processing",
-    description: "Tracks a file from upload through reading, chunking, and ready.",
-    preview: <FileProcessing accent filename="research.pdf" size="2.4 MB" stage="chunking" progress={72} />,
-    snippet: `<FileProcessing filename="research.pdf" size="2.4 MB" stage="chunking" progress={72} />`,
-  },
-  {
-    name: "AgentState",
-    slug: "agent-state",
-    description: "The wrapper that chooses the right wait state and transitions it smoothly.",
-    preview: <AgentState status="tool" toolName="search" accent />,
-    snippet: `<AgentState status={status} text={content} onRetry={retry} />`,
-  },
-];
-
-function ComponentSection({ item, index }: { item: ComponentCard; index: number }) {
-  return (
-    <article className="component-row" id={item.slug}>
-      <div className="component-copy">
-        <span className="component-number">{String(index + 1).padStart(2, "0")}</span>
-        <h3>{item.name}</h3>
-        <p>{item.description}</p>
-        <InstallPill name={item.slug} compact />
-        <pre className="usage-code"><code>{item.snippet}</code></pre>
-      </div>
-      <div className="component-stage">
-        <span className="stage-label">live preview</span>
-        <div className="preview-center">{item.preview}</div>
-      </div>
-    </article>
-  );
+function StatePreview({ slug }: { slug: string }) {
+  if (slug === "thinking") return <Thinking accent elapsedMs={9000} />;
+  if (slug === "streaming") return <Streaming accent text="here it comes, one useful token at a time." />;
+  if (slug === "tool-call") return <ToolCall accent steps={[{ label: "searching the web…", toolName: "search", state: "complete" }, { label: "reading the useful part…", toolName: "read_file", state: "active" }]} />;
+  if (slug === "stalled") return <Stalled accent />;
+  if (slug === "error") return <ErrorState message="the stream dropped." onRetry={() => undefined} />;
+  if (slug === "done") return <Done accent />;
+  if (slug === "reasoning-trace") return <ReasoningTrace accent text="checking assumptions and ruling out the weird options…" />;
+  if (slug === "sources") return <Sources accent sources={sourceItems} />;
+  if (slug === "agent-plan") return <AgentPlan accent steps={planSteps} />;
+  if (slug === "approval") return <Approval accent preview="to: studio@example.com · subject: quick follow-up" expiresIn={30} />;
+  if (slug === "queue") return <Queue accent position={3} />;
+  return <FileProcessing accent filename="research.pdf" size="2.4 mb" stage="chunking" progress={72} />;
 }
+
+const catalogue = [
+  ["thinking", "thinking", "the quiet gap before the first token."],
+  ["streaming", "streaming", "text arrives with a live cursor."],
+  ["tool-call", "tool call", "shows one tool or a sequence of tools."],
+  ["stalled", "stalled", "steps in after five seconds without a token."],
+  ["error", "error", "keeps the failure short and gives retry a clear place."],
+  ["done", "done", "a small check that acknowledges completion."],
+  ["reasoning-trace", "reasoning trace", "opens while reasoning streams, then folds away."],
+  ["sources", "sources", "citations arrive as compact source chips."],
+  ["agent-plan", "agent plan", "tracks active, complete, and failed steps."],
+  ["approval", "approval", "asks a person before the agent acts."],
+  ["queue", "queue", "counts down a place in line or a rate limit."],
+  ["file-processing", "file processing", "follows a file from upload to ready."],
+] as const;
 
 export default function Home() {
   const allCommand = installCommand("all");
-  return (
-    <main>
-      <header className="site-nav">
-        <a className="brand" href="#top" aria-label="Crate home">
-          <span className="brand-mark"><PackageOpen /></span>Crate
-        </a>
-        <nav aria-label="Primary navigation">
-          <a href="#components">Components</a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#footer">About</a>
-        </nav>
-        <a className="nav-install" href="#components">Open the crate <ArrowRight /></a>
-      </header>
+  const [mode, setMode] = useState<Mode>("with");
+  const [status, setStatus] = useState<AgentStatus>("thinking");
+  const [streamed, setStreamed] = useState("");
+  const [ticketNumber, setTicketNumber] = useState(42);
+  const [printedTicket, setPrintedTicket] = useState<number | null>(null);
+  const [now, setNow] = useState(0);
+  const [peopleLeft, setPeopleLeft] = useState(0);
+  const [breakStreak, setBreakStreak] = useState(0);
+  const [openState, setOpenState] = useState<string>("thinking");
+  const runTimers = useRef<number[]>([]);
+  const [rows, setRows] = useState<BoardRow[]>([
+    { number: 39, prompt: "summarize the research", status: "done", startedAt: 58 },
+    { number: 40, prompt: "compare the options", status: "tool call", startedAt: 34 },
+    { number: 41, prompt: "write the short version", status: "thinking", startedAt: 9 },
+  ]);
 
-      <section className="hero" id="top">
-        <div className="hero-blob" aria-hidden="true" />
-        <div className="eyebrow"><i />Open source · React · AI SDK ready</div>
-        <h1>AI wait states that <span>handle themselves.</span></h1>
-        <p>
-          Drop in one wrapper. It follows the stream from first thought to final token—tools,
-          stalls, recovery and all.
-        </p>
-        <div className="hero-command">
-          <span className="prompt">$</span>
-          <code>{allCommand}</code>
-          <CopyButton value={allCommand} label="Copy" />
-        </div>
-        <div className="hero-meta">
-          <span>7 components</span><i />
-          <span>1 smart hook</span><i />
-          <span>MIT licensed</span>
-        </div>
-      </section>
+  const clearRun = useCallback(() => {
+    runTimers.current.forEach((timer) => window.clearTimeout(timer));
+    runTimers.current = [];
+  }, []);
 
-      <section className="demo-section section-wrap" aria-labelledby="demo-title">
-        <div className="section-intro">
-          <span className="kicker">A whole response, handled</span>
-          <h2 id="demo-title">Every awkward pause gets a useful state.</h2>
-          <p>This fake conversation loops through thinking, tools, streaming, a stall, an error, retry and done.</p>
-        </div>
-        <SimulatedChat />
-      </section>
+  const setScenario = useCallback((next: AgentStatus, resetBreak = true) => {
+    clearRun();
+    if (resetBreak) setBreakStreak(0);
+    setStatus(next);
+    setStreamed(next === "streaming" ? streamReply : "");
+  }, [clearRun]);
 
-      <section className="components-section section-wrap" id="components" aria-labelledby="components-title">
-        <div className="section-intro compact-intro">
-          <span className="kicker">Inside the crate</span>
-          <h2 id="components-title">Use the wrapper. Or take exactly what you need.</h2>
-        </div>
-        <div className="component-list">
-          {componentCards.map((item, index) => <ComponentSection item={item} index={index} key={item.slug} />)}
-        </div>
-      </section>
+  const startRequest = useCallback(() => {
+    clearRun();
+    const nextNumber = ticketNumber + 1;
+    setTicketNumber(nextNumber);
+    setPrintedTicket(nextNumber);
+    setBreakStreak(0);
+    setStatus("thinking");
+    setStreamed("");
+    setRows((current) => [{ number: nextNumber, prompt: "make this wait feel better", status: "thinking", startedAt: 0 }, ...current].slice(0, 4));
+    const sequence: Array<[number, AgentStatus]> = [[2200, "reasoning"], [4700, "tool"], [7200, "streaming"], [9800, "sources"], [12200, "done"]];
+    runTimers.current = sequence.map(([delay, next]) => window.setTimeout(() => {
+      setStatus(next);
+      if (next === "streaming") setStreamed(streamReply);
+    }, delay));
+  }, [clearRun, ticketNumber]);
 
-      <section className="how-section section-wrap" id="how-it-works" aria-labelledby="how-title">
-        <div className="how-copy">
-          <span className="kicker">How it works</span>
-          <h2 id="how-title">Your stream already knows the state.</h2>
-          <p><code>useAgentStatus</code> reads AI SDK v5 status, text and tool parts, then handles timing and stalled streams for you.</p>
-        </div>
-        <div className="two-line-code">
-          <div><span>1</span><code>const status = useAgentStatus(chat);</code></div>
-          <div><span>2</span><code>&lt;AgentState status={`{status}`} /&gt;</code></div>
-          <CopyButton value={`const status = useAgentStatus(chat);\n<AgentState status={status} />`} />
-        </div>
-      </section>
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow((count) => count + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    if (mode !== "without") return;
+    const timer = window.setInterval(() => setPeopleLeft((count) => count + 1), 3000);
+    return () => window.clearInterval(timer);
+  }, [mode]);
+  useEffect(() => {
+    setRows((current) => current.map((row, index) => index === 0 ? { ...row, status: mode === "without" ? "waiting" : stateLabels[status] } : row));
+  }, [mode, status]);
+  useEffect(() => () => clearRun(), [clearRun]);
 
-      <section className="care-cta section-wrap">
-        <div>
-          <span className="kicker">One Roll Studios</span>
-          <h2>Want something built with this much care?</h2>
-          <p>One Roll Studios builds it.</p>
-        </div>
-        <a href={DISCOVERY_URL} target="_blank" rel="noreferrer">Start a project <ArrowRight /></a>
-      </section>
+  const activeMessage = useMemo(() => breakStreak >= 3 ? "okay, now you're just doing this on purpose." : reply, [breakStreak]);
+  const triggerBreak = () => {
+    clearRun();
+    setBreakStreak((count) => count + 1);
+    setStatus("error");
+  };
+  const elapsed = (time: number) => {
+    const total = Math.max(0, time + now);
+    return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+  };
 
-      <footer id="footer">
-        <div className="footer-brand"><span className="brand-mark"><PackageOpen /></span><strong>Crate</strong><span>AI wait states that handle themselves.</span></div>
-        <div className="footer-cta">
-          <span>Want something built with this much care? One Roll Studios builds it.</span>
-          <a href={DISCOVERY_URL} target="_blank" rel="noreferrer">Let’s talk <ArrowRight /></a>
+  return <main>
+    <header className="site-header">
+      <a href="#top" className="wordmark">crate</a>
+      <a href="#states">12 wait states</a>
+    </header>
+
+    <section className="hero" id="top">
+      <div className="hero-copy">
+        <h1>your ai is thinking. your users are leaving.</h1>
+        <p>12 free wait states for ai apps. they switch on their own. one command.</p>
+        <div className="hero-command"><code>{allCommand}</code><CopyButton value={allCommand} /></div>
+      </div>
+
+      <div className="waiting-room" data-agent-state={mode === "without" ? "waiting" : status}>
+        <div className="departure-board">
+          <div className="board-head"><span>request</span><span>prompt</span><span>status</span><span>elapsed</span></div>
+          <div className="board-rows" aria-live="polite">
+            {rows.map((row) => <div className="board-row" key={row.number}>
+              <span className="request-number">{String(row.number).padStart(3, "0")}</span>
+              <span className="board-prompt">{row.prompt}</span>
+              <SplitStatus value={row.status} />
+              <time>{elapsed(row.startedAt)}</time>
+            </div>)}
+          </div>
         </div>
-        <div className="footer-bottom">
-          <span>MIT licensed · made by <a href={STUDIO_URL}>One Roll Studios</a></span>
-          <a href={STUDIO_URL}>onerollstudios.com</a>
+
+        <div className="mode-switch" role="group" aria-label="compare wait states">
+          <button type="button" className={mode === "without" ? "active" : ""} onClick={() => setMode("without")}>without crate</button>
+          <button type="button" className={mode === "with" ? "active" : ""} onClick={() => setMode("with")}>with crate</button>
+          {mode === "without" ? <span className="left-count" aria-live="polite">people who left: {peopleLeft}</span> : null}
         </div>
-      </footer>
-    </main>
-  );
+
+        <div className="playground">
+          <div className="chat-line user-line">make this wait feel better.</div>
+          <div className="response-zone">
+            {mode === "without" ? <div className="plain-wait"><i aria-hidden="true" />waiting</div> : <>
+              {status === "stalled" ? <p className="partial-answer">i was getting somewhere. probably.</p> : null}
+              {status === "error" ? <p className="error-reply">{activeMessage}</p> : null}
+              <AgentState status={status} accent text={streamed} reasoning="checking the request, the sources, and whether this is secretly three questions…" sources={sourceItems} steps={[{ label: "searching the web…", toolName: "search", state: "active" }]} planSteps={planSteps} approvalTitle="the agent wants to send this email" approvalPreview="to: studio@example.com · subject: the useful answer" approvalExpiresIn={30} queuePosition={3} filename="research.pdf" fileSize="2.4 mb" fileStage="reading" fileProgress={46} errorMessage="the stream tripped over its own shoelaces." onRetry={() => setScenario("thinking")} />
+            </>}
+          </div>
+          <SignalStrip state={status} plain={mode === "without"} />
+        </div>
+
+        <div className="controls">
+          <button type="button" onClick={() => setScenario("stalled")}>slow it down</button>
+          <button type="button" onClick={() => setScenario("stalled")}>cut the stream</button>
+          <button type="button" onClick={triggerBreak}>break it</button>
+          <button type="button" onClick={() => setScenario("tool")}>call a tool</button>
+          <button type="button" onClick={() => setScenario("approval")}>ask permission</button>
+          <button type="button" onClick={() => setScenario("queue")}>join the queue</button>
+        </div>
+
+        <div className="ticket-row">
+          <button type="button" className="take-number" onClick={startRequest}><Ticket aria-hidden="true" />take a number</button>
+          {printedTicket ? <div className="paper-ticket" aria-live="polite"><span>your number</span><strong>{String(printedTicket).padStart(3, "0")}</strong></div> : null}
+        </div>
+      </div>
+    </section>
+
+    <section className="states-section" id="states">
+      <h2>every way an ai makes you wait</h2>
+      <div className="timetable">
+        {catalogue.map(([slug, name, description]) => {
+          const open = openState === slug;
+          const command = installCommand(slug);
+          return <article className={"state-row" + (open ? " open" : "")} key={slug}>
+            <button type="button" className="state-summary" aria-expanded={open} onClick={() => setOpenState(open ? "" : slug)}>
+              <strong>{name}</strong><span>{description}</span><code>{command}</code><i aria-hidden="true">{open ? "−" : "+"}</i>
+            </button>
+            {open ? <div className="inline-preview"><StatePreview slug={slug} /></div> : null}
+          </article>;
+        })}
+      </div>
+    </section>
+
+    <section className="setup-section">
+      <h2>two lines. that's the setup.</h2>
+      <div className="setup-code"><code>const status = useAgentStatus(chat);</code><code>{"<AgentState status={status} />"}</code></div>
+    </section>
+
+    <section className="studio-cta">
+      <h2>we make waiting feel good. imagine what we do with the rest.</h2>
+      <a href={DISCOVERY_URL} target="_blank" rel="noreferrer">book a call with one roll studios</a>
+    </section>
+
+    <footer><p>free forever. mit licensed. made by <a href={STUDIO_URL}>one roll studios.</a></p></footer>
+  </main>;
 }
