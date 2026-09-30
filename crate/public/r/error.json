@@ -16,7 +16,7 @@
     },
     {
       "path": "components/agent-wait-states/types.ts",
-      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"tool\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  duotone?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n\nexport const duoBackground =\n  \"linear-gradient(120deg, #9E8CF2 0%, #6FB6F0 100%)\";\n",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"reasoning\"\n  | \"sources\"\n  | \"tool\"\n  | \"plan\"\n  | \"approval\"\n  | \"queue\"\n  | \"file\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentSource = {\n  id?: string;\n  url?: string;\n  domain?: string;\n  title: string;\n};\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  reasoning?: string;\n  sources: AgentSource[];\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  accent?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n",
       "type": "registry:ui",
       "target": "components/agent-wait-states/types.ts"
     }

@@ -4,7 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Check, Copy, PackageOpen, RotateCcw } from "lucide-react";
 import {
   AgentState,
+  AgentPlan,
+  Approval,
   Done,
+  FileProcessing,
+  Queue,
+  ReasoningTrace,
+  Sources,
   ErrorState,
   Stalled,
   Streaming,
@@ -102,12 +108,12 @@ function SimulatedChat() {
             {phase.state === "stalled" ? (
               <>
                 <p className="partial-copy">{streamed}</p>
-                <AgentState status="stalled" duotone />
+                <AgentState status="stalled" accent />
               </>
             ) : (
               <AgentState
                 status={phase.state}
-                duotone
+                accent
                 text={streamed}
                 steps={phase.state === "tool" ? steps : undefined}
                 errorMessage="The stream dropped. Your prompt is safe."
@@ -132,7 +138,6 @@ type ComponentCard = {
   description: string;
   preview: React.ReactNode;
   snippet: string;
-  dark?: boolean;
 };
 
 const componentCards: ComponentCard[] = [
@@ -140,35 +145,34 @@ const componentCards: ComponentCard[] = [
     name: "Thinking",
     slug: "thinking",
     description: "A quiet signal for the gap before the first token arrives.",
-    preview: <Thinking duotone elapsedMs={9000} />,
-    snippet: `<Thinking duotone elapsedMs={elapsedMs} />`,
+    preview: <Thinking accent elapsedMs={9000} />,
+    snippet: `<Thinking accent elapsedMs={elapsedMs} />`,
   },
   {
     name: "Streaming",
     slug: "streaming",
     description: "Text arrives with a soft cursor that stays out of the way.",
-    preview: <Streaming duotone text="Here’s what I found" />,
-    snippet: `<Streaming text={content} duotone />`,
+    preview: <Streaming accent text="Here’s what I found" />,
+    snippet: `<Streaming text={content} accent />`,
   },
   {
     name: "ToolCall",
     slug: "tool-call",
     description: "One tool or a full sequence, with active and completed steps.",
     preview: (
-      <ToolCall duotone steps={[
+      <ToolCall accent steps={[
         { label: "Searching the web…", toolName: "search", state: "complete" },
         { label: "Reading file…", toolName: "read_file", state: "active" },
       ]} />
     ),
-    snippet: `<ToolCall steps={steps} duotone />`,
+    snippet: `<ToolCall steps={steps} accent />`,
   },
   {
     name: "Stalled",
     slug: "stalled",
     description: "Reassures people when a live response goes quiet for five seconds.",
-    preview: <Stalled duotone />,
+    preview: <Stalled accent />,
     snippet: `<Stalled message="Still working…" />`,
-    dark: true,
   },
   {
     name: "Error",
@@ -181,15 +185,56 @@ const componentCards: ComponentCard[] = [
     name: "Done",
     slug: "done",
     description: "A quiet confirmation that acknowledges completion, then recedes.",
-    preview: <Done duotone />,
-    snippet: `<Done duotone />`,
-    dark: true,
+    preview: <Done accent />,
+    snippet: `<Done accent />`,
+  },
+  {
+    name: "ReasoningTrace",
+    slug: "reasoning-trace",
+    description: "Streams reasoning in a panel, then collapses to the time spent.",
+    preview: <ReasoningTrace accent text="Checking the constraints and comparing the options…" />,
+    snippet: `<ReasoningTrace text={reasoning} done={done} accent />`,
+  },
+  {
+    name: "Sources",
+    slug: "sources",
+    description: "Citation chips arrive with the answer and keep overflow tidy.",
+    preview: <Sources accent sources={[{ domain: "example.com", title: "Useful source" }, { domain: "docs.ai", title: "API reference" }, { domain: "paper.dev", title: "Research notes" }, { domain: "news.test", title: "Latest update" }]} />,
+    snippet: `<Sources sources={sources} accent />`,
+  },
+  {
+    name: "AgentPlan",
+    slug: "agent-plan",
+    description: "A step list that marks progress, active work, and failures.",
+    preview: <AgentPlan accent steps={[{ label: "Read the brief", state: "complete" }, { label: "Draft the answer", state: "active" }, { label: "Check the facts", state: "pending" }]} />,
+    snippet: `<AgentPlan steps={steps} accent />`,
+  },
+  {
+    name: "Approval",
+    slug: "approval",
+    description: "A clear human checkpoint before an agent takes action.",
+    preview: <Approval accent preview="To: hello@example.com · Subject: quick follow-up" expiresIn={30} />,
+    snippet: `<Approval preview={action} onAllow={allow} onDeny={deny} />`,
+  },
+  {
+    name: "Queue",
+    slug: "queue",
+    description: "A live place in line or a rate-limit countdown.",
+    preview: <Queue accent position={3} />,
+    snippet: `<Queue position={3} accent />`,
+  },
+  {
+    name: "FileProcessing",
+    slug: "file-processing",
+    description: "Tracks a file from upload through reading, chunking, and ready.",
+    preview: <FileProcessing accent filename="research.pdf" size="2.4 MB" stage="chunking" progress={72} />,
+    snippet: `<FileProcessing filename="research.pdf" size="2.4 MB" stage="chunking" progress={72} />`,
   },
   {
     name: "AgentState",
     slug: "agent-state",
     description: "The wrapper that chooses the right wait state and transitions it smoothly.",
-    preview: <AgentState status="tool" toolName="search" duotone />,
+    preview: <AgentState status="tool" toolName="search" accent />,
     snippet: `<AgentState status={status} text={content} onRetry={retry} />`,
   },
 ];
@@ -204,7 +249,7 @@ function ComponentSection({ item, index }: { item: ComponentCard; index: number 
         <InstallPill name={item.slug} compact />
         <pre className="usage-code"><code>{item.snippet}</code></pre>
       </div>
-      <div className={`component-stage${item.dark ? " theme-demo-dark" : ""}`}>
+      <div className="component-stage">
         <span className="stage-label">live preview</span>
         <div className="preview-center">{item.preview}</div>
       </div>

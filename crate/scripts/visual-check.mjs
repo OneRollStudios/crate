@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { createServer } from "node:net";
 import { chromium } from "playwright";
@@ -6,6 +7,12 @@ import { chromium } from "playwright";
 const discoveryURL = "https://www.cal.eu/onerollstudios/discovery?utm_source=packs";
 const screenshotDir = "design/screenshots";
 const results = [];
+const localChrome = [
+  "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
+  "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
+  "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+].find(existsSync);
 
 function getFreePort() {
   return new Promise((resolve, reject) => {
@@ -101,8 +108,9 @@ async function runViewport(browser, baseURL, name, viewport, colorScheme) {
     page.setDefaultNavigationTimeout(15000);
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
+    page.on("response", (response) => { if (response.status() >= 400) errors.push(`HTTP ${response.status()} ${response.url()}`); });
     page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
+      if (message.type() === "error" && !message.text().startsWith("Failed to load resource:")) errors.push(message.text());
     });
     await page.goto(baseURL, { waitUntil: "networkidle" });
     await page.screenshot({ path: `${screenshotDir}/${name}-${colorScheme}.png`, fullPage: true });
@@ -201,7 +209,7 @@ async function main() {
 
   try {
     await waitForServer(server, baseURL);
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, executablePath: localChrome });
     await runViewport(browser, baseURL, "desktop", { width: 1440, height: 900 }, "light");
     await runViewport(browser, baseURL, "desktop", { width: 1440, height: 900 }, "dark");
     await runViewport(browser, baseURL, "mobile", { width: 390, height: 844 }, "light");

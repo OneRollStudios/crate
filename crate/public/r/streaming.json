@@ -3,17 +3,20 @@
   "name": "streaming",
   "title": "Streaming",
   "author": "One Roll Studios",
-  "description": "Streaming text with a soft glowing cursor.",
+  "description": "Streaming text with a soft cursor.",
+  "dependencies": [
+    "lucide-react"
+  ],
   "files": [
     {
       "path": "components/agent-wait-states/streaming.tsx",
-      "content": "import { cx, duoBackground, type WaitStateProps } from \"./types\";\n\nexport type StreamingProps = WaitStateProps & {\n  children?: React.ReactNode;\n  text?: string;\n};\n\nexport function Streaming({ className, duotone = false, children, text }: StreamingProps) {\n  return (\n    <span\n      className={cx(\"text-sm leading-7 text-foreground\", className)}\n      aria-live=\"polite\"\n      aria-label=\"Response streaming\"\n    >\n      {children ?? text}\n      <span\n        aria-hidden=\"true\"\n        className=\"ml-1 inline-block h-[1.05em] w-[3px] translate-y-[2px] rounded-full bg-primary shadow-[0_0_12px_color-mix(in_srgb,var(--primary)_60%,transparent)] motion-safe:animate-pulse motion-reduce:opacity-80\"\n        style={{ background: duotone ? duoBackground : undefined }}\n      />\n    </span>\n  );\n}\n",
+      "content": "import { cx, type WaitStateProps } from \"./types\";\n\nexport type StreamingProps = WaitStateProps & { children?: React.ReactNode; text?: string };\n\nexport function Streaming({ className, accent = false, children, text }: StreamingProps) {\n  return (\n    <span className={cx(\"text-sm leading-7 text-foreground\", className)} aria-live=\"polite\" aria-label=\"Response streaming\">\n      {children ?? text}\n      <span aria-hidden=\"true\" className={cx(\"ml-1 inline-block h-[1.05em] w-[3px] translate-y-[2px] rounded-full motion-safe:animate-pulse motion-reduce:opacity-80\", accent ? \"bg-primary shadow-[0_0_12px_color-mix(in_srgb,var(--primary)_60%,transparent)]\" : \"bg-foreground\")} />\n    </span>\n  );\n}\n",
       "type": "registry:ui",
       "target": "components/agent-wait-states/streaming.tsx"
     },
     {
       "path": "components/agent-wait-states/types.ts",
-      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"tool\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  duotone?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n\nexport const duoBackground =\n  \"linear-gradient(120deg, #9E8CF2 0%, #6FB6F0 100%)\";\n",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"reasoning\"\n  | \"sources\"\n  | \"tool\"\n  | \"plan\"\n  | \"approval\"\n  | \"queue\"\n  | \"file\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentSource = {\n  id?: string;\n  url?: string;\n  domain?: string;\n  title: string;\n};\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  reasoning?: string;\n  sources: AgentSource[];\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  accent?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n",
       "type": "registry:ui",
       "target": "components/agent-wait-states/types.ts"
     }

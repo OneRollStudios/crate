@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "agent-plan",
+  "title": "AgentPlan",
+  "author": "One Roll Studios",
+  "description": "A self-updating plan with progress and failures.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "files": [
+    {
+      "path": "components/agent-wait-states/agent-plan.tsx",
+      "content": "import { Check, Circle, LoaderCircle, X } from \"lucide-react\";\nimport { cx, type WaitStateProps } from \"./types\";\n\nexport type PlanStep = { id?: string; label: string; state: \"pending\" | \"active\" | \"complete\" | \"failed\" };\nexport type AgentPlanProps = WaitStateProps & { steps: PlanStep[] };\n\nexport function AgentPlan({ className, accent = false, steps }: AgentPlanProps) {\n  const complete = steps.filter((step) => step.state === \"complete\").length;\n  const activeIndex = steps.findIndex((step) => step.state === \"active\");\n  const progress = Math.max(complete, activeIndex >= 0 ? activeIndex + 1 : complete);\n\n  return (\n    <div className={cx(\"w-full max-w-md rounded-[16px] border border-border bg-background p-4 text-foreground\", className)} aria-live=\"polite\">\n      <div className=\"mb-3 flex items-center justify-between text-xs\"><span className=\"font-medium\">Plan</span><span className=\"text-muted-foreground\">{Math.min(progress, steps.length)} of {steps.length}</span></div>\n      <ol className=\"space-y-2\">\n        {steps.map((step, index) => <li key={step.id ?? `${step.label}-${index}`} className={cx(\"flex items-center gap-2.5 text-sm\", step.state === \"pending\" && \"text-muted-foreground\")}>\n          <span className={cx(\"grid size-6 shrink-0 place-items-center rounded-full border border-border\", step.state === \"active\" && accent && \"border-primary text-primary\", step.state === \"failed\" && \"text-destructive\")} aria-hidden=\"true\">\n            {step.state === \"complete\" ? <Check className=\"size-3.5\" /> : step.state === \"failed\" ? <X className=\"size-3.5\" /> : step.state === \"active\" ? <LoaderCircle className=\"size-3.5 motion-safe:animate-spin\" /> : <Circle className=\"size-3\" />}\n          </span>\n          <span className={cx(step.state === \"complete\" && \"text-muted-foreground line-through\")}>{step.label}</span>\n        </li>)}\n      </ol>\n    </div>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/agent-plan.tsx"
+    },
+    {
+      "path": "components/agent-wait-states/types.ts",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"reasoning\"\n  | \"sources\"\n  | \"tool\"\n  | \"plan\"\n  | \"approval\"\n  | \"queue\"\n  | \"file\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentSource = {\n  id?: string;\n  url?: string;\n  domain?: string;\n  title: string;\n};\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  reasoning?: string;\n  sources: AgentSource[];\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  accent?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/types.ts"
+    }
+  ],
+  "type": "registry:ui"
+}

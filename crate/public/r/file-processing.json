@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "file-processing",
+  "title": "FileProcessing",
+  "author": "One Roll Studios",
+  "description": "File upload and processing stage progress.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "files": [
+    {
+      "path": "components/agent-wait-states/file-processing.tsx",
+      "content": "import { Check, FileText, LoaderCircle } from \"lucide-react\";\nimport { cx, type WaitStateProps } from \"./types\";\n\nexport type FileStage = \"uploading\" | \"reading\" | \"chunking\" | \"ready\";\nexport type FileProcessingProps = WaitStateProps & { filename: string; size: string; stage?: FileStage; progress?: number };\n\nconst stages: Array<{ key: FileStage; label: string }> = [\n  { key: \"uploading\", label: \"Upload\" },\n  { key: \"reading\", label: \"Reading\" },\n  { key: \"chunking\", label: \"Chunking\" },\n  { key: \"ready\", label: \"Ready\" },\n];\n\nexport function FileProcessing({ className, accent = false, filename, size, stage = \"uploading\", progress = 0 }: FileProcessingProps) {\n  const activeIndex = stages.findIndex((item) => item.key === stage);\n  const percent = stage === \"ready\" ? 100 : Math.max(0, Math.min(100, progress));\n  return (\n    <div className={cx(\"w-full max-w-md rounded-[16px] border border-border bg-background p-4 text-foreground\", className)} aria-live=\"polite\">\n      <div className=\"flex items-center gap-3\"><span className={cx(\"grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground\", accent && \"text-primary\")} aria-hidden=\"true\"><FileText className=\"size-4\" /></span><div className=\"min-w-0 flex-1\"><p className=\"m-0 truncate text-sm font-medium\">{filename}</p><p className=\"m-0 text-xs text-muted-foreground\">{size}</p></div><span className=\"text-xs text-muted-foreground\">{percent}%</span></div>\n      <div className=\"my-3 h-1.5 overflow-hidden rounded-full bg-muted\" aria-hidden=\"true\"><span className={cx(\"block h-full rounded-full bg-muted-foreground transition-[width] motion-reduce:transition-none\", accent && \"bg-primary\")} style={{ width: `${percent}%` }} /></div>\n      <ol className=\"grid grid-cols-4 gap-1 text-center text-[10px] text-muted-foreground\">\n        {stages.map((item, index) => <li key={item.key} className={cx(\"flex min-w-0 flex-col items-center gap-1\", index === activeIndex && \"text-foreground\")}><span className={cx(\"grid size-5 place-items-center rounded-full border border-border\", index === activeIndex && accent && \"border-primary text-primary\")} aria-hidden=\"true\">{index < activeIndex || stage === \"ready\" ? <Check className=\"size-3\" /> : index === activeIndex ? <LoaderCircle className=\"size-3 motion-safe:animate-spin\" /> : null}</span><span className=\"truncate\">{item.label}</span></li>)}\n      </ol>\n    </div>\n  );\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/file-processing.tsx"
+    },
+    {
+      "path": "components/agent-wait-states/types.ts",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"reasoning\"\n  | \"sources\"\n  | \"tool\"\n  | \"plan\"\n  | \"approval\"\n  | \"queue\"\n  | \"file\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentSource = {\n  id?: string;\n  url?: string;\n  domain?: string;\n  title: string;\n};\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  reasoning?: string;\n  sources: AgentSource[];\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  accent?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/types.ts"
+    }
+  ],
+  "type": "registry:ui"
+}

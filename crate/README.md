@@ -1,67 +1,58 @@
 # Crate Wait States
 
-Open-source React components for the time between sending an AI prompt and receiving a finished answer. `useAgentStatus` reads a Vercel AI SDK `useChat` return value and automatically moves the UI through thinking, tool use, streaming, stalled, error, and done states.
+Open-source React components for the time between sending an AI prompt and receiving a finished answer. `useAgentStatus` reads a Vercel AI SDK v5+ `useChat` return value and automatically maps thinking, reasoning, sources, tool use, streaming, stalled, error, and done states.
 
 Made by [One Roll Studios](https://onerollstudios.com). MIT licensed.
 
 ## Install
 
-Install everything:
-
 ```bash
 npx shadcn@latest add https://crate.onerollstudios.com/r/all.json
 ```
 
-Or install one item:
+Install individual items by replacing `all` with one of:
 
-```bash
-npx shadcn@latest add https://crate.onerollstudios.com/r/thinking.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/streaming.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/tool-call.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/stalled.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/error.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/done.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/agent-state.json
-npx shadcn@latest add https://crate.onerollstudios.com/r/use-agent-status.json
+```text
+thinking
+streaming
+tool-call
+stalled
+error
+done
+reasoning-trace
+sources
+agent-plan
+approval
+queue
+file-processing
+agent-state
+use-agent-status
 ```
 
 ## AI SDK usage
 
 ```tsx
-import { useChat } from "@ai-sdk/react";
-import { AgentState } from "@/components/agent-wait-states";
-import { useAgentStatus } from "@/hooks/use-agent-status";
+const chat = useChat();
+const status = useAgentStatus(chat);
 
-export function ChatWaitState() {
-  const chat = useChat();
-  const status = useAgentStatus(chat);
-
-  return (
-    <AgentState
-      status={status}
-      text="The text currently being streamed"
-      errorMessage={chat.error?.message}
-    />
-  );
-}
+<AgentState
+  status={status}
+  text={streamedText}
+  reasoning={status.reasoning}
+  sources={status.sources}
+/>
 ```
 
-The hook accepts the structural shape returned by AI SDK v5+ `useChat`: `status`, `messages`, `error`, and `stop`. It reads text parts, static tool parts such as `tool-search`, `dynamic-tool` parts, and legacy `tool-invocation` parts.
-
-```ts
-const status = useAgentStatus(chat, {
-  stallAfterMs: 5000,
-  onCancel: chat.stop,
-  manualStatus: undefined,
-});
-```
-
-It returns:
+The hook reads AI SDK v5+ text, reasoning, source, static tool, dynamic tool, and legacy tool-invocation parts. It detects a five-second streaming stall by default, changes the thinking label after eight seconds, and exposes cancellation after twenty seconds using `chat.stop()`.
 
 ```ts
 type AgentStatusSnapshot = {
-  state: "thinking" | "tool" | "streaming" | "stalled" | "error" | "done";
+  state:
+    | "thinking" | "reasoning" | "sources" | "tool"
+    | "streaming" | "stalled" | "error" | "done";
   activeToolName?: string;
+  reasoning?: string;
+  sources: AgentSource[];
   elapsedMs: number;
   showCancel: boolean;
   label: string;
@@ -69,48 +60,34 @@ type AgentStatusSnapshot = {
 };
 ```
 
-While a request is waiting, the default display uses dots initially, shows “Still thinking…” after eight seconds, and offers cancel after twenty seconds. A streaming response becomes stalled after five seconds without new text. `stop()` is used as the default cancel handler.
+Pass `manualStatus` to use the hook with an external state source. `AgentPlan`, `Approval`, `Queue`, and `FileProcessing` are intentionally prop-driven because they describe application workflows rather than AI SDK message parts.
 
-## Manual usage
-
-`AgentState` also accepts a plain status, so it works without the AI SDK:
+## Components
 
 ```tsx
-<AgentState status="thinking" />
-<AgentState status="streaming" text={content} duotone />
-<AgentState status="tool" toolName="search" />
-<AgentState status="stalled" />
-<AgentState status="error" onRetry={retry} />
-<AgentState status="done" />
+<Thinking elapsedMs={elapsedMs} onCancel={cancel} accent />
+<Streaming text={content} accent />
+<ToolCall steps={toolSteps} accent />
+<Stalled message="Still working…" accent />
+<ErrorState message={error.message} onRetry={retry} />
+<Done accent />
+
+<ReasoningTrace text={reasoning} done={finished} durationSeconds={12} accent />
+<Sources sources={sources} maxVisible={3} accent />
+<AgentPlan steps={planSteps} accent />
+<Approval preview={action} onAllow={allow} onDeny={deny} expiresIn={30} accent />
+<Queue position={3} accent />
+<Queue variant="rate-limit" retryIn={20} accent />
+<FileProcessing filename="report.pdf" size="2.4 MB" stage="chunking" progress={72} accent />
 ```
 
-Individual components:
+`AgentState` renders every state through one wrapper. For the prop-driven states, pass `planSteps`, approval callbacks and preview, queue options, or file metadata alongside the status.
 
-```tsx
-<Thinking elapsedMs={elapsedMs} onCancel={cancel} />
-<Streaming text={content} />
-<ToolCall steps={steps} />
-<Stalled message="Still working…" />
-<Error message="The stream dropped." onRetry={retry} />
-<Done />
-```
+## Theming and accessibility
 
-`ToolCall` accepts one implicit step through `toolName` and `label`, or a list:
+Every component uses the host app's shadcn variables: `--primary`, `--muted`, `--foreground`, `--background`, and `--border`. Components bundle no fonts and remain readable in light and dark themes. The optional `accent` prop uses `--primary`.
 
-```tsx
-<ToolCall
-  steps={[
-    { label: "Searching the web…", toolName: "search", state: "complete" },
-    { label: "Reading file…", toolName: "read_file", state: "active" },
-  ]}
-/>
-```
-
-## Theming
-
-The components use the host app’s shadcn variables: `--primary`, `--muted`, `--foreground`, `--background`, and `--border`. They bundle no fonts and work in light or dark themes when those variables change. Pass `duotone` to use the optional lilac `#9E8CF2` to sky `#6FB6F0` accent.
-
-All state announcements use polite live regions. Motion has a reduced-motion fallback, and every action is a native keyboard-accessible button.
+State changes use polite live regions. Controls are native keyboard-accessible buttons, and motion has a `prefers-reduced-motion` fallback.
 
 ## Development
 
@@ -120,4 +97,4 @@ npm run dev
 npm run build
 ```
 
-`npm run build` first runs `shadcn build`, writes installable item files to `public/r`, then creates the static Next.js export in `out` for Cloudflare Pages.
+The build creates shadcn registry items in `public/r` and a static Cloudflare Pages export in `out`.

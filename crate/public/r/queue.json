@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "queue",
+  "title": "Queue",
+  "author": "One Roll Studios",
+  "description": "Queue position and rate-limit countdown states.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "files": [
+    {
+      "path": "components/agent-wait-states/queue.tsx",
+      "content": "\"use client\";\n\nimport { useEffect, useState } from \"react\";\nimport { Clock3, Users } from \"lucide-react\";\nimport { cx, type WaitStateProps } from \"./types\";\n\nexport type QueueProps = WaitStateProps & { variant?: \"line\" | \"rate-limit\"; position?: number; retryIn?: number };\n\nexport function Queue({ className, accent = false, variant = \"line\", position = 3, retryIn = 20 }: QueueProps) {\n  const [value, setValue] = useState(variant === \"line\" ? position : retryIn);\n  useEffect(() => {\n    setValue(variant === \"line\" ? position : retryIn);\n    const timer = window.setInterval(() => setValue((current) => Math.max(0, current - 1)), variant === \"line\" ? 3500 : 1000);\n    return () => window.clearInterval(timer);\n  }, [position, retryIn, variant]);\n  const message = variant === \"line\" ? `You’re #${Math.max(1, value)} in line` : `Slow down. Try again in ${value}s`;\n  const Icon = variant === \"line\" ? Users : Clock3;\n  return <div className={cx(\"inline-flex items-center gap-3 rounded-[16px] border border-border bg-background px-4 py-3 text-sm text-foreground\", className)} aria-live=\"polite\"><span className={cx(\"grid size-7 place-items-center rounded-lg bg-muted text-muted-foreground\", accent && \"text-primary\")} aria-hidden=\"true\"><Icon className=\"size-4\" /></span><span>{message}</span></div>;\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/queue.tsx"
+    },
+    {
+      "path": "components/agent-wait-states/types.ts",
+      "content": "export type AgentStatus =\n  | \"thinking\"\n  | \"reasoning\"\n  | \"sources\"\n  | \"tool\"\n  | \"plan\"\n  | \"approval\"\n  | \"queue\"\n  | \"file\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentSource = {\n  id?: string;\n  url?: string;\n  domain?: string;\n  title: string;\n};\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  reasoning?: string;\n  sources: AgentSource[];\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};\n\nexport type WaitStateProps = {\n  className?: string;\n  accent?: boolean;\n};\n\nexport function cx(...values: Array<string | false | null | undefined>) {\n  return values.filter(Boolean).join(\" \");\n}\n",
+      "type": "registry:ui",
+      "target": "components/agent-wait-states/types.ts"
+    }
+  ],
+  "type": "registry:ui"
+}

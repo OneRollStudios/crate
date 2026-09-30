@@ -1,14 +1,29 @@
 export type AgentStatus =
   | "thinking"
+  | "reasoning"
+  | "sources"
   | "tool"
+  | "plan"
+  | "approval"
+  | "queue"
+  | "file"
   | "streaming"
   | "stalled"
   | "error"
   | "done";
 
+export type AgentSource = {
+  id?: string;
+  url?: string;
+  domain?: string;
+  title: string;
+};
+
 export type AgentStatusSnapshot = {
   state: AgentStatus;
   activeToolName?: string;
+  reasoning?: string;
+  sources: AgentSource[];
   elapsedMs: number;
   showCancel: boolean;
   label: string;
@@ -17,12 +32,9 @@ export type AgentStatusSnapshot = {
 
 export type WaitStateProps = {
   className?: string;
-  duotone?: boolean;
+  accent?: boolean;
 };
 
 export function cx(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
 }
-
-export const duoBackground =
-  "linear-gradient(120deg, #9E8CF2 0%, #6FB6F0 100%)";
