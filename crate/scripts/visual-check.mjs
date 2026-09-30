@@ -4,7 +4,7 @@ import { createServer } from "node:net";
 import { chromium } from "playwright";
 
 const discoveryURL = "https://www.cal.eu/onerollstudios/discovery?utm_source=packs";
-const screenshotDir = "screenshots";
+const screenshotDir = "design/screenshots";
 const results = [];
 
 function getFreePort() {
