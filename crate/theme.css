@@ -1,0 +1,161 @@
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/ors/InterDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/ors/InterDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/ors/InterDisplay-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/ors/InterDisplay-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Display";
+  src: url("/fonts/ors/InterDisplay-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/ors/Inter-Variable.ttf") format("truetype-variations");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ors-white: #FFFFFF;
+  --ors-black: #0A0E1A;
+  --ors-primary: #1F3BFF;
+  --ors-primary-hover: #1730D6;
+  --ors-accent: #D4FF3D;
+  --ors-text: #0A0E1A;
+  --ors-text-muted: #4A5060;
+  --ors-text-faint: #8A8F9C;
+  --ors-light-warm: #EFEDE6;
+  --ors-light-warm-secondary: #E8E5DC;
+  --ors-dark-secondary: #1A2547;
+  --ors-dark-text: #F6F4ED;
+  --ors-border: rgba(10, 14, 26, 0.10);
+
+  --ors-font-heading: "Inter Display", Arial, sans-serif;
+  --ors-font-body: "Inter", Arial, sans-serif;
+  --ors-font-code: "Inter", Arial, sans-serif;
+
+  --ors-radius-card: 2px;
+  --ors-radius-button: 6px;
+  --ors-radius-pill: 999px;
+  --ors-shadow-card: 0 1px 2px rgba(10, 14, 26, 0.04);
+  --ors-shadow-soft: 0 0 7px -2px #4c525f08, 0 0 19.4px -4px #747b870d;
+  --ors-shadow-raised: 0 4px 6px -2px #10182808, 0 12px 16px -4px #10182814;
+
+  --background: var(--ors-white);
+  --foreground: var(--ors-text);
+  --primary: var(--ors-accent);
+  --primary-foreground: var(--ors-black);
+  --muted: var(--ors-light-warm);
+  --muted-foreground: var(--ors-text-muted);
+  --border: var(--ors-border);
+  --destructive: var(--ors-primary);
+  --page: var(--ors-white);
+  --surface: var(--ors-white);
+  --graphite: var(--ors-black);
+  --board-text: var(--ors-dark-text);
+  --lime: var(--ors-accent);
+  --quiet: var(--ors-text-muted);
+  --error: var(--ors-primary);
+  --sans: var(--ors-font-body);
+  --display: var(--ors-font-heading);
+  --mono: var(--ors-font-code);
+}
+
+.ors-primary-button {
+  border: 0;
+  border-radius: var(--ors-radius-button);
+  padding: 10px 20px;
+  color: var(--ors-black);
+  background: var(--ors-accent);
+  font-family: var(--ors-font-body);
+  font-weight: 500;
+  line-height: 1.5;
+  transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.ors-primary-button:hover {
+  background: var(--ors-accent);
+  opacity: 0.86;
+}
+
+.ors-dot-grid {
+  background-image: radial-gradient(circle, rgba(10, 14, 26, 0.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.ors-accent-glow {
+  background: radial-gradient(circle, var(--ors-accent) 0%, rgba(212, 255, 61, 0.34) 30%, transparent 72%);
+}
+
+.ors-light-section {
+  color: var(--ors-text);
+  background-color: var(--ors-white);
+}
+
+.ors-warm-light-section {
+  color: var(--ors-text);
+  background-color: var(--ors-light-warm);
+}
+
+.ors-dark-section {
+  color: var(--ors-dark-text);
+  background-color: var(--ors-black);
+}
+
+.ors-card {
+  border: 1px solid var(--ors-border);
+  border-radius: var(--ors-radius-card);
+  background-color: var(--ors-white);
+  box-shadow: var(--ors-shadow-card);
+}
+
+.circuit-glow-line {
+  background: linear-gradient(90deg, transparent 0%, var(--ors-accent) 50%, transparent 100%);
+  box-shadow: 0 0 19.4px -4px var(--ors-accent);
+}
+
+.traveling-light-pulse,
+.floating-particle {
+  color: var(--ors-accent);
+  background-color: var(--ors-accent);
+  box-shadow: 0 0 19.4px -4px var(--ors-accent);
+}
+
+.crate-logo-ray {
+  background: linear-gradient(180deg, var(--ors-accent) 0%, transparent 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traveling-light-pulse,
+  .floating-particle,
+  .crate-logo-ray {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -4,7 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { createServer } from "node:net";
 import { chromium } from "playwright";
 
-const discoveryURL = "https://www.cal.eu/onerollstudios/discovery?utm_source=packs";
+const studioURL = "https://onerollstudios.com/";
 const screenshotDir = "design/screenshots";
 const results = [];
 const localChrome = [
@@ -69,16 +69,17 @@ async function checkLayout(page, label) {
     const root = document.documentElement;
     const overflowing = [...document.querySelectorAll("body *")]
       .filter((element) => {
-        if (element.closest(".hero-blob")) return false;
+        if (element.closest(".corner-circuit") || element.closest(".hero-circuit")) return false;
         const rect = element.getBoundingClientRect();
         return rect.right > root.clientWidth + 1 || rect.left < -1;
       })
       .slice(0, 10)
-      .map((element) => `${element.tagName.toLowerCase()}.${element.className} in ${element.parentElement?.className ?? ""}: ${element.textContent?.trim().slice(0, 70)}`);
+      .map((element) => { const rect = element.getBoundingClientRect(); return element.tagName.toLowerCase() + "." + element.className + " [" + rect.left + "," + rect.right + "] in " + (element.parentElement?.className ?? ""); });
     const clippedText = [...document.querySelectorAll("h1,h2,h3,p,a,button,code")]
       .filter((element) => {
         const style = getComputedStyle(element);
         const clips = ["hidden", "clip"].includes(style.overflowY) || ["hidden", "clip"].includes(style.overflowX);
+        if (element.closest(".command-box") || element.closest(".row-command")) return false;
         return clips && (element.scrollHeight > element.clientHeight + 2 || element.scrollWidth > element.clientWidth + 2);
       })
       .slice(0, 10)
@@ -116,16 +117,16 @@ async function runViewport(browser, baseURL, name, viewport, colorScheme) {
     await page.screenshot({ path: `${screenshotDir}/${name}-${colorScheme}.png`, fullPage: true });
     await checkLayout(page, `${name}-${colorScheme}`);
 
-    const ctaHrefs = await page.locator('a[href*="cal.eu/onerollstudios/discovery"]').evaluateAll(
+    const studioHrefs = await page.locator('footer a[href="https://onerollstudios.com"]').evaluateAll(
       (links) => links.map((link) => link.href),
     );
-    if (!ctaHrefs.length || ctaHrefs.some((href) => href !== discoveryURL)) {
-      throw new Error(`${name}-${colorScheme} CTA mismatch: ${JSON.stringify(ctaHrefs)}`);
+    if (!studioHrefs.length || studioHrefs.some((href) => href !== studioURL)) {
+      throw new Error(name + "-" + colorScheme + " studio URL mismatch: " + JSON.stringify(studioHrefs));
     }
-    results.push(`PASS ${name}-${colorScheme}: ORS CTA URL`);
+    results.push("PASS " + name + "-" + colorScheme + ": studio URL");
 
-    const command = await page.locator(".hero-command code").innerText();
-    await page.locator(".hero-command .copy-button").click();
+    const command = await page.locator(".hero-install code").innerText();
+    await page.locator(".hero-install .copy-button").click();
     const clipboard = await page.evaluate(() => navigator.clipboard.readText());
     if (clipboard !== command) throw new Error(`${name}-${colorScheme} copy mismatch`);
     results.push(`PASS ${name}-${colorScheme}: copy button`);
@@ -165,52 +166,22 @@ async function runReducedMotion(browser, baseURL) {
 }
 
 async function captureHeroStates(browser, baseURL) {
-  console.log("Capturing every waiting-room hero state…");
+  console.log("Capturing every hero card state…");
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   try {
     const page = await context.newPage();
     page.setDefaultTimeout(15000);
     await page.goto(baseURL, { waitUntil: "networkidle" });
-    const room = page.locator(".waiting-room");
-    await room.scrollIntoViewIfNeeded();
+    const network = page.locator(".hero-network");
+    await network.scrollIntoViewIfNeeded();
     const captured = [];
-
-    async function shot(name) {
-      await room.screenshot({ path: screenshotDir + "/hero-" + name + ".png" });
-      captured.push(name);
+    for (const phase of [0, 1, 2, 3]) {
+      await page.locator('[data-network-phase="' + phase + '"]').waitFor();
+      await network.screenshot({ path: screenshotDir + "/hero-state-" + phase + ".png" });
+      captured.push(phase);
     }
-    async function waitState(name) {
-      await page.locator('[data-agent-state="' + name + '"]').waitFor();
-      await shot(name);
-    }
-
-    await waitState("thinking");
-    await page.getByRole("button", { name: "take a number" }).click();
-    await waitState("reasoning");
-    await waitState("tool");
-    await waitState("streaming");
-    await waitState("sources");
-    await waitState("done");
-
-    await page.getByRole("button", { name: "slow it down" }).click();
-    await waitState("stalled");
-    await page.getByRole("button", { name: "break it" }).click();
-    await waitState("error");
-    await page.getByRole("button", { name: "break it" }).click();
-    await page.getByRole("button", { name: "break it" }).click();
-    await page.getByText("okay, now you're just doing this on purpose.").waitFor();
-    await shot("error-third-break");
-    await page.getByRole("button", { name: "ask permission" }).click();
-    await waitState("approval");
-    await page.getByRole("button", { name: "join the queue" }).click();
-    await waitState("queue");
-    await page.getByRole("button", { name: "without crate" }).click();
-    await waitState("waiting");
-
-    const expected = ["thinking", "reasoning", "tool", "streaming", "sources", "done", "stalled", "error", "approval", "queue", "waiting"];
-    const missing = expected.filter((state) => !captured.includes(state));
-    if (missing.length) throw new Error("Hero sequence missed: " + missing.join(", "));
-    results.push("PASS hero states: " + captured.join(", "));
+    if (captured.length !== 4) throw new Error("Hero card sequence missed a state");
+    results.push("PASS hero states: thinking, tool call, agent plan, approval");
   } finally {
     await context.close();
   }
