@@ -16,8 +16,8 @@ export function ReasoningTrace({ className, accent = false, text = "", done = fa
   const label = done ? `Thought for ${durationSeconds}s` : "Show thinking";
 
   return (
-    <div className={cx("w-full max-w-md rounded-[16px] border border-border bg-background text-sm text-foreground", className)}>
-      <button type="button" className="flex w-full items-center gap-2 rounded-[16px] px-4 py-3 text-left font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+    <div className={cx("w-full max-w-md rounded-sm border border-border bg-background text-sm text-foreground", className)}>
+      <button type="button" className="flex w-full items-center gap-2 rounded-sm px-4 py-3 text-left font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
         <span className={cx("size-2 rounded-full bg-muted-foreground", accent && !done && "bg-primary motion-safe:animate-pulse")} aria-hidden="true" />
         <span className="flex-1">{label}</span>
         <ChevronDown className={cx("size-4 transition-transform motion-reduce:transition-none", open && "rotate-180")} aria-hidden="true" />

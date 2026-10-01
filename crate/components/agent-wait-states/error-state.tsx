@@ -14,7 +14,7 @@ export function ErrorState({
   return (
     <div
       className={cx(
-        "flex w-full max-w-sm items-center gap-3 rounded-[16px] border border-border bg-background p-3 text-sm shadow-[0_12px_30px_-22px_color-mix(in_srgb,var(--primary)_35%,transparent)]",
+        "flex w-full max-w-sm items-center gap-3 rounded-sm border border-border bg-background p-3 text-sm shadow-[0_12px_30px_-22px_color-mix(in_srgb,var(--primary)_35%,transparent)]",
         className,
       )}
       role="status"

@@ -10,7 +10,7 @@ export function AgentPlan({ className, accent = false, steps }: AgentPlanProps) 
   const progress = Math.max(complete, activeIndex >= 0 ? activeIndex + 1 : complete);
 
   return (
-    <div className={cx("w-full max-w-md rounded-[16px] border border-border bg-background p-4 text-foreground", className)} aria-live="polite">
+    <div className={cx("w-full max-w-md rounded-sm border border-border bg-background p-4 text-foreground", className)} aria-live="polite">
       <div className="mb-3 flex items-center justify-between text-xs"><span className="font-medium">Plan</span><span className="text-muted-foreground">{Math.min(progress, steps.length)} of {steps.length}</span></div>
       <ol className="space-y-2">
         {steps.map((step, index) => <li key={step.id ?? `${step.label}-${index}`} className={cx("flex items-center gap-2.5 text-sm", step.state === "pending" && "text-muted-foreground")}>

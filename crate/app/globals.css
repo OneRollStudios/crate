@@ -2,6 +2,9 @@
 @import "tailwindcss";
 
 @theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
@@ -21,7 +24,7 @@ a { color: inherit; text-decoration: none; }
 code, pre { font-family: var(--ors-font-body); }
 ::selection { background: var(--ors-accent); color: var(--ors-black); }
 :focus-visible { outline: 2px solid var(--ors-primary); outline-offset: 3px; }
-main { overflow: clip; }
+main { --radius: 6px; overflow: clip; }
 .section-shell { width: min(1180px, calc(100% - 48px)); margin-inline: auto; position: relative; z-index: 2; }
 .light-section { background-color: var(--ors-white); color: var(--ors-black); }
 .dark-section { background: var(--ors-black); color: var(--ors-dark-text); position: relative; }
@@ -76,7 +79,6 @@ p { margin: 0; }
 .travel-pulse { position: absolute; z-index: -1; width: 12px; height: 12px; border-radius: 50%; background: var(--ors-accent); box-shadow: 0 0 7px var(--ors-accent), 0 0 22px var(--ors-accent); offset-path: path("M55 125H250Q270 125 270 145V235Q270 255 290 255H510Q530 255 530 275V420Q530 440 550 440H710"); animation: circuit-travel 9.6s linear infinite; }
 .float-card { position: absolute; text-transform: lowercase; width: 300px; padding: 14px; background: var(--ors-white); border: 1px solid var(--ors-border); border-radius: var(--ors-card-radius); box-shadow: var(--ors-shadow-card); transition: border-color .3s ease, box-shadow .3s ease, transform .3s ease; }
 .float-card.is-active { border-color: var(--ors-accent); box-shadow: var(--ors-shadow-card), 0 0 22px rgba(212,255,61,.33); }
-.float-card .rounded-\[2px\] { box-shadow: none; }
 .float-card > div { max-width: none; }
 .card-label { display: block; margin-bottom: 9px; color: var(--ors-muted); font-size: .72rem; font-weight: 600; }
 .card-one { top: 55px; left: 0; transform: rotate(-2.2deg); }

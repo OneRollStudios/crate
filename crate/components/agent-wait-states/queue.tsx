@@ -15,5 +15,5 @@ export function Queue({ className, accent = false, variant = "line", position = 
   }, [position, retryIn, variant]);
   const message = variant === "line" ? `You’re #${Math.max(1, value)} in line` : `Slow down. Try again in ${value}s`;
   const Icon = variant === "line" ? Users : Clock3;
-  return <div className={cx("inline-flex items-center gap-3 rounded-[16px] border border-border bg-background px-4 py-3 text-sm text-foreground", className)} aria-live="polite"><span className={cx("grid size-7 place-items-center rounded-lg bg-muted text-muted-foreground", accent && "text-primary")} aria-hidden="true"><Icon className="size-4" /></span><span>{message}</span></div>;
+  return <div className={cx("inline-flex items-center gap-3 rounded-sm border border-border bg-background px-4 py-3 text-sm text-foreground", className)} aria-live="polite"><span className={cx("grid size-7 place-items-center rounded-lg bg-muted text-muted-foreground", accent && "text-primary")} aria-hidden="true"><Icon className="size-4" /></span><span>{message}</span></div>;
 }
