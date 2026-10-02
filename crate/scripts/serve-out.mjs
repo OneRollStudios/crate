@@ -13,7 +13,7 @@ const types = {
   ".woff2": "font/woff2",
 };
 
-createServer((request, response) => {
+const server = createServer((request, response) => {
   const pathname = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
   let file = normalize(join(root, pathname));
 
@@ -32,6 +32,6 @@ createServer((request, response) => {
   response.writeHead(200, { "content-type": types[extname(file)] ?? "application/octet-stream" });
   createReadStream(file).pipe(response);
 }).listen(port, "127.0.0.1", () => {
-  console.log(`Serving out at http://127.0.0.1:${port}`);
+  console.log(`Serving out at http://127.0.0.1:${server.address().port}`);
 });
 

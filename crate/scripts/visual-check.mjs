@@ -5,7 +5,7 @@ import { createServer } from "node:net";
 import { chromium } from "playwright";
 
 const studioURL = "https://onerollstudios.com/";
-const screenshotDir = "design/screenshots";
+const screenshotDir = process.env.SCREENSHOT_DIR ?? "design/screenshots";
 const results = [];
 const localChrome = [
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -114,6 +114,7 @@ async function runViewport(browser, baseURL, name, viewport, colorScheme) {
       if (message.type() === "error" && !message.text().startsWith("Failed to load resource:")) errors.push(message.text());
     });
     await page.goto(baseURL, { waitUntil: "networkidle" });
+    await page.locator(".crate-preloader").waitFor({ state: "hidden" });
     await page.screenshot({ path: `${screenshotDir}/${name}-${colorScheme}.png`, fullPage: true });
     await checkLayout(page, `${name}-${colorScheme}`);
 
@@ -125,8 +126,8 @@ async function runViewport(browser, baseURL, name, viewport, colorScheme) {
     }
     results.push("PASS " + name + "-" + colorScheme + ": studio URL");
 
-    const command = await page.locator(".hero-install code").innerText();
-    await page.locator(".hero-install .copy-button").click();
+    const command = await page.locator(".hero-copy .command code").innerText();
+    await page.locator(".hero-copy .command .copy-button").click();
     const clipboard = await page.evaluate(() => navigator.clipboard.readText());
     if (clipboard !== command) throw new Error(`${name}-${colorScheme} copy mismatch`);
     results.push(`PASS ${name}-${colorScheme}: copy button`);
@@ -172,15 +173,14 @@ async function captureHeroStates(browser, baseURL) {
     const page = await context.newPage();
     page.setDefaultTimeout(15000);
     await page.goto(baseURL, { waitUntil: "networkidle" });
-    const network = page.locator(".hero-network");
+    await page.locator(".crate-preloader").waitFor({ state: "hidden" });
+    const network = page.locator(".demo-board .network");
     await network.scrollIntoViewIfNeeded();
-    const captured = [];
-    for (const phase of [0, 1, 2, 3]) {
-      await page.locator('[data-network-phase="' + phase + '"]').waitFor();
-      await network.screenshot({ path: screenshotDir + "/hero-state-" + phase + ".png" });
-      captured.push(phase);
+    for (const state of ["thinking", "tool", "plan", "approval"]) {
+      const card = network.locator(`.${state}-card`);
+      await card.waitFor({ state: "visible" });
+      await card.screenshot({ path: `${screenshotDir}/hero-${state}.png` });
     }
-    if (captured.length !== 4) throw new Error("Hero card sequence missed a state");
     results.push("PASS hero states: thinking, tool call, agent plan, approval");
   } finally {
     await context.close();

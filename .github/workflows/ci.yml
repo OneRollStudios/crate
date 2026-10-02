@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: crate
+        shell: bash
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      SCREENSHOT_DIR: screenshots
+
+    steps:
+      # Check out the code being tested.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Cache npm downloads using the app's lockfile.
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: crate/package-lock.json
+
+      # Install exactly the dependencies recorded in the lockfile.
+      - name: Install dependencies
+        run: npm ci
+
+      # Build the registry and static site; Next.js also checks TypeScript.
+      - name: Build
+        id: build
+        run: npm run build
+
+      # Include newly generated files when detecting an outdated registry.
+      - name: Registry in sync
+        run: |
+          git add --intent-to-add -- public/r/ registry.json
+          git diff --exit-code -- public/r/ registry.json
+
+      # Report every em dash, and treat search errors as failures too.
+      - name: Copy guard
+        if: ${{ !cancelled() }}
+        run: |
+          if grep -rnF -- $'\u2014' app/ components/; then
+            echo "Em dashes are not allowed in app/ or components/."
+            exit 1
+          else
+            test "$?" -eq 1
+          fi
+
+      # Install Chromium and Linux libraries required by Playwright.
+      - name: Install Chromium
+        id: chromium
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npx playwright install --with-deps chromium
+
+      # Check the static export, including desktop/mobile and light/dark.
+      - name: Visual check
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: node scripts/visual-check.mjs
+
+      # Exercise the registry in a fresh Next.js and shadcn consumer app.
+      - name: Install test
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: bash scripts/install-test.sh
+
+      # Preserve any screenshots produced, even when another step failed.
+      - name: Upload screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: crate/screenshots/
+          if-no-files-found: warn

@@ -1,0 +1,2 @@
+# Keep the locally runnable Bash test compatible with Linux and Git Bash.
+*.sh text eol=lf
