@@ -1,171 +1,103 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { CratePreloader } from "@/components/crate-preloader";
+import { ArrowUpRight, ArrowRight, Check, Copy, Plus, Minus, Pause, Play, RotateCcw, Terminal, Code2, Box, GitBranch, Braces } from "lucide-react";
 import { AgentPlan, Approval, Done, ErrorState, FileProcessing, Queue, ReasoningTrace, Sources, Stalled, Streaming, Thinking, ToolCall } from "@/components/agent-wait-states";
-import { CrateLogo } from "@/components/crate-logo";
 
 const installCommand = "npx shadcn@latest add https://crate.onerollstudios.com/r/all.json";
-const sourceItems = [
-  { domain: "crate", title: "sources" },
-  { domain: "react", title: "streaming" },
-  { domain: "shadcn", title: "wait states" },
-  { domain: "tailwind", title: "your theme" },
+const sources = [{domain:"crate",title:"Components"},{domain:"react",title:"Streaming"},{domain:"shadcn",title:"Your theme"}];
+type Kind = "thinking" | "queue" | "file-processing" | "reasoning-trace" | "tool-call" | "agent-plan" | "streaming" | "sources" | "approval" | "stalled" | "error" | "done";
+const groups: { title: string; rows: {key:Kind;name:string;description:string}[] }[] = [
+{title:"Before it answers",rows:[
+{key:"thinking",name:"Thinking",description:'Starts calm, says "still thinking" if it takes a while, offers a cancel if it takes too long.'},
+{key:"queue",name:"Queue",description:'"You’re #3 in line." Or a real countdown when you hit a rate limit.'},
+{key:"file-processing",name:"File processing",description:"Upload, reading, chunking, ready. You see your file get handled."}]},
+{title:"While it works",rows:[
+{key:"reasoning-trace",name:"Reasoning trace",description:"See the thinking as it happens. It folds away when done."},
+{key:"tool-call",name:"Tool call",description:"Searching the web, reading a file. One step or ten."},
+{key:"agent-plan",name:"Agent plan",description:"The agent’s to-do list, checking itself off live."},
+{key:"streaming",name:"Streaming",description:"Text arrives with a cursor that knows when to leave."},
+{key:"sources",name:"Sources",description:"Citations appear as the answer writes itself."}]},
+{title:"When it needs you, or breaks",rows:[
+{key:"approval",name:"Approval",description:'"The agent wants to send this email." Allow or deny before it acts.'},
+{key:"stalled",name:"Stalled",description:"Nothing new for 5 seconds? It tells you instead of pretending."},
+{key:"error",name:"Error",description:"Short, honest, with a retry that actually retries."}]},
+{title:"When it’s done",rows:[{key:"done",name:"Done",description:"A small check, then it gets out of the way."}]}];
+
+function CopyButton({text}: {text:string}) {
+ const [status,setStatus]=useState("Copy");
+ async function copy(){try{await navigator.clipboard.writeText(text);setStatus("Copied");}catch{setStatus("Select to copy");}window.setTimeout(()=>setStatus("Copy"),2500);}
+ return <button className="copy-button" onClick={copy} aria-label={status} title={status}>{status==="Copied"?<Check size={16}/>:<Copy size={16}/>}<span className="sr-only" role="status">{status}</span></button>;
+}
+function Command({text=installCommand}:{text?:string}){return <div className="command"><Terminal size={16} aria-hidden="true"/><code>{text}</code><CopyButton text={text}/></div>}
+function DemoApproval(){const [decision,setDecision]=useState<string|null>(null);return decision?<div className="decision"><Check size={18}/><span>{decision} in demo</span><button onClick={()=>setDecision(null)} aria-label="Reset approval demo"><RotateCcw size={15}/></button></div>:<Approval accent title="Send this email?" preview="The agent wants to send this email." onAllow={()=>setDecision("Allowed")} onDeny={()=>setDecision("Denied")}/>}
+function RetryDemo(){const [retry,setRetry]=useState(false);return retry?<div className="decision"><Done accent label="Retry complete"/><button onClick={()=>setRetry(false)} aria-label="Reset error demo"><RotateCcw size={15}/></button></div>:<ErrorState message="Connection interrupted." onRetry={()=>setRetry(true)}/>}
+function Preview({kind,tick}:{kind:Kind;tick:number}){
+const phase=tick%4;
+switch(kind){
+ case "thinking":return <Thinking accent elapsedMs={phase>1?9000:3000}/>;
+ case "queue":return <Queue accent position={3}/>;
+ case "file-processing":return <FileProcessing accent filename="document.pdf" size="Demo file" stage={(["uploading","reading","chunking","ready"] as const)[phase]} progress={[24,52,78,100][phase]}/>;
+ case "reasoning-trace":return <ReasoningTrace accent text="Reading the request. Choosing the next step." done={phase===3} durationSeconds={12}/>;
+ case "tool-call":return <ToolCall accent toolName="search" label="Searching the web…"/>;
+ case "agent-plan":return <AgentPlan accent steps={["Read the request","Run the tools","Write the answer"].map((label,i)=>({label,state:i<phase?"complete":i===phase?"active":"pending"}))}/>;
+ case "streaming":return <Streaming accent text={"A little polish goes a long way.".slice(0,9+phase*8)}/>;
+ case "sources":return <Sources accent sources={sources.slice(0,phase+1)} maxVisible={3}/>;
+ case "approval":return <DemoApproval/>;
+ case "stalled":return <Stalled accent message="No new activity. Still waiting."/>;
+ case "error":return <RetryDemo/>;
+ case "done":return <Done accent label="All done"/>;
+}}
+function Logo({large=false}:{large?:boolean}){return <span className={large?"logo logo-large":"logo"}>crate<span className="logo-period">.</span><span className="logo-rays" aria-hidden="true">{Array.from({length:29},(_,i)=><i key={i} style={{height:`${35+(i*29)%90}%`,animationDelay:`-${i%7}s`}}/>)}</span></span>}
+
+const stateOptions: {kind:Kind;label:string;event:string}[] = [
+ {kind:"thinking",label:"Thinking",event:'chat.status = "submitted"'},
+ {kind:"tool-call",label:"Tool call",event:'part.type = "tool-search"'},
+ {kind:"streaming",label:"Streaming",event:'chat.status = "streaming"'},
+ {kind:"stalled",label:"Stalled",event:'No new content for 5 seconds'},
+ {kind:"error",label:"Error",event:'chat.status = "error"'},
+ {kind:"done",label:"Done",event:'chat.status = "ready"'},
 ];
-const planLabels = ["thinking", "tool call", "streaming", "done"];
-
-type PreviewKey = "thinking" | "queue" | "file-processing" | "reasoning-trace" | "tool-call" | "agent-plan" | "streaming" | "sources" | "approval" | "stalled" | "error" | "done";
-
-const groups: Array<{ title: string; rows: Array<{ key: PreviewKey; name: string; description: string; slug: string }> }> = [
-  { title: "before it answers", rows: [
-    { key: "thinking", name: "thinking", description: "starts calm, says \"still thinking\" if it takes a while, offers a cancel if it takes too long.", slug: "thinking" },
-    { key: "queue", name: "queue", description: "\"you're #3 in line.\" or a real countdown when you hit a rate limit.", slug: "queue" },
-    { key: "file-processing", name: "file processing", description: "upload, reading, chunking, ready. you see your file get handled.", slug: "file-processing" },
-  ]},
-  { title: "while it works", rows: [
-    { key: "reasoning-trace", name: "reasoning trace", description: "see the thinking as it happens. it folds away when done.", slug: "reasoning-trace" },
-    { key: "tool-call", name: "tool call", description: "searching the web, reading a file. one step or ten.", slug: "tool-call" },
-    { key: "agent-plan", name: "agent plan", description: "the agent's to-do list, checking itself off live.", slug: "agent-plan" },
-    { key: "streaming", name: "streaming", description: "text arrives with a cursor that knows when to leave.", slug: "streaming" },
-    { key: "sources", name: "sources", description: "citations appear as the answer writes itself.", slug: "sources" },
-  ]},
-  { title: "when it needs you, or breaks", rows: [
-    { key: "approval", name: "approval", description: "\"the agent wants to send this email.\" allow or deny before it acts.", slug: "approval" },
-    { key: "stalled", name: "stalled", description: "nothing new for 5 seconds? it tells you instead of pretending.", slug: "stalled" },
-    { key: "error", name: "error", description: "short, honest, with a retry that actually retries.", slug: "error" },
-  ]},
-  { title: "when it's done", rows: [
-    { key: "done", name: "done", description: "a small check, then it gets out of the way.", slug: "done" },
-  ]},
+const themes = [
+ {name:"Studio",font:'"Inter", sans-serif',radius:"2px",bg:"#f6f4ed",fg:"#0a0e1a",primary:"#607913",muted:"#eaece0",quiet:"#58624d",border:"#cfd5c2",swatch:"#d4ff3d"},
+ {name:"Editorial",font:'Georgia, serif',radius:"0px",bg:"#fff0e7",fg:"#422818",primary:"#994027",muted:"#f4e0d3",quiet:"#755546",border:"#ddc3b1",swatch:"#c76645"},
+ {name:"Midnight",font:'"Inter", sans-serif',radius:"12px",bg:"#171b2b",fg:"#f4f2ff",primary:"#b6acff",muted:"#292e45",quiet:"#b7bdd1",border:"#454963",swatch:"#b6acff"}
 ];
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  async function copy() {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1400);
-  }
-  return <button type="button" className="copy-button" onClick={copy} aria-label="copy">{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}</button>;
+function ThemeDemo(){
+ const [selected,setSelected]=useState(0);const t=themes[selected];
+ const style={"--background":t.bg,"--foreground":t.fg,"--primary":t.primary,"--primary-foreground":t.bg,"--muted":t.muted,"--muted-foreground":t.quiet,"--border":t.border,"--radius":t.radius,fontFamily:t.font,background:t.bg,color:t.fg} as CSSProperties;
+ return <div className="theme-demo"><div className="theme-controls" role="group" aria-label="Preview a component theme">{themes.map((theme,i)=><button key={theme.name} aria-pressed={selected===i} onClick={()=>setSelected(i)}><i style={{background:theme.swatch}}/>{theme.name}</button>)}</div><div className="theme-canvas" style={style}><span className="theme-canvas-label">Your app</span><AgentPlan accent steps={[{label:"Read the request",state:"complete"},{label:"Find the answer",state:"active"},{label:"Write the response",state:"pending"}]}/><div className="theme-tokens"><span>Aa <small>Font</small></span><span><i style={{background:t.primary}}/><small>Color</small></span><span><i className="radius-icon" style={{borderRadius:t.radius}}/><small>Radius</small></span></div></div><p className="theme-demo-caption">One component. Three themes. No restyling the component.</p></div>
 }
-
-function CircuitArt({ corner = false }: { corner?: boolean }) {
-  return <svg className={corner ? "corner-circuit" : "hero-circuit"} viewBox="0 0 760 650" aria-hidden="true">
-    <path className="circuit-haze" d="M55 125H250Q270 125 270 145V235Q270 255 290 255H510Q530 255 530 275V420Q530 440 550 440H710" />
-    <path className="circuit-line" d="M55 125H250Q270 125 270 145V235Q270 255 290 255H510Q530 255 530 275V420Q530 440 550 440H710" />
-    <path className="circuit-haze circuit-secondary" d="M115 570V500Q115 480 135 480H355Q375 480 375 460V90" />
-    <path className="circuit-line circuit-secondary" d="M115 570V500Q115 480 135 480H355Q375 480 375 460V90" />
-  </svg>;
+function SetupDemo({tick}:{tick:number}){
+ const [selected,setSelected]=useState(1);const state=stateOptions[selected];
+ return <div className="setup-demo"><div className="setup-editor"><div className="panel-bar"><span><Code2 size={16}/> Your chat component</span><CopyButton text={'const status = useAgentStatus(chat)\n<AgentState status={status} />'}/></div><div className="code-lines"><div><span>1</span><code><em>const</em> status = <b>useAgentStatus</b>(chat)</code></div><div><span>2</span><code>&lt;<b>AgentState</b> status=&#123;status&#125; /&gt;</code></div></div><div className="code-caption"><Braces size={18}/><p>The hook reads the stream.<br/>The wrapper renders the matching state.</p></div></div><div className="setup-output"><div className="panel-bar"><span><span className="live-dot"/> What your user sees</span><span className="demo-label">Demo</span></div><div className="output-component"><Preview kind={state.kind} tick={tick}/></div><div className="event-caption"><span>Stream event</span><code>{state.event}</code></div></div><div className="setup-switches"><span>Try a state</span><div role="group" aria-label="Choose a demo state">{stateOptions.map((s,i)=><button key={s.kind} aria-pressed={selected===i} onClick={()=>setSelected(i)}>{s.label}</button>)}</div></div></div>
 }
-
-function LivePreview({ kind, tick }: { kind: PreviewKey; tick: number }) {
-  const phase = tick % 4;
-  const plan = planLabels.map((label, index) => ({ label, state: index < phase ? "complete" as const : index === phase ? "active" as const : "pending" as const }));
-  switch (kind) {
-    case "thinking": return <Thinking accent elapsedMs={phase > 1 ? 9000 : 800} />;
-    case "queue": return <Queue accent position={3} />;
-    case "file-processing": return <FileProcessing accent filename="crate #1" size="12 states" stage={["uploading", "reading", "chunking", "ready"][phase] as "uploading" | "reading" | "chunking" | "ready"} progress={[24, 52, 78, 100][phase]} />;
-    case "reasoning-trace": return <ReasoningTrace accent text="see the thinking as it happens." done={phase === 3} durationSeconds={12} />;
-    case "tool-call": return <ToolCall accent toolName={phase % 2 ? "file" : "search"} label={phase % 2 ? "reading a file…" : "searching the web…"} />;
-    case "agent-plan": return <AgentPlan accent steps={plan} />;
-    case "streaming": return <Streaming accent text="text arrives" />;
-    case "sources": return <Sources accent sources={sourceItems.slice(0, phase + 1)} maxVisible={3} />;
-    case "approval": return <Approval accent title="send this email?" preview="the agent wants to send this email." />;
-    case "stalled": return <Stalled accent message="still working…" />;
-    case "error": return <ErrorState message="something fails." onRetry={() => undefined} />;
-    case "done": return <Done accent label="done" />;
-  }
-}
-
-export default function Home() {
-  const [tick, setTick] = useState(0);
-  const [open, setOpen] = useState<PreviewKey | null>("thinking");
-  useEffect(() => { const timer = window.setInterval(() => setTick((value) => value + 1), 2400); return () => window.clearInterval(timer); }, []);
-  const active = tick % 4;
-  const toolLabel = active % 2 ? "reading file…" : "searching the web…";
-  const heroPlan = useMemo(() => planLabels.map((label, index) => ({ label, state: index < Math.min(3, active + 1) ? "complete" as const : index === Math.min(3, active + 1) ? "active" as const : "pending" as const })), [active]);
-
-  return <main>
-    <nav className="site-nav" aria-label="crate">
-      <a href="#top" className="nav-logo"><CrateLogo variant="mark" /></a>
-      <div className="nav-pill"><a href="#crates">crates</a><a href="#install">docs</a><a href="https://github.com/onerollstudios" target="_blank" rel="noreferrer">github</a></div>
-      <a className="primary-button nav-install" href="#install">install crate #1</a>
-    </nav>
-
-    <section className="hero ors-dot-grid" id="top">
-      <div className="section-shell hero-grid">
-        <div className="hero-copy">
-          <h1><span>ui</span><span className="headline-chip thinking-chip"><Thinking accent /></span><span>your ai</span><span className="headline-chip stream-chip"><Streaming accent text="your ai" /></span><span>can build with.</span></h1>
-          <p className="hero-subline">ready-made components for ai products. install them yourself, or just ask your coding agent.</p>
-          <div className="hero-actions"><a className="outline-button" href="#problem">see it in action</a><a className="primary-button" href="#install">install crate #1</a></div>
-          <div className="command-box hero-install"><code>{installCommand}</code><CopyButton text={installCommand} /></div>
-          <p className="agent-prompt">or tell your agent: "add crate wait states to my chat"</p>
-          <div className="facts" aria-label="crate #1"><div><strong>12</strong><span>states in crate #1</span></div><div><strong>1</strong><span>command to install</span></div><div><strong>2</strong><span>lines of setup</span></div></div>
-        </div>
-
-        <div className="hero-network" data-network-phase={active}>
-          <CircuitArt />
-          <span className="travel-pulse" aria-hidden="true" />
-          <span className="particle particle-one" aria-hidden="true" /><span className="particle particle-two" aria-hidden="true" /><span className="particle particle-three" aria-hidden="true" />
-          <div className={"float-card card-one " + (active === 0 ? "is-active" : "")}><span className="card-label">thinking</span><Thinking accent elapsedMs={active > 0 ? 9000 : 700} /></div>
-          <div className={"float-card card-two " + (active === 1 ? "is-active" : "")}><span className="card-label">tool call</span><ToolCall accent toolName="search" label={toolLabel} /></div>
-          <div className={"float-card card-three " + (active === 2 ? "is-active" : "")}><span className="card-label">agent plan</span><AgentPlan accent steps={heroPlan} /></div>
-          <div className={"float-card card-four " + (active === 3 ? "is-active" : "")}><span className="card-label">approval</span><Approval accent title="send this email?" preview="the agent wants to send this email." /></div>
-        </div>
-      </div>
-    </section>
-
-    <section className="problem dark-section" id="problem">
-      <CircuitArt corner />
-      <div className="section-shell problem-inner">
-        <h2>the better ai products feel better because someone sweated the small moments.</h2>
-        <div className="moment-list">
-          <div className="moment-row"><h3>how thinking looks.</h3><div className="light-preview"><Thinking accent elapsedMs={800} /></div></div>
-          <div className="moment-row"><h3>what shows up when a tool runs.</h3><div className="light-preview"><ToolCall accent label="searching the web…" toolName="search" /></div></div>
-          <div className="moment-row"><h3>how sources appear.</h3><div className="light-preview"><Sources accent sources={sourceItems.slice(0, Math.min(4, active + 1))} maxVisible={3} /></div></div>
-          <div className="moment-row"><h3>what happens when something fails.</h3><div className="light-preview"><ErrorState message="something fails." onRetry={() => undefined} /></div></div>
-        </div>
-        <p className="closing-line"><span className="plain-spinner" aria-hidden="true" />getting those right takes weeks. so most teams ship a spinner and move on.</p>
-      </div>
-    </section>
-
-    <section className="fix light-section ors-dot-grid">
-      <div className="section-shell fix-grid">
-        <div><h2>crate gives you those moments, ready to drop in.</h2><p>they read your ai stream and switch on their own.</p></div>
-        <div className="state-timeline" data-timeline-phase={tick % 6}>
-          <span className="timeline-line" aria-hidden="true" /><span className="timeline-pulse" aria-hidden="true" />
-          {["thinking", "tool call", "streaming", "stalled", "error", "done"].map((state, index) => <div key={state} className={"timeline-state " + (tick % 6 === index ? "is-active" : "")}><span>{state}</span></div>)}
-        </div>
-        <pre className="setup-code"><code>const status = useAgentStatus(chat){"\n"}&lt;AgentState status=&#123;status&#125; /&gt;</code></pre>
-      </div>
-    </section>
-
-    <section className="crates light-section ors-dot-grid" id="crates">
-      <div className="section-shell">
-        <div className="crate-heading"><div><span className="mono-label">crate #1</span><h2>wait states</h2></div><div><a className="primary-button" href="#install">install all of crate #1</a><p>or pick single pieces below.</p></div></div>
-        <div className="component-groups">
-          {groups.map((group) => <section className="component-group" key={group.title}><h3>{group.title}</h3>
-            {group.rows.map((row) => { const expanded = open === row.key; const command = "npx shadcn@latest add https://crate.onerollstudios.com/r/" + row.slug + ".json"; return <div className={"component-row " + (expanded ? "is-open" : "")} key={row.key}>
-              <div className="row-trigger"><button type="button" className="row-copy" onClick={() => setOpen(expanded ? null : row.key)} aria-expanded={expanded}><strong>{row.name}</strong><span>{row.description}</span></button><span className="row-preview"><LivePreview kind={row.key} tick={tick} /></span></div>
-              <div className="row-command"><code>{command}</code><CopyButton text={command} /></div>
-            </div>; })}
-          </section>)}
-        </div>
-      </div>
-    </section>
-
-    <section className="install light-section ors-dot-grid" id="install">
-      <div className="section-shell"><h2>install it yourself, or ask your coding agent.</h2>
-        <div className="install-cards"><article><h3>by hand</h3><div className="command-box"><code>{installCommand}</code><CopyButton text={installCommand} /></div></article><article><h3>by agent</h3><div className="agent-card"><span>›</span> add crate wait states to my chat</div></article></div>
-        <div className="install-facts"><span>react + tailwind + shadcn.</span><span>uses your theme: your colors, your fonts.</span></div>
-      </div>
-    </section>
-
-    <section className="coming light-section ors-dot-grid">
-      <div className="section-shell"><h2>this is crate #1. more are on the way.</h2><div className="coming-grid"><article className="active-crate">crate #1 · wait states</article><article>crate #2 · soon</article><article>crate #3 · soon</article></div></div>
-    </section>
-
-    <section className="end-cta dark-section"><CrateLogo variant="full" /><h2>skip the weeks.</h2><a className="primary-button" href="#install">install crate #1</a></section>
-    <footer><p>crate. made by <a href="https://onerollstudios.com">one roll studios.</a></p></footer>
-  </main>;
+export default function Home(){
+ const [tick,setTick]=useState(0);const [playing,setPlaying]=useState(true);const [open,setOpen]=useState<Kind|null>(null);
+ useEffect(()=>{const media=window.matchMedia("(prefers-reduced-motion: reduce)");if(media.matches)setPlaying(false);const change=()=>{if(media.matches)setPlaying(false)};media.addEventListener("change",change);return()=>media.removeEventListener("change",change)},[]);
+ useEffect(()=>{if(!playing)return;const timer=window.setInterval(()=>setTick(v=>v+1),2600);return()=>window.clearInterval(timer)},[playing]);
+ return <><CratePreloader/><main className={playing?"":"paused"}>
+ <a className="skip-link" href="#crates">Skip to components</a>
+ <header className="nav"><a href="#top" aria-label="Crate home"><Logo/></a><nav aria-label="Main navigation"><a href="#crates">Components</a><a href="https://github.com/OneRollStudios/crate/tree/main/crate#readme" target="_blank" rel="noreferrer">Docs</a><a href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={14}/></a></nav><a className="button primary nav-cta" href="#install">Install crate #1 <ArrowUpRight size={17}/></a></header>
+ <section className="hero" id="top"><div className="shell hero-grid"><div className="hero-copy">
+ <h1>Your AI builds the product.<br/><span className="hero-promise">Crate brings the UI.</span></h1>
+ <p className="hero-definition">Ready-made components<br className="wide-break"/> for AI products.</p>
+ <p className="hero-description">Thinking, tool calls, approvals, and everything in between. Install them yourself, or just ask your coding agent.</p>
+ <div className="hero-actions"><a className="button primary" href="#crates">Explore the components <ArrowRight size={17}/></a><a className="text-button" href="#setup">See the setup <ArrowUpRight size={17}/></a></div>
+ <Command/><p className="agent-hint">Or ask your agent: <span>“Add crate wait states to my chat”</span></p>
+ </div><div className="demo-board"><div className="board-heading"><span><Box size={17}/> Crate #1 / Wait states</span><button onClick={()=>setPlaying(v=>!v)} aria-label={playing?"Pause demo animations":"Play demo animations"}>{playing?<Pause size={14}/>:<Play size={14}/>}<span>{playing?"Pause demos":"Play demos"}</span></button></div><div className="network" aria-label="Interactive component demos"><div className="connection horizontal connection-one"/><div className="connection horizontal connection-two"/><div className="connection vertical connection-three"/><div className="connection vertical connection-four"/>
+ <article className="demo-card thinking-card"><div className="card-caption"><span>Thinking</span><span>01</span></div><Thinking accent label={tick%4>1?"Still thinking…":"Thinking…"}/></article>
+ <article className="demo-card tool-card"><div className="card-caption"><span>Tool call</span><span>02</span></div><ToolCall accent steps={[{label:"Read the request",state:"complete"},{label:tick%2?"Reading a file…":"Searching the web…",toolName:"search",state:"active"}]}/></article>
+ <article className="demo-card plan-card dark-demo"><div className="card-caption"><span>Agent plan</span><span>03</span></div><Preview kind="agent-plan" tick={tick}/></article>
+ <article className="demo-card approval-card"><div className="card-caption"><span>Approval</span><span>04</span></div><DemoApproval/></article>
+ </div><div className="board-foot"><span className="live-dot"/><span>Live components. Try the approval buttons.</span></div></div></div>
+ <div className="shell"><div className="hero-facts"><div className="fact"><span className="fact-number">12</span><span>UI states<br/><small>in the first crate</small></span></div><div className="fact"><span className="fact-number">1</span><span>install command<br/><small>for the whole collection</small></span></div><a className="fact" href="#setup"><span className="fact-number">2</span><span>lines of setup<br/><small>to connect your chat</small></span><ArrowUpRight size={17}/></a><a className="release" href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer"><GitBranch size={23}/><span><strong>Free & open source.</strong><small>Crate #1 · MIT licensed</small></span><ArrowUpRight size={18}/></a></div></div></section>
+ <section className="problem dark-section" id="problem"><div className="shell problem-grid"><div className="problem-copy"><h2>The better AI products feel better because someone <span>sweated the small moments.</span></h2><p>What’s it doing? Did it stop? Can I try again?<br/>Your interface should have an answer.</p><div className="problem-cost"><span className="plain-spinner"/><div><h3>Getting those right takes work.</h3><p>A spinner is easy to ship.<br/>It leaves your users guessing.</p></div></div></div><div className="moments"><div className="moments-title"><span>Make the work visible.</span><span>With Crate</span></div>{[{text:"How thinking looks.",kind:"thinking"},{text:"What shows up when a tool runs.",kind:"tool-call"},{text:"How sources appear.",kind:"sources"},{text:"What happens when something fails.",kind:"error"}].map((x,i)=><div className="moment" key={x.kind}><div className="moment-heading"><span>0{i+1}</span><h3>{x.text}</h3></div><div className="moment-preview dark-demo"><Preview kind={x.kind as Kind} tick={tick}/></div></div>)}</div></div></section>
+ <section className="setup section" id="setup"><div className="shell"><div className="setup-heading"><div className="setup-numeral" aria-hidden="true">2<span>lines</span></div><div><h2>Two lines of setup.<br/><span>The right UI for every state.</span></h2><p>Connect your existing chat. Crate follows the AI stream and switches the interface as the work changes.</p></div></div><SetupDemo tick={tick}/><div className="setup-notes"><span><Check size={17}/> Automatic state detection with the Vercel AI SDK</span><span><Check size={17}/> Using another stack? Pass the status yourself.</span></div></div></section>
+ <section className="crates section" id="crates"><div className="shell"><div className="crate-heading"><div><span className="collection-label"><Box size={19}/> Crate #1</span><h2>Wait states.</h2><p>Every moment between a request and a response.</p></div><div><a className="button primary" href="#install">Install all 12 components <ArrowUpRight size={17}/></a><p>Or pick the pieces you need.</p></div></div><div className="component-stack">{groups.map((g,gi)=><section className={`category-card category-${gi}`} style={{"--card-index":gi} as CSSProperties} key={g.title}><header className="category-heading"><div><span className="category-number">0{gi+1}</span><h3>{g.title}</h3></div><span className="category-count">{g.rows.length} {g.rows.length===1?"component":"components"}</span></header><div className="category-body">{g.rows.map(row=><article className={open===row.key?"component-row is-open":"component-row"} key={row.key}><div className="row-main"><button className="row-info" aria-expanded={open===row.key} aria-controls={`install-${row.key}`} onClick={()=>setOpen(open===row.key?null:row.key)}><span className="row-name">{row.name}{open===row.key?<Minus size={16}/>:<Plus size={16}/>}</span><span className="row-description">{row.description}</span></button><div className="row-preview"><Preview kind={row.key} tick={tick}/></div></div><div className="row-command" id={`install-${row.key}`} hidden={open!==row.key}><Command text={`npx shadcn@latest add https://crate.onerollstudios.com/r/${row.key}.json`}/></div></article>)}</div>{gi===3?<div className="done-graphic"><div className="done-check"><Check strokeWidth={1.3}/></div><p>The work is done.<br/><span>Let the answer take over.</span></p></div>:null}</section>)}</div></div></section>
+ <section className="install dark-section section" id="install"><div className="shell"><div className="theme-layout"><div className="theme-copy"><h2>Your code.<br/><span>Your theme.</span></h2><p>Crate fits the product you’re building. Your colors, your fonts, your corner radius.</p><div className="ownership"><Braces size={24}/><div><h3>The components live in your codebase.</h3><p>Read them. Change them. Make them yours.</p></div></div><div className="stack-tags"><span>React</span><span>Tailwind</span><span>shadcn</span></div></div><ThemeDemo/></div><div className="install-heading"><h3>Bring Crate into your next build.</h3><span>Crate #1 is free & open source.</span></div><div className="install-cards"><article><div className="install-card-title"><Terminal size={23}/><h4>Install it yourself</h4></div><Command/></article><article><div className="install-card-title"><Code2 size={23}/><h4>Ask your coding agent</h4></div><div className="agent-command"><span>›</span> Add crate wait states to my chat <CopyButton text="Add crate wait states to my chat"/></div></article></div></div></section>
+ <section className="coming section"><div className="shell coming-layout"><h2>One crate today.<br/><span>More on the way.</span></h2><div className="crate-shelf"><a href="#crates"><span>01</span><strong>Wait states</strong><span className="available">Available now <ArrowUpRight size={15}/></span></a><div><span>02</span><strong>Next crate</strong><span>Soon</span></div><div><span>03</span><strong>Next crate</strong><span>Soon</span></div></div></div></section>
+ <footer className="site-footer"><div className="shell"><div className="footer-cta"><div><h2>Build the product.<br/><span>We’ve packed the details.</span></h2><p>Start with 12 ready-made wait states.</p></div><a href="#install" className="footer-install" aria-label="Install crate #1"><ArrowUpRight strokeWidth={1.3}/><span>Install crate #1</span></a></div><div className="footer-links"><div><span>Crate #1</span><strong>Free. Open source. Yours.</strong></div><nav aria-label="Footer navigation"><a href="#crates">Components <ArrowUpRight size={15}/></a><a href="https://github.com/OneRollStudios/crate/tree/main/crate#readme" target="_blank" rel="noreferrer">Documentation <ArrowUpRight size={15}/></a><a href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={15}/></a></nav></div><div className="footer-wordmark" aria-label="Crate">crate<span>.</span><div className="wordmark-grid" aria-hidden="true"/></div><div className="footer-bottom"><a href="https://onerollstudios.com" target="_blank" rel="noreferrer">Made by One Roll Studios <ArrowUpRight size={15}/></a><span>React components for AI products.</span><a href="#top">Back to top ↑</a></div></div></footer>
+ </main></>
 }
