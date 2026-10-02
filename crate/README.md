@@ -98,3 +98,21 @@ npm run build
 ```
 
 The build creates shadcn registry items in `public/r` and a static Cloudflare Pages export in `out`.
+
+Pull requests and pushes to `main` run the `checks` CI job: the production build
+(including TypeScript), registry synchronization, the em-dash copy guard, visual
+checks, and a fresh Next.js + shadcn installation test. Screenshots are uploaded
+as the `screenshots` artifact, including any captured before a failure.
+
+After building, run the install test from `crate/` with Node 22+, npm, Bash, and
+curl available (use Git Bash or WSL on Windows):
+
+```bash
+bash scripts/install-test.sh
+```
+
+The test serves `out/` on a free local port, installs `all.json` into a temporary
+consumer app, and builds it. It stops the server and removes the temporary app
+on exit. It uses the latest public Next.js and shadcn CLIs and requires internet
+access. For visual checks, run `node scripts/visual-check.mjs`; set
+`SCREENSHOT_DIR=screenshots` to use the same ignored output folder as CI.

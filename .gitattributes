@@ -1,0 +1,6 @@
+# Keep the locally runnable Bash test compatible with Linux and Git Bash.
+*.sh text eol=lf
+
+# Registry JSON embeds source text, so use identical newlines on every OS.
+/crate/components/agent-wait-states/** text eol=lf
+/crate/hooks/** text eol=lf
