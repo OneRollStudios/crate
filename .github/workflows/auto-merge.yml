@@ -1,0 +1,56 @@
+name: Auto-merge
+
+# Turns the "auto-merge" label into GitHub's native auto-merge (squash).
+# GitHub then merges the PR only once every required check on main passes.
+# Removing the label turns auto-merge off again.
+#
+# pull_request_target runs this file as it exists on main, never the PR's
+# copy, so a PR cannot change these rules for itself. It never checks out
+# or runs PR code; it only calls the GitHub API.
+on:
+  pull_request_target:
+    types: [labeled, unlabeled, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Handle events for one PR in order, so a quick label/unlabel can't race.
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  enable:
+    name: enable
+    # Only when auto-merge is labeled, or a labeled draft is marked ready.
+    # Other label changes never re-enable it.
+    if: >-
+      !github.event.pull_request.draft &&
+      contains(github.event.pull_request.labels.*.name, 'auto-merge') &&
+      ((github.event.action == 'labeled' && github.event.label.name == 'auto-merge') ||
+       github.event.action == 'ready_for_review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable squash auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge "$PR_URL" --auto --squash
+
+  disable:
+    name: disable
+    if: github.event.action == 'unlabeled' && github.event.label.name == 'auto-merge'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disable auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          # Only call disable when it is on, so real failures still fail.
+          if [[ "$(gh pr view "$PR_URL" --json autoMergeRequest --jq '.autoMergeRequest != null')" == "true" ]]; then
+            gh pr merge "$PR_URL" --disable-auto
+          else
+            echo "Auto-merge was not enabled; nothing to do."
+          fi
