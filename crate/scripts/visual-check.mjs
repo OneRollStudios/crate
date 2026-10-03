@@ -7,12 +7,12 @@ import { chromium } from "playwright";
 const studioURL = "https://onerollstudios.com/";
 const screenshotDir = process.env.SCREENSHOT_DIR ?? "design/screenshots";
 const results = [];
-const localChrome = [
-  "C:/Program Files/Google/Chrome/Application/chrome.exe",
-  "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-  "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-  "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-].find(existsSync);
+// Playwright's bundled Chromium by default (npx playwright install chromium).
+// Set CHROMIUM_PATH to use a specific Chrome or Chromium binary instead.
+const chromiumPath = process.env.CHROMIUM_PATH || undefined;
+if (chromiumPath && !existsSync(chromiumPath)) {
+  throw new Error(`CHROMIUM_PATH does not exist: ${chromiumPath}`);
+}
 
 function getFreePort() {
   return new Promise((resolve, reject) => {
@@ -196,7 +196,7 @@ async function main() {
 
   try {
     await waitForServer(server, baseURL);
-    browser = await chromium.launch({ headless: true, executablePath: localChrome });
+    browser = await chromium.launch({ headless: true, executablePath: chromiumPath });
     await runViewport(browser, baseURL, "desktop", { width: 1440, height: 900 }, "light");
     await runViewport(browser, baseURL, "desktop", { width: 1440, height: 900 }, "dark");
     await runViewport(browser, baseURL, "mobile", { width: 390, height: 844 }, "light");
