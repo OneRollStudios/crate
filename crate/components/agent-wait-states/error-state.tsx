@@ -1,4 +1,7 @@
+"use client";
+
 import { AlertCircle, RotateCcw } from "lucide-react";
+import { useCrate } from "./crate-provider";
 import { cx, type WaitStateProps } from "./types";
 
 export type ErrorStateProps = WaitStateProps & {
@@ -8,9 +11,11 @@ export type ErrorStateProps = WaitStateProps & {
 
 export function ErrorState({
   className,
-  message = "Something went wrong.",
+  message,
   onRetry,
+  labels,
 }: ErrorStateProps) {
+  const { labels: l } = useCrate(labels);
   return (
     <div
       className={cx(
@@ -21,14 +26,14 @@ export function ErrorState({
       aria-live="polite"
     >
       <AlertCircle className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-      <span className="min-w-0 flex-1 text-foreground">{message}</span>
+      <span className="min-w-0 flex-1 text-foreground">{message ?? l.error}</span>
       {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
           className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <RotateCcw className="size-3" aria-hidden="true" /> Retry
+          <RotateCcw className="size-3" aria-hidden="true" /> {l.retry}
         </button>
       ) : null}
     </div>

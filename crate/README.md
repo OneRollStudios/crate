@@ -25,6 +25,7 @@ agent-plan
 approval
 queue
 file-processing
+crate-provider
 agent-state
 use-agent-status
 ```
@@ -61,6 +62,43 @@ type AgentStatusSnapshot = {
 ```
 
 Pass `manualStatus` to use the hook with an external state source. `AgentPlan`, `Approval`, `Queue`, and `FileProcessing` are intentionally prop-driven because they describe application workflows rather than AI SDK message parts.
+
+## Labels and languages
+
+Every piece of text in the components can be replaced. Wrap your app (or any part of it) in `CrateProvider` to set labels and a locale for every component inside it. Any label you leave out falls back to English.
+
+```tsx
+import { CrateProvider, type CrateLabels } from "@/components/agent-wait-states";
+
+const fr: Partial<CrateLabels> = {
+  thinking: "Réflexion…",
+  stillThinking: "Toujours en réflexion…",
+  cancel: "Annuler",
+  done: "Terminé",
+  retry: "Réessayer",
+  error: "Une erreur est survenue.",
+  showThinking: "Afficher le raisonnement",
+  thoughtFor: (seconds, f) => `Réflexion pendant ${f.seconds(seconds)}`,
+  moreSources: (count, f) => `+${f.number(count)} ${f.plural(count, { one: "autre", other: "autres" })}`,
+  planProgress: (current, total, f) => `${f.number(current)} sur ${f.number(total)}`,
+  expiresIn: (seconds, f) => `Expire dans ${f.seconds(seconds)}`,
+  deny: "Refuser",
+  allow: "Autoriser",
+  queuePosition: (position, f) => `Vous êtes n° ${f.number(position)} dans la file`,
+};
+
+<CrateProvider locale="fr" labels={fr}>
+  <AgentState status={status} />
+</CrateProvider>
+```
+
+- Labels that contain a number are functions. They receive the value and a formatter `f` built from the locale with `Intl`: `f.number()` for counts, `f.seconds()` for times and countdowns, and `f.plural(value, { one, other, ... })` for plural forms.
+- Each component also takes a `labels` prop that overrides the provider for that component only, for example `<Done labels={{ done: "Fini !" }} />`. Existing text props such as `label`, `message`, and `title` still win over both.
+- `useAgentStatus` reads the provider too, so `status.label` follows your locale.
+- Nested providers inherit the outer locale and labels and override only what they set.
+- Right-to-left: components use logical CSS properties, so they mirror correctly inside `dir="rtl"`. Set `dir` on your `<html>` or a parent element.
+
+See the `CrateLabels` type in `crate-provider.tsx` for every label key.
 
 ## Components
 
