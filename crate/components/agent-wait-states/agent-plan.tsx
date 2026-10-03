@@ -1,17 +1,21 @@
+"use client";
+
 import { Check, Circle, LoaderCircle, X } from "lucide-react";
+import { useCrate } from "./crate-provider";
 import { cx, type WaitStateProps } from "./types";
 
 export type PlanStep = { id?: string; label: string; state: "pending" | "active" | "complete" | "failed" };
 export type AgentPlanProps = WaitStateProps & { steps: PlanStep[] };
 
-export function AgentPlan({ className, accent = false, steps }: AgentPlanProps) {
+export function AgentPlan({ className, accent = false, steps, labels }: AgentPlanProps) {
+  const { labels: l, format } = useCrate(labels);
   const complete = steps.filter((step) => step.state === "complete").length;
   const activeIndex = steps.findIndex((step) => step.state === "active");
   const progress = Math.max(complete, activeIndex >= 0 ? activeIndex + 1 : complete);
 
   return (
     <div className={cx("w-full max-w-md rounded-sm border border-border bg-background p-4 text-foreground", className)} aria-live="polite">
-      <div className="mb-3 flex items-center justify-between text-xs"><span className="font-medium">Plan</span><span className="text-muted-foreground">{Math.min(progress, steps.length)} of {steps.length}</span></div>
+      <div className="mb-3 flex items-center justify-between text-xs"><span className="font-medium">{l.plan}</span><span className="text-muted-foreground">{l.planProgress(Math.min(progress, steps.length), steps.length, format)}</span></div>
       <ol className="space-y-2">
         {steps.map((step, index) => <li key={step.id ?? `${step.label}-${index}`} className={cx("flex items-center gap-2.5 text-sm", step.state === "pending" && "text-muted-foreground")}>
           <span className={cx("grid size-6 shrink-0 place-items-center rounded-full border border-border", step.state === "active" && accent && "border-primary text-primary", step.state === "failed" && "text-destructive")} aria-hidden="true">

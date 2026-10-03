@@ -1,3 +1,5 @@
+import type { CrateLabels } from "./crate-provider";
+
 export type AgentStatus =
   | "thinking"
   | "reasoning"
@@ -33,6 +35,8 @@ export type AgentStatusSnapshot = {
 export type WaitStateProps = {
   className?: string;
   accent?: boolean;
+  /** Replace any of this component's labels. Overrides CrateProvider. */
+  labels?: Partial<CrateLabels>;
 };
 
 export function cx(...values: Array<string | false | null | undefined>) {

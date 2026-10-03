@@ -46,9 +46,9 @@ function isSnapshot(value: AgentStatus | AgentStatusSnapshot): value is AgentSta
 }
 
 export function AgentState({
-  status, className, accent = false, text, toolName, steps, errorMessage, onRetry, onCancel,
+  status, className, accent = false, labels, text, toolName, steps, errorMessage, onRetry, onCancel,
   reasoning, reasoningDone, reasoningDurationSeconds, sources, planSteps = [], approvalTitle,
-  approvalPreview = "Review this action before it runs.", onAllow, onDeny, approvalExpiresIn,
+  approvalPreview, onAllow, onDeny, approvalExpiresIn,
   queueVariant, queuePosition, retryIn, filename = "document.pdf", fileSize = "2.4 MB",
   fileStage, fileProgress,
 }: AgentStateProps) {
@@ -58,18 +58,18 @@ export function AgentState({
 
   return (
     <div key={state} className={cx("crate-state-in motion-reduce:opacity-100", className)} aria-live="polite" aria-atomic="true">
-      {state === "thinking" ? <Thinking accent={accent} elapsedMs={snapshot?.elapsedMs} label={snapshot?.label === "Thinking…" ? undefined : snapshot?.label} onCancel={cancel} /> : null}
-      {state === "reasoning" ? <ReasoningTrace accent={accent} text={reasoning ?? snapshot?.reasoning} done={reasoningDone} durationSeconds={reasoningDurationSeconds} /> : null}
-      {state === "sources" ? <Sources accent={accent} sources={sources ?? snapshot?.sources ?? []} /> : null}
-      {state === "tool" ? <ToolCall accent={accent} toolName={toolName ?? snapshot?.activeToolName} steps={steps} /> : null}
-      {state === "plan" ? <AgentPlan accent={accent} steps={planSteps} /> : null}
-      {state === "approval" ? <Approval accent={accent} title={approvalTitle} preview={approvalPreview} onAllow={onAllow} onDeny={onDeny} expiresIn={approvalExpiresIn} /> : null}
-      {state === "queue" ? <Queue accent={accent} variant={queueVariant} position={queuePosition} retryIn={retryIn} /> : null}
-      {state === "file" ? <FileProcessing accent={accent} filename={filename} size={fileSize} stage={fileStage} progress={fileProgress} /> : null}
-      {state === "streaming" ? <Streaming accent={accent} text={text} /> : null}
-      {state === "stalled" ? <Stalled accent={accent} /> : null}
-      {state === "error" ? <ErrorState message={errorMessage} onRetry={onRetry} /> : null}
-      {state === "done" ? <Done accent={accent} /> : null}
+      {state === "thinking" ? <Thinking accent={accent} labels={labels} elapsedMs={snapshot?.elapsedMs} onCancel={cancel} /> : null}
+      {state === "reasoning" ? <ReasoningTrace accent={accent} labels={labels} text={reasoning ?? snapshot?.reasoning} done={reasoningDone} durationSeconds={reasoningDurationSeconds} /> : null}
+      {state === "sources" ? <Sources accent={accent} labels={labels} sources={sources ?? snapshot?.sources ?? []} /> : null}
+      {state === "tool" ? <ToolCall accent={accent} labels={labels} toolName={toolName ?? snapshot?.activeToolName} steps={steps} /> : null}
+      {state === "plan" ? <AgentPlan accent={accent} labels={labels} steps={planSteps} /> : null}
+      {state === "approval" ? <Approval accent={accent} labels={labels} title={approvalTitle} preview={approvalPreview} onAllow={onAllow} onDeny={onDeny} expiresIn={approvalExpiresIn} /> : null}
+      {state === "queue" ? <Queue accent={accent} labels={labels} variant={queueVariant} position={queuePosition} retryIn={retryIn} /> : null}
+      {state === "file" ? <FileProcessing accent={accent} labels={labels} filename={filename} size={fileSize} stage={fileStage} progress={fileProgress} /> : null}
+      {state === "streaming" ? <Streaming accent={accent} labels={labels} text={text} /> : null}
+      {state === "stalled" ? <Stalled accent={accent} labels={labels} /> : null}
+      {state === "error" ? <ErrorState labels={labels} message={errorMessage} onRetry={onRetry} /> : null}
+      {state === "done" ? <Done accent={accent} labels={labels} /> : null}
       <style>{`@media (prefers-reduced-motion: no-preference) { @keyframes crate-state-enter { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: none } } .crate-state-in { animation: crate-state-enter 260ms ease-out both; } }`}</style>
     </div>
   );

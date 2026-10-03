@@ -1,4 +1,7 @@
+"use client";
+
 import { Check, Circle, LoaderCircle, Search, FileText, Wrench } from "lucide-react";
+import { useCrate } from "./crate-provider";
 import { cx, type WaitStateProps } from "./types";
 
 export type ToolStep = { id?: string; label: string; toolName?: string; state?: "pending" | "active" | "complete" };
@@ -12,10 +15,11 @@ function ToolIcon({ name, active }: { name?: string; active: boolean }) {
   return <Wrench className={iconClass} />;
 }
 
-export function ToolCall({ className, accent = false, steps, toolName = "tool", label }: ToolCallProps) {
-  const items = steps?.length ? steps : [{ label: label ?? `Running ${toolName}…`, toolName, state: "active" as const }];
+export function ToolCall({ className, accent = false, steps, toolName = "tool", label, labels }: ToolCallProps) {
+  const { labels: l } = useCrate(labels);
+  const items = steps?.length ? steps : [{ label: label ?? l.runningTool(toolName), toolName, state: "active" as const }];
   return (
-    <div className={cx("w-full max-w-sm rounded-sm border border-border bg-background p-2 text-foreground shadow-[0_14px_34px_-24px_color-mix(in_srgb,var(--primary)_30%,transparent)]", className)} aria-live="polite" aria-label="Agent tool activity">
+    <div className={cx("w-full max-w-sm rounded-sm border border-border bg-background p-2 text-foreground shadow-[0_14px_34px_-24px_color-mix(in_srgb,var(--primary)_30%,transparent)]", className)} aria-live="polite" aria-label={l.toolActivity}>
       <ol className="space-y-1">
         {items.map((step, index) => {
           const state = step.state ?? (index === items.length - 1 ? "active" : "complete");

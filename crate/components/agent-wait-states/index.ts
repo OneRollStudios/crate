@@ -12,3 +12,4 @@ export { Approval, type ApprovalProps } from "./approval";
 export { Queue, type QueueProps } from "./queue";
 export { FileProcessing, type FileProcessingProps, type FileStage } from "./file-processing";
 export type { AgentStatus, AgentStatusSnapshot, AgentSource, WaitStateProps } from "./types";
+export { CrateProvider, useCrate, defaultLabels, createFormat, type CrateProviderProps, type CrateLabels, type CrateFormat } from "./crate-provider";
