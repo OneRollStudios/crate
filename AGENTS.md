@@ -7,6 +7,7 @@ their coding agent to add them. Crate #1 is "wait states": 12 components for the
 moments while an AI app is working, plus the useAgentStatus() hook and the
 AgentState wrapper that switch between them automatically.
 Live site: crate.onerollstudios.com (Cloudflare Pages, deploys from main).
+Read ROADMAP.md for direction.
 
 ## Repo layout
 - crate/ : the Next.js app (static export). All work happens here.
