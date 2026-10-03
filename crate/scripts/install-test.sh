@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run after npm run build. Requires Node 22+, npm, Bash, and curl.
+# Run after npm run build. Requires Node 22+, npm, Bash, curl, and Playwright's
+# Chromium (npx playwright install chromium, or set CHROMIUM_PATH).
 # From crate/: bash scripts/install-test.sh
 crate_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$crate_dir"
@@ -12,11 +13,14 @@ fi
 
 temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/crate-install.XXXXXX")"
 server_pid=""
+app_pid=""
 cleanup() {
-  if [[ -n "$server_pid" ]]; then
-    kill "$server_pid" 2>/dev/null || true
-    wait "$server_pid" 2>/dev/null || true
-  fi
+  for pid in "$server_pid" "$app_pid"; do
+    if [[ -n "$pid" ]]; then
+      kill "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+    fi
+  done
   rm -rf -- "$temp_dir"
 }
 trap cleanup EXIT
@@ -61,15 +65,85 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return <html lang="en"><body>{children}</body></html>;
 }
 TSX
+# Drive useAgentStatus with a real useChat and a mocked AI SDK stream.
+npm install ai @ai-sdk/react
 cat > app/page.tsx <<'TSX'
 "use client";
 
+import { useChat } from "@ai-sdk/react";
+import type { ChatTransport, UIMessage, UIMessageChunk } from "ai";
 import { AgentState } from "@/components/agent-wait-states/agent-state";
 import { useAgentStatus } from "@/hooks/use-agent-status";
 
+// A mocked AI SDK stream: no server, no API key. Each request opens a stream
+// that the test feeds one chunk at a time through window.__crateMock.
+type CrateMock = {
+  requests: number;
+  push: (chunk: UIMessageChunk) => void;
+  close: () => void;
+};
+
+declare global {
+  interface Window {
+    __crateMock?: CrateMock;
+  }
+}
+
+let controller: ReadableStreamDefaultController<UIMessageChunk> | undefined;
+const mock: CrateMock = {
+  requests: 0,
+  push: (chunk) => controller?.enqueue(chunk),
+  close: () => controller?.close(),
+};
+if (typeof window !== "undefined") window.__crateMock = mock;
+
+const transport: ChatTransport<UIMessage> = {
+  async sendMessages() {
+    mock.requests += 1;
+    return new ReadableStream<UIMessageChunk>({
+      start(next) {
+        controller = next;
+      },
+    });
+  },
+  async reconnectToStream() {
+    return null;
+  },
+};
+
 export default function Page() {
-  const status = useAgentStatus({ status: "ready", messages: [] });
-  return <AgentState status={status} />;
+  const chat = useChat({ transport });
+  const status = useAgentStatus(chat, { stallAfterMs: 1500 });
+
+  return (
+    <main>
+      <button type="button" onClick={() => chat.sendMessage({ text: "Find the docs" })}>
+        Send
+      </button>
+      <p data-testid="chat-status">{chat.status}</p>
+      <AgentState
+        status={status}
+        errorMessage={chat.error?.message}
+        onRetry={() => chat.regenerate()}
+      />
+    </main>
+  );
 }
 TSX
 npm run build
+
+# Serve the consumer app and check every state in a browser.
+app_port="$(node -e 'const s=require("net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
+npx next start -p "$app_port" > "$temp_dir/app.log" 2>&1 &
+app_pid=$!
+for ((attempt = 0; attempt < 100; attempt++)); do
+  if curl --fail --silent --output /dev/null "http://localhost:$app_port"; then
+    break
+  fi
+  if ! kill -0 "$app_pid" 2>/dev/null; then
+    cat "$temp_dir/app.log" >&2
+    exit 1
+  fi
+  sleep 0.2
+done
+node "$crate_dir/scripts/stream-test.mjs" "http://localhost:$app_port"
