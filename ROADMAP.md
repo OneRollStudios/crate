@@ -27,7 +27,8 @@ Crate #1, wait states, plus the landing page, shipped and launched.
 Make crate easy for coding agents to find, understand, and install:
 - llms.txt and machine-readable docs per component
 - crate MCP server or agent skill
-- stream adapters, so components plug into common AI streaming setups
+- stream adapters, so components plug into common AI streaming setups:
+  Vercel AI SDK (existing), OpenAI Agents SDK, LangChain/LangGraph, and raw SSE
 - `crate init`: detect the app's theme and set up automatically
 
 ### 3. Breadth (`m2-breadth`)
