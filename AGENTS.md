@@ -7,6 +7,7 @@ their coding agent to add them. Crate #1 is "wait states": 12 components for the
 moments while an AI app is working, plus the useAgentStatus() hook and the
 AgentState wrapper that switch between them automatically.
 Live site: crate.onerollstudios.com (Cloudflare Pages, deploys from main).
+Read ROADMAP.md for direction.
 
 ## Repo layout
 - crate/ : the Next.js app (static export). All work happens here.
@@ -53,6 +54,9 @@ Live site: crate.onerollstudios.com (Cloudflare Pages, deploys from main).
 - Keep the copy casing already used on the live page unless a task says otherwise.
 
 ## Copy rules
+These apply to public-facing copy: the website and the README's marketing
+sections. Internal docs (ROADMAP.md, issues, PR descriptions) can name tools
+and companies when it's useful. The em dash rule applies everywhere.
 - Never invent stats, testimonials, customer logos, or scenarios.
 - Never name other companies or products to sell crate.
 - Never promise "free forever". Paid crates are coming.
