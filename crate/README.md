@@ -116,3 +116,6 @@ consumer app, and builds it. It stops the server and removes the temporary app
 on exit. It uses the latest public Next.js and shadcn CLIs and requires internet
 access. For visual checks, run `node scripts/visual-check.mjs`; set
 `SCREENSHOT_DIR=screenshots` to use the same ignored output folder as CI.
+It uses Playwright's bundled Chromium on any OS, so run
+`npx playwright install chromium` once first. To use a specific Chrome or
+Chromium instead, set `CHROMIUM_PATH` to its executable.
