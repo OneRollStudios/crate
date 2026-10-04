@@ -93,6 +93,12 @@ jobs:
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: bash scripts/install-test.sh vite
 
+      # Install into an app with its own shadcn theme (colors, radius, font)
+      # and check every component takes its look from that theme.
+      - name: Themed host test
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: bash scripts/install-test.sh themed
+
       # Preserve any screenshots produced, even when another step failed.
       - name: Upload screenshots
         if: ${{ always() }}

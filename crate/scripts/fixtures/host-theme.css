@@ -1,0 +1,26 @@
+/* Appended by scripts/install-test.sh themed: a host theme that differs from
+   shadcn's default on every axis Crate reads (colors, radius, font). */
+:root {
+  --radius: 1rem;
+  --background: oklch(0.97 0.02 85);
+  --foreground: oklch(0.27 0.06 270);
+  --primary: oklch(0.52 0.24 300);
+  --primary-foreground: oklch(0.98 0.01 300);
+  --muted: oklch(0.92 0.04 85);
+  --muted-foreground: oklch(0.45 0.06 270);
+  --border: oklch(0.8 0.07 85);
+  --destructive: oklch(0.55 0.21 25);
+}
+.dark {
+  --background: oklch(0.2 0.04 220);
+  --foreground: oklch(0.95 0.02 200);
+  --primary: oklch(0.8 0.15 170);
+  --primary-foreground: oklch(0.2 0.04 220);
+  --muted: oklch(0.28 0.04 220);
+  --muted-foreground: oklch(0.75 0.04 200);
+  --border: oklch(0.38 0.05 220);
+  --destructive: oklch(0.7 0.19 25);
+}
+body {
+  font-family: "DejaVu Serif", Georgia, serif;
+}

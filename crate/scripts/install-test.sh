@@ -3,13 +3,20 @@ set -euo pipefail
 
 # Run after npm run build. Requires Node 22+, npm, Bash, curl, and Playwright's
 # Chromium (npx playwright install chromium, or set CHROMIUM_PATH).
-# From crate/: bash scripts/install-test.sh [next|vite]
-# Installs the registry into a fresh Next.js app (default) or Vite + React app.
-framework="${1:-next}"
-if [[ "$framework" != "next" && "$framework" != "vite" ]]; then
-  echo "Usage: bash scripts/install-test.sh [next|vite]" >&2
-  exit 2
-fi
+# From crate/: bash scripts/install-test.sh [next|vite|themed]
+#   next    install into a fresh Next.js app and drive every state (default)
+#   vite    the same in a fresh Vite + React app
+#   themed  install into a Next.js app with a non-default shadcn theme
+#           (colors, radius, font) and check every component uses that theme
+mode="${1:-next}"
+case "$mode" in
+  next | themed) framework="next" ;;
+  vite) framework="vite" ;;
+  *)
+    echo "Usage: bash scripts/install-test.sh [next|vite|themed]" >&2
+    exit 2
+    ;;
+esac
 crate_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$crate_dir"
 if [[ ! -f out/r/all.json ]]; then
@@ -97,10 +104,12 @@ TS
 fi
 
 npx --yes shadcn@latest init --defaults --yes
+if [[ "$mode" == "themed" ]]; then
+  # Make it an existing app with its own look before Crate arrives.
+  cat "$crate_dir/scripts/fixtures/host-theme.css" >> app/globals.css
+fi
 npx --yes shadcn@latest add "http://localhost:$port/r/all.json" --yes
 
-# Drive useAgentStatus with a real useChat and a mocked AI SDK stream.
-npm install ai @ai-sdk/react
 if [[ "$framework" == "next" ]]; then
   # Avoid remote font downloads.
   cat > app/layout.tsx <<'TSX'
@@ -110,9 +119,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return <html lang="en"><body>{children}</body></html>;
 }
 TSX
-  cp "$crate_dir/scripts/fixtures/mock-chat.tsx" app/page.tsx
+fi
+if [[ "$mode" == "themed" ]]; then
+  # Every component, side by side.
+  cp "$crate_dir/scripts/fixtures/themed-page.tsx" app/page.tsx
 else
-  cp "$crate_dir/scripts/fixtures/mock-chat.tsx" src/App.tsx
+  # Drive useAgentStatus with a real useChat and a mocked AI SDK stream.
+  npm install ai @ai-sdk/react
+  if [[ "$framework" == "next" ]]; then
+    cp "$crate_dir/scripts/fixtures/mock-chat.tsx" app/page.tsx
+  else
+    cp "$crate_dir/scripts/fixtures/mock-chat.tsx" src/App.tsx
+  fi
 fi
 npm run build
 
@@ -134,4 +152,10 @@ for ((attempt = 0; attempt < 100; attempt++)); do
   fi
   sleep 0.2
 done
-node "$crate_dir/scripts/stream-test.mjs" "http://localhost:$app_port"
+# Run the checks from crate/ so screenshots land in crate's SCREENSHOT_DIR.
+cd "$crate_dir"
+if [[ "$mode" == "themed" ]]; then
+  node "$crate_dir/scripts/theme-check.mjs" "http://localhost:$app_port"
+else
+  node "$crate_dir/scripts/stream-test.mjs" "http://localhost:$app_port"
+fi
