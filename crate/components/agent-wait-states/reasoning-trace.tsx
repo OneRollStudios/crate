@@ -12,10 +12,10 @@ export type ReasoningTraceProps = WaitStateProps & {
   defaultOpen?: boolean;
 };
 
-export function ReasoningTrace({ className, accent = false, text = "", done = false, durationSeconds = 12, defaultOpen, labels }: ReasoningTraceProps) {
+export function ReasoningTrace({ className, accent = false, text = "", done = false, durationSeconds, defaultOpen, labels }: ReasoningTraceProps) {
   const { labels: l, format } = useCrate(labels);
   const [open, setOpen] = useState(defaultOpen ?? !done);
-  const label = done ? l.thoughtFor(durationSeconds, format) : l.showThinking;
+  const label = !done ? l.showThinking : durationSeconds === undefined ? l.thoughtDone : l.thoughtFor(durationSeconds, format);
 
   return (
     <div className={cx("w-full max-w-md rounded-sm border border-border bg-background text-sm text-foreground", className)}>

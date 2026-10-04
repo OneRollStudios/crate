@@ -37,7 +37,7 @@ function Preview({kind,tick}:{kind:Kind;tick:number}){
 const phase=tick%4;
 switch(kind){
  case "thinking":return <Thinking accent elapsedMs={phase>1?9000:3000}/>;
- case "queue":return <Queue accent position={3}/>;
+ case "queue":return <Queue accent position={Math.max(1,3-phase)}/>;
  case "file-processing":return <FileProcessing accent filename="document.pdf" size="Demo file" stage={(["uploading","reading","chunking","ready"] as const)[phase]} progress={[24,52,78,100][phase]}/>;
  case "reasoning-trace":return <ReasoningTrace accent text="Reading the request. Choosing the next step." done={phase===3} durationSeconds={12}/>;
  case "tool-call":return <ToolCall accent toolName="search" label="Searching the web…"/>;

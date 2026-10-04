@@ -15,9 +15,9 @@ function ToolIcon({ name, active }: { name?: string; active: boolean }) {
   return <Wrench className={iconClass} />;
 }
 
-export function ToolCall({ className, accent = false, steps, toolName = "tool", label, labels }: ToolCallProps) {
+export function ToolCall({ className, accent = false, steps, toolName, label, labels }: ToolCallProps) {
   const { labels: l } = useCrate(labels);
-  const items = steps?.length ? steps : [{ label: label ?? l.runningTool(toolName), toolName, state: "active" as const }];
+  const items = steps?.length ? steps : [{ label: label ?? (toolName ? l.runningTool(toolName) : l.runningToolUnnamed), toolName, state: "active" as const }];
   return (
     <div className={cx("w-full max-w-sm rounded-sm border border-border bg-background p-2 text-foreground shadow-[0_14px_34px_-24px_color-mix(in_srgb,var(--primary)_30%,transparent)]", className)} aria-live="polite" aria-label={l.toolActivity}>
       <ol className="space-y-1">
