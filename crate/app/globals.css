@@ -45,3 +45,28 @@
 .problem-grid-single .problem-copy{max-width:760px}
 .make-it-yours{background:#0e151c}
 .install .install-heading{margin-top:0;padding-top:0;border-top:0}
+.lab-heading{max-width:760px}
+.lab-heading h2{font-size:clamp(46px,5.6vw,79px);font-weight:500;letter-spacing:-.05em;line-height:1.04}
+.lab-heading h2>span{color:var(--lime)}
+.lab-heading p{font-size:19px;line-height:1.6;color:#b5c1ad;margin-top:23px}
+.theme-lab{margin-top:48px;border:1px solid #3c4934;border-radius:5px;background:#17201f;min-width:0}
+.lab-controls{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:end;padding:16px 18px;border-bottom:1px solid #3c4934}
+.lab-control{display:flex;flex-direction:column;gap:7px;font-size:12px;color:#bac5b2;min-width:0}
+.lab-control output{color:#f6f4ed;margin-left:6px}
+.lab-control input[type=color]{width:44px;height:30px;padding:0;border:1px solid #5a7044;border-radius:3px;background:transparent;cursor:pointer}
+.lab-range input{width:160px;accent-color:#d4ff3d}
+.lab-segments{display:flex;gap:3px;padding:3px;border:1px solid #3c4934;border-radius:4px}
+.lab-segments button{border:1px solid transparent;border-radius:3px;background:transparent;color:#bac5b2;font-size:12px;padding:6px 10px}
+.lab-segments button[aria-pressed=true]{background:#29352a;color:#f6f4ed;border-color:#5a7044}
+.lab-control input:focus-visible,.lab-segments button:focus-visible{outline:2px solid #d4ff3d;outline-offset:2px}
+.lab-panels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.lab-panel{min-width:0;min-height:190px;padding:20px 18px;transition:background .25s,color .25s}
+.lab-panel>div[aria-live]{max-width:100%}
+.lab-panel-name{display:block;font-size:13px;color:var(--muted-foreground);margin-bottom:16px}
+.lab-panel-yours{outline:2px solid #d4ff3d;outline-offset:-2px}
+.lab-code{margin:0;padding:16px 18px;border-top:1px solid #3c4934;color:#d7e6c6;font:12px/1.7 ui-monospace,monospace;overflow-x:auto;white-space:pre}
+.lab-footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:20px 40px}
+.lab-footer .stack-tags{margin-top:0}
+@media(max-width:1100px){.lab-panels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.lab-heading h2{font-size:53px}.lab-heading p{font-size:18px}.lab-panels{grid-template-columns:minmax(0,1fr)}.lab-panel{min-height:150px}.lab-range input{width:100%}.lab-control.lab-range{flex:1 1 160px}}
+@media(prefers-reduced-motion:reduce){.lab-panel{transition:none}}
