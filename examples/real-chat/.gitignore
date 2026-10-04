@@ -1,0 +1,7 @@
+# Copied from crate/public/r/all.json by scripts/sync-crate.mjs
+/components/agent-wait-states/
+/hooks/
+.env*.local
+next-env.d.ts
+/lib/crate-components.json
+package-lock.json

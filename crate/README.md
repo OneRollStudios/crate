@@ -142,8 +142,8 @@ docs coding agents read never go stale. These files are not committed.
 
 Pull requests and pushes to `main` run the `checks` CI job: the production build
 (including TypeScript), registry synchronization, the llms.txt link check, the em-dash copy guard, visual
-checks, fresh Next.js + shadcn and Vite + React + shadcn installation tests, and
-a themed host app test. Screenshots are uploaded
+checks, fresh Next.js + shadcn and Vite + React + shadcn installation tests, a
+themed host app test, and the real chat example. Screenshots are uploaded
 as the `screenshots` artifact, including any captured before a failure.
 
 After building, run the install test from `crate/` with Node 22+, npm, Bash, and
@@ -176,6 +176,11 @@ the homepage, `/r/all.json`, `/llms.txt` and every link in it, and installs
 `all.json` from the live site into a fresh Next.js + shadcn app and builds it. A
 failure opens an issue labeled `human`. Pass a URL to check a preview instead:
 `bash scripts/verify-live.sh https://<branch>.crate-3m1.pages.dev`.
+
+`examples/real-chat` is a minimal Next.js chat that wires the AI SDK's `useChat`
+to `useAgentStatus`. It calls a real model when `ANTHROPIC_API_KEY` is set and
+otherwise streams a scripted reply. CI builds it in mock mode and checks every
+state with `bash ../examples/real-chat/scripts/ci-test.sh`. See its README.
 
 For visual checks, run `node scripts/visual-check.mjs`; set
 `SCREENSHOT_DIR=screenshots` to use the same ignored output folder as CI.
