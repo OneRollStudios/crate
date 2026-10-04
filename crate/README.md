@@ -160,6 +160,13 @@ done, checking that the right component shows for each. It stops the servers and
 removes the temporary app on exit. It uses the latest public Next.js, shadcn, and
 AI SDK packages and requires internet access.
 
+The `Live check` workflow runs `bash scripts/verify-live.sh` against the live site
+every day, about five minutes after each push to `main`, and on demand. It checks
+the homepage, `/r/all.json`, `/llms.txt` and every link in it, and installs
+`all.json` from the live site into a fresh Next.js + shadcn app and builds it. A
+failure opens an issue labeled `human`. Pass a URL to check a preview instead:
+`bash scripts/verify-live.sh https://<branch>.crate-3m1.pages.dev`.
+
 For visual checks, run `node scripts/visual-check.mjs`; set
 `SCREENSHOT_DIR=screenshots` to use the same ignored output folder as CI.
 

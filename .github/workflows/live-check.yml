@@ -1,0 +1,91 @@
+name: Live check
+
+# Checks the deployed site with crate/scripts/verify-live.sh: homepage,
+# /r/all.json, /llms.txt and every link in it, and a real install from the
+# live registry into a fresh Next.js + shadcn app.
+# If it fails, it opens an issue labeled "human" (or comments on the open one).
+on:
+  schedule:
+    # Every day at 06:17 UTC.
+    - cron: "17 6 * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+# A newer run replaces one still waiting, e.g. two quick pushes to main.
+concurrency:
+  group: live-check
+  cancel-in-progress: true
+
+jobs:
+  live:
+    name: live
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: crate
+        shell: bash
+    env:
+      SITE_URL: https://crate.onerollstudios.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Cloudflare Pages deploys main on its own; give it time to finish.
+      - name: Wait for the Cloudflare deploy
+        if: github.event_name == 'push'
+        run: sleep 300
+
+      - name: Verify live site
+        run: bash scripts/verify-live.sh "$SITE_URL" 2>&1 | tee live-check.log
+
+      - name: Open or update a failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER: ${{ github.event_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          title="Live check failed"
+          {
+            echo "The live check of $SITE_URL failed."
+            echo
+            echo "- Run: $RUN_URL"
+            echo "- Trigger: $TRIGGER"
+            echo "- Commit on main: $COMMIT"
+            echo
+            echo "Failed checks:"
+            echo
+            echo '```text'
+            grep '^FAIL' live-check.log || echo "No FAIL lines; the run failed before or outside the checks. See the run log."
+            echo '```'
+            echo
+            echo "<details><summary>Last 100 lines of output</summary>"
+            echo
+            echo '```text'
+            tail -n 100 live-check.log 2>/dev/null || echo "No output captured."
+            echo '```'
+            echo
+            echo "</details>"
+          } > issue.md
+          # One open issue at a time: later failures comment on it.
+          existing="$(gh issue list --state open --label human --search "\"$title\" in:title" --json number,title \
+            --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)"
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --body-file issue.md
+          else
+            gh issue create --title "$title" --label human --body-file issue.md
+          fi
