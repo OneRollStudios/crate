@@ -142,22 +142,25 @@ docs coding agents read never go stale. These files are not committed.
 
 Pull requests and pushes to `main` run the `checks` CI job: the production build
 (including TypeScript), registry synchronization, the llms.txt link check, the em-dash copy guard, visual
-checks, a fresh Next.js + shadcn installation test, and the real chat example. Screenshots are uploaded
+checks, fresh Next.js + shadcn and Vite + React + shadcn installation tests, and
+the real chat example. Screenshots are uploaded
 as the `screenshots` artifact, including any captured before a failure.
 
 After building, run the install test from `crate/` with Node 22+, npm, Bash, and
 curl available (use Git Bash or WSL on Windows):
 
 ```bash
-bash scripts/install-test.sh
+bash scripts/install-test.sh        # Next.js
+bash scripts/install-test.sh vite   # Vite + React
 ```
 
 The test serves `out/` on a free local port, installs `all.json` into a temporary
-consumer app, and builds it. The app wires `useAgentStatus` to a real `useChat`
+consumer app (Next.js, or Vite + React set up as in shadcn's Vite guide), and
+builds it. Both apps use the same test page, `scripts/fixtures/mock-chat.tsx`. The app wires `useAgentStatus` to a real `useChat`
 with a mocked AI SDK stream (no API key), and `scripts/stream-test.mjs` drives it
 in Chromium through thinking, tool call, streaming, stalled, error, retry, and
 done, checking that the right component shows for each. It stops the servers and
-removes the temporary app on exit. It uses the latest public Next.js, shadcn, and
+removes the temporary app on exit. It uses the latest public Next.js, Vite, shadcn, and
 AI SDK packages and requires internet access.
 
 The `Live check` workflow runs `bash scripts/verify-live.sh` against the live site
