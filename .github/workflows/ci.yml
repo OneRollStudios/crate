@@ -49,6 +49,17 @@ jobs:
           git add --intent-to-add -- public/r/ registry.json
           git diff --exit-code -- public/r/ registry.json
 
+      # Every link in llms.txt must point at a file in the static export.
+      - name: LLM docs
+        run: |
+          test -s out/llms.txt
+          site="https://crate.onerollstudios.com/"
+          links=$(grep -oE "\]\(${site}[^)]+" out/llms.txt | sed 's/^](//')
+          for url in $links; do
+            test -s "out/${url#"$site"}" || { echo "llms.txt links a missing file: $url"; exit 1; }
+          done
+          echo "llms.txt links $(echo "$links" | wc -l) files, all present."
+
       # Report every em dash, and treat search errors as failures too.
       - name: Copy guard
         if: ${{ !cancelled() }}
