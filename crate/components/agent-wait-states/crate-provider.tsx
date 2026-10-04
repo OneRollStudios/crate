@@ -20,12 +20,14 @@ export type CrateLabels = {
   responseStreaming: string;
   toolActivity: string;
   runningTool: (toolName: string) => string;
+  runningToolUnnamed: string;
   stalled: string;
   error: string;
   retry: string;
   done: string;
   showThinking: string;
   thoughtFor: (seconds: number, format: CrateFormat) => string;
+  thoughtDone: string;
   reasoningPlaceholder: string;
   sources: string;
   sourceFallback: string;
@@ -40,7 +42,9 @@ export type CrateLabels = {
   deny: string;
   allow: string;
   queuePosition: (position: number, format: CrateFormat) => string;
+  queueWaiting: string;
   rateLimited: (seconds: number, format: CrateFormat) => string;
+  rateLimitedUnknown: string;
   fileUploading: string;
   fileReading: string;
   fileChunking: string;
@@ -55,12 +59,14 @@ export const defaultLabels: CrateLabels = {
   responseStreaming: "Response streaming",
   toolActivity: "Agent tool activity",
   runningTool: (toolName) => `Running ${toolName}…`,
+  runningToolUnnamed: "Running a tool…",
   stalled: "Still working…",
   error: "Something went wrong.",
   retry: "Retry",
   done: "Done",
   showThinking: "Show thinking",
   thoughtFor: (seconds, f) => `Thought for ${f.seconds(seconds)}`,
+  thoughtDone: "Done thinking",
   reasoningPlaceholder: "Working through the details…",
   sources: "Sources",
   sourceFallback: "source",
@@ -75,7 +81,9 @@ export const defaultLabels: CrateLabels = {
   deny: "Deny",
   allow: "Allow",
   queuePosition: (position, f) => `You’re #${f.number(position)} in line`,
+  queueWaiting: "Waiting in line…",
   rateLimited: (seconds, f) => `Slow down. Try again in ${f.seconds(seconds)}`,
+  rateLimitedUnknown: "Slow down. Try again shortly.",
   fileUploading: "Upload",
   fileReading: "Reading",
   fileChunking: "Chunking",

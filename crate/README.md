@@ -119,7 +119,7 @@ See the `CrateLabels` type in `crate-provider.tsx` for every label key.
 <FileProcessing filename="report.pdf" size="2.4 MB" stage="chunking" progress={72} accent />
 ```
 
-`AgentState` renders every state through one wrapper. For the prop-driven states, pass `planSteps`, approval callbacks and preview, queue options, or file metadata alongside the status.
+`AgentState` renders every state through one wrapper. For the prop-driven states, pass `planSteps`, approval callbacks and preview, queue options, or file metadata alongside the status. Components never make up data: leave out a value such as `position`, `retryIn`, `durationSeconds`, `filename`, or `size` and that part shows a neutral message or nothing, instead of a placeholder number or file.
 
 ## Theming and accessibility
 

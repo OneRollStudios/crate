@@ -49,7 +49,7 @@ export function AgentState({
   status, className, accent = false, labels, text, toolName, steps, errorMessage, onRetry, onCancel,
   reasoning, reasoningDone, reasoningDurationSeconds, sources, planSteps = [], approvalTitle,
   approvalPreview, onAllow, onDeny, approvalExpiresIn,
-  queueVariant, queuePosition, retryIn, filename = "document.pdf", fileSize = "2.4 MB",
+  queueVariant, queuePosition, retryIn, filename, fileSize,
   fileStage, fileProgress,
 }: AgentStateProps) {
   const snapshot = isSnapshot(status) ? status : undefined;
