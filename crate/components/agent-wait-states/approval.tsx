@@ -2,17 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { ShieldCheck } from "lucide-react";
+import { useCrate } from "./crate-provider";
 import { cx, type WaitStateProps } from "./types";
 
 export type ApprovalProps = WaitStateProps & {
   title?: string;
-  preview: React.ReactNode;
+  preview?: React.ReactNode;
   onAllow?: () => void;
   onDeny?: () => void;
   expiresIn?: number;
 };
 
-export function Approval({ className, accent = false, title = "The agent wants to send this email", preview, onAllow, onDeny, expiresIn }: ApprovalProps) {
+export function Approval({ className, accent = false, title, preview, onAllow, onDeny, expiresIn, labels }: ApprovalProps) {
+  const { labels: l, format } = useCrate(labels);
   const [remaining, setRemaining] = useState(expiresIn);
 
   useEffect(() => {
@@ -23,15 +25,15 @@ export function Approval({ className, accent = false, title = "The agent wants t
   }, [expiresIn]);
 
   return (
-    <div className={cx("w-full max-w-md rounded-sm border border-border bg-background p-4 text-foreground", className)} role="group" aria-label="Approval required">
+    <div className={cx("w-full max-w-md rounded-sm border border-border bg-background p-4 text-foreground", className)} role="group" aria-label={l.approvalRequired}>
       <div className="flex items-start gap-3">
         <span className={cx("grid size-8 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground", accent && "text-primary")} aria-hidden="true"><ShieldCheck className="size-4" /></span>
-        <div className="min-w-0 flex-1"><p className="m-0 text-sm font-medium">{title}</p>{remaining !== undefined ? <p className="mt-1 text-xs text-muted-foreground" aria-live="polite">Expires in {remaining}s</p> : null}</div>
+        <div className="min-w-0 flex-1"><p className="m-0 text-sm font-medium">{title ?? l.approvalTitle}</p>{remaining !== undefined ? <p className="mt-1 text-xs text-muted-foreground" aria-live="polite">{l.expiresIn(remaining, format)}</p> : null}</div>
       </div>
-      <div className="my-3 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{preview}</div>
+      <div className="my-3 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{preview ?? l.approvalPreview}</div>
       <div className="flex justify-end gap-2">
-        <button type="button" onClick={onDeny} className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">Deny</button>
-        <button type="button" onClick={onAllow} className={cx("rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary", accent && "border-primary bg-primary text-primary-foreground hover:opacity-90")}>Allow</button>
+        <button type="button" onClick={onDeny} className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{l.deny}</button>
+        <button type="button" onClick={onAllow} className={cx("rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary", accent && "border-primary bg-primary text-primary-foreground hover:opacity-90")}>{l.allow}</button>
       </div>
     </div>
   );

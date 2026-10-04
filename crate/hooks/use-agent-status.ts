@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useCrate } from "@/components/agent-wait-states/crate-provider";
 import type { AgentSource, AgentStatus, AgentStatusSnapshot } from "@/components/agent-wait-states/types";
 
 type UnknownPart = {
@@ -35,7 +36,7 @@ function readTool(part: UnknownPart) {
   return isTool && name && !FINISHED_TOOL_STATES.has(state ?? "") ? name : undefined;
 }
 
-function inspectMessages(messages: ChatLike["messages"]) {
+function inspectMessages(messages: ChatLike["messages"], sourceTitle: string) {
   let activeToolName: string | undefined;
   let content = "";
   let reasoning = "";
@@ -55,7 +56,7 @@ function inspectMessages(messages: ChatLike["messages"]) {
         sources.push({
           id: part.sourceId,
           url: part.url,
-          title: part.title ?? part.filename ?? part.url ?? "Source",
+          title: part.title ?? part.filename ?? part.url ?? sourceTitle,
         });
         latestPart = "source";
       }
@@ -74,7 +75,8 @@ function inspectMessages(messages: ChatLike["messages"]) {
 }
 
 export function useAgentStatus(chat: ChatLike, options: UseAgentStatusOptions = {}): AgentStatusSnapshot {
-  const inspected = useMemo(() => inspectMessages(chat.messages), [chat.messages]);
+  const { labels } = useCrate();
+  const inspected = useMemo(() => inspectMessages(chat.messages, labels.sourceTitle), [chat.messages, labels.sourceTitle]);
   const [now, setNow] = useState(() => Date.now());
   const busySince = useRef<number | null>(null);
   const lastContentAt = useRef(Date.now());
@@ -114,7 +116,7 @@ export function useAgentStatus(chat: ChatLike, options: UseAgentStatusOptions = 
   else if (chat.status === "submitted") state = "thinking";
   else state = "done";
 
-  const label = elapsedMs >= 8000 ? "Still thinking…" : "Thinking…";
+  const label = elapsedMs >= 8000 ? labels.stillThinking : labels.thinking;
   const cancel = options.onCancel ?? chat.stop;
 
   return {
