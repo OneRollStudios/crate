@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "registry:build": "shadcn build",
-    "build": "npm run registry:build && next build",
+    "llms:build": "node scripts/llms.mjs",
+    "build": "npm run registry:build && npm run llms:build && next build",
     "visual:check": "node scripts/visual-check.mjs",
     "start": "next start",
     "typecheck": "tsc --noEmit"

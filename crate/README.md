@@ -136,9 +136,12 @@ npm run build
 ```
 
 The build creates shadcn registry items in `public/r` and a static Cloudflare Pages export in `out`.
+It also generates `/llms.txt` and one Markdown doc per item in `/llms/` from the
+component source, `registry.json`, and this README (`scripts/llms.mjs`), so the
+docs coding agents read never go stale. These files are not committed.
 
 Pull requests and pushes to `main` run the `checks` CI job: the production build
-(including TypeScript), registry synchronization, the em-dash copy guard, visual
+(including TypeScript), registry synchronization, the llms.txt link check, the em-dash copy guard, visual
 checks, and a fresh Next.js + shadcn installation test. Screenshots are uploaded
 as the `screenshots` artifact, including any captured before a failure.
 
