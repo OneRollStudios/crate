@@ -66,7 +66,8 @@ if [[ "$framework" == "next" ]]; then
 else
   # A Vite + React app set up the way shadcn's Vite guide describes: Tailwind
   # through @tailwindcss/vite, and an @ alias for src/ in Vite and TypeScript.
-  npx --yes create-vite@latest "$app_dir" --template react-ts --no-interactive
+  # create-vite treats an absolute target as relative, so pass a bare name.
+  (cd "$temp_dir" && npx --yes create-vite@latest consumer --template react-ts --no-interactive)
   cd "$app_dir"
   npm install
   npm install tailwindcss @tailwindcss/vite
