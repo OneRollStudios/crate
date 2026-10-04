@@ -176,12 +176,12 @@ async function captureHeroStates(browser, baseURL) {
     await page.locator(".crate-preloader").waitFor({ state: "hidden" });
     const network = page.locator(".demo-board .network");
     await network.scrollIntoViewIfNeeded();
-    for (const state of ["thinking", "tool", "plan", "approval"]) {
-      const card = network.locator(`.${state}-card`);
-      await card.waitFor({ state: "visible" });
-      await card.screenshot({ path: `${screenshotDir}/hero-${state}.png` });
-    }
-    results.push("PASS hero states: thinking, tool call, agent plan, approval");
+    // The hero shows one demo: the approval card (one job per section).
+    const card = network.locator(".approval-card");
+    await card.waitFor({ state: "visible" });
+    await card.screenshot({ path: `${screenshotDir}/hero-approval.png` });
+    if ((await network.locator(".demo-card").count()) !== 1) throw new Error("hero: expected exactly one demo card");
+    results.push("PASS hero: one demo (approval)");
   } finally {
     await context.close();
   }

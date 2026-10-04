@@ -40,3 +40,8 @@
 @keyframes preloader-failsafe{to{visibility:hidden;opacity:0}}
 @media(max-width:700px){.preloader-word>span{font-size:64px}.preloader-mark{grid-template-columns:repeat(2,18px);grid-template-rows:repeat(2,18px);gap:3px}.preloader-lockup{gap:20px}}
 @media(prefers-reduced-motion:reduce){.crate-preloader{display:none}}
+.network-single{display:block}
+.problem-grid-single{grid-template-columns:minmax(0,1fr)}
+.problem-grid-single .problem-copy{max-width:760px}
+.make-it-yours{background:#0e151c}
+.install .install-heading{margin-top:0;padding-top:0;border-top:0}
