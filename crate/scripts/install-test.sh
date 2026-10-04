@@ -3,7 +3,13 @@ set -euo pipefail
 
 # Run after npm run build. Requires Node 22+, npm, Bash, curl, and Playwright's
 # Chromium (npx playwright install chromium, or set CHROMIUM_PATH).
-# From crate/: bash scripts/install-test.sh
+# From crate/: bash scripts/install-test.sh [next|vite]
+# Installs the registry into a fresh Next.js app (default) or Vite + React app.
+framework="${1:-next}"
+if [[ "$framework" != "next" && "$framework" != "vite" ]]; then
+  echo "Usage: bash scripts/install-test.sh [next|vite]" >&2
+  exit 2
+fi
 crate_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$crate_dir"
 if [[ ! -f out/r/all.json ]]; then
@@ -50,91 +56,73 @@ fi
 
 # Use the public CLIs without inheriting dependencies from the Crate app.
 export CI=1 NEXT_TELEMETRY_DISABLED=1
-npx --yes create-next-app@latest "$temp_dir/consumer" \
-  --typescript --tailwind --app --no-src-dir --no-react-compiler \
-  --import-alias '@/*' --use-npm --disable-git --yes
-cd "$temp_dir/consumer"
+app_dir="$temp_dir/consumer"
+
+if [[ "$framework" == "next" ]]; then
+  npx --yes create-next-app@latest "$app_dir" \
+    --typescript --tailwind --app --no-src-dir --no-react-compiler \
+    --import-alias '@/*' --use-npm --disable-git --yes
+  cd "$app_dir"
+else
+  # A Vite + React app set up the way shadcn's Vite guide describes: Tailwind
+  # through @tailwindcss/vite, and an @ alias for src/ in Vite and TypeScript.
+  # create-vite treats an absolute target as relative, so pass a bare name.
+  (cd "$temp_dir" && npx --yes create-vite@latest consumer --template react-ts --no-interactive)
+  cd "$app_dir"
+  npm install
+  npm install tailwindcss @tailwindcss/vite
+  echo '@import "tailwindcss";' > src/index.css
+  cat > vite.config.ts <<'TS'
+import { fileURLToPath, URL } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
+});
+TS
+  # Both tsconfig files need the alias (tsconfig.app.json may hold comments).
+  node -e '
+    const fs = require("node:fs");
+    const root = JSON.parse(fs.readFileSync("tsconfig.json", "utf8"));
+    root.compilerOptions = { ...root.compilerOptions, paths: { "@/*": ["./src/*"] } };
+    fs.writeFileSync("tsconfig.json", JSON.stringify(root, null, 2) + "\n");
+    const app = fs.readFileSync("tsconfig.app.json", "utf8");
+    if (!app.includes("\"compilerOptions\": {")) throw new Error("Unexpected tsconfig.app.json");
+    fs.writeFileSync("tsconfig.app.json",
+      app.replace("\"compilerOptions\": {", "\"compilerOptions\": {\n    \"paths\": { \"@/*\": [\"./src/*\"] },"));
+  '
+fi
+
 npx --yes shadcn@latest init --defaults --yes
 npx --yes shadcn@latest add "http://localhost:$port/r/all.json" --yes
 
-# Avoid remote font downloads and compile real imports of the installed API.
-cat > app/layout.tsx <<'TSX'
+# Drive useAgentStatus with a real useChat and a mocked AI SDK stream.
+npm install ai @ai-sdk/react
+if [[ "$framework" == "next" ]]; then
+  # Avoid remote font downloads.
+  cat > app/layout.tsx <<'TSX'
 import "./globals.css";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return <html lang="en"><body>{children}</body></html>;
 }
 TSX
-# Drive useAgentStatus with a real useChat and a mocked AI SDK stream.
-npm install ai @ai-sdk/react
-cat > app/page.tsx <<'TSX'
-"use client";
-
-import { useChat } from "@ai-sdk/react";
-import type { ChatTransport, UIMessage, UIMessageChunk } from "ai";
-import { AgentState } from "@/components/agent-wait-states/agent-state";
-import { useAgentStatus } from "@/hooks/use-agent-status";
-
-// A mocked AI SDK stream: no server, no API key. Each request opens a stream
-// that the test feeds one chunk at a time through window.__crateMock.
-type CrateMock = {
-  requests: number;
-  push: (chunk: UIMessageChunk) => void;
-  close: () => void;
-};
-
-declare global {
-  interface Window {
-    __crateMock?: CrateMock;
-  }
-}
-
-let controller: ReadableStreamDefaultController<UIMessageChunk> | undefined;
-const mock: CrateMock = {
-  requests: 0,
-  push: (chunk) => controller?.enqueue(chunk),
-  close: () => controller?.close(),
-};
-if (typeof window !== "undefined") window.__crateMock = mock;
-
-const transport: ChatTransport<UIMessage> = {
-  async sendMessages() {
-    mock.requests += 1;
-    return new ReadableStream<UIMessageChunk>({
-      start(next) {
-        controller = next;
-      },
-    });
-  },
-  async reconnectToStream() {
-    return null;
-  },
-};
-
-export default function Page() {
-  const chat = useChat({ transport });
-  const status = useAgentStatus(chat, { stallAfterMs: 1500 });
-
-  return (
-    <main>
-      <button type="button" onClick={() => chat.sendMessage({ text: "Find the docs" })}>
-        Send
-      </button>
-      <p data-testid="chat-status">{chat.status}</p>
-      <AgentState
-        status={status}
-        errorMessage={chat.error?.message}
-        onRetry={() => chat.regenerate()}
-      />
-    </main>
-  );
-}
-TSX
+  cp "$crate_dir/scripts/fixtures/mock-chat.tsx" app/page.tsx
+else
+  cp "$crate_dir/scripts/fixtures/mock-chat.tsx" src/App.tsx
+fi
 npm run build
 
 # Serve the consumer app and check every state in a browser.
 app_port="$(node -e 'const s=require("net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
-npx next start -p "$app_port" > "$temp_dir/app.log" 2>&1 &
+if [[ "$framework" == "next" ]]; then
+  npx next start -p "$app_port" > "$temp_dir/app.log" 2>&1 &
+else
+  npx vite preview --host 127.0.0.1 --port "$app_port" --strictPort > "$temp_dir/app.log" 2>&1 &
+fi
 app_pid=$!
 for ((attempt = 0; attempt < 100; attempt++)); do
   if curl --fail --silent --output /dev/null "http://localhost:$app_port"; then

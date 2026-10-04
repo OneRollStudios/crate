@@ -12,7 +12,7 @@ jobs:
   checks:
     name: checks
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: crate
@@ -87,6 +87,11 @@ jobs:
       - name: Install test
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: bash scripts/install-test.sh
+
+      # The same install and stream test in a fresh Vite + React app.
+      - name: Install test (Vite)
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: bash scripts/install-test.sh vite
 
       # Preserve any screenshots produced, even when another step failed.
       - name: Upload screenshots
