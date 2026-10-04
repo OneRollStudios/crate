@@ -153,11 +153,13 @@ The test serves `out/` on a free local port, installs `all.json` into a temporar
 consumer app, and builds it. The app wires `useAgentStatus` to a real `useChat`
 with a mocked AI SDK stream (no API key), and `scripts/stream-test.mjs` drives it
 in Chromium through thinking, tool call, streaming, stalled, error, retry, and
-done, checking that the right component shows for each. It needs Playwright's
-Chromium (`npx playwright install chromium`, or set `CHROMIUM_PATH`). It stops
-the servers and removes the temporary app on exit. It uses the latest public
-Next.js, shadcn, and AI SDK packages and requires internet access. For visual checks, run `node scripts/visual-check.mjs`; set
+done, checking that the right component shows for each. It stops the servers and
+removes the temporary app on exit. It uses the latest public Next.js, shadcn, and
+AI SDK packages and requires internet access.
+
+For visual checks, run `node scripts/visual-check.mjs`; set
 `SCREENSHOT_DIR=screenshots` to use the same ignored output folder as CI.
-It uses Playwright's bundled Chromium on any OS, so run
-`npx playwright install chromium` once first. To use a specific Chrome or
-Chromium instead, set `CHROMIUM_PATH` to its executable.
+
+Both the install test and the visual check use Playwright's bundled Chromium on
+any OS, so run `npx playwright install chromium` once first. To use a specific
+Chrome or Chromium instead, set `CHROMIUM_PATH` to its executable.
