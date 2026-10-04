@@ -142,16 +142,24 @@ docs coding agents read never go stale. These files are not committed.
 
 Pull requests and pushes to `main` run the `checks` CI job: the production build
 (including TypeScript), registry synchronization, the llms.txt link check, the em-dash copy guard, visual
-checks, and fresh Next.js + shadcn and Vite + React + shadcn installation tests. Screenshots are uploaded
+checks, fresh Next.js + shadcn and Vite + React + shadcn installation tests, and
+a themed host app test. Screenshots are uploaded
 as the `screenshots` artifact, including any captured before a failure.
 
 After building, run the install test from `crate/` with Node 22+, npm, Bash, and
 curl available (use Git Bash or WSL on Windows):
 
 ```bash
-bash scripts/install-test.sh        # Next.js
-bash scripts/install-test.sh vite   # Vite + React
+bash scripts/install-test.sh          # Next.js
+bash scripts/install-test.sh vite     # Vite + React
+bash scripts/install-test.sh themed   # Next.js app with its own theme
 ```
+
+The `themed` mode installs into an app whose shadcn theme differs from the
+default on colors (light and dark), radius, and font
+(`scripts/fixtures/host-theme.css`), renders every component, and checks with
+`scripts/theme-check.mjs` that each one takes every color, corner radius, and
+font from that theme. It saves a screenshot of each state in light and dark.
 
 The test serves `out/` on a free local port, installs `all.json` into a temporary
 consumer app (Next.js, or Vite + React set up as in shadcn's Vite guide), and
