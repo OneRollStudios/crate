@@ -24,11 +24,11 @@ jobs:
     steps:
       # Check out the code being tested.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Cache npm downloads using the app's lockfile.
       - name: Set up Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -91,7 +91,7 @@ jobs:
       # Preserve any screenshots produced, even when another step failed.
       - name: Upload screenshots
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: screenshots
           path: crate/screenshots/
