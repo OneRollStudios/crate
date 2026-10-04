@@ -12,7 +12,7 @@ jobs:
   checks:
     name: checks
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: crate
@@ -64,8 +64,8 @@ jobs:
       - name: Copy guard
         if: ${{ !cancelled() }}
         run: |
-          if grep -rnF -- $'\u2014' app/ components/; then
-            echo "Em dashes are not allowed in app/ or components/."
+          if grep -rnF --exclude-dir=node_modules -- $'\u2014' app/ components/ ../examples/; then
+            echo "Em dashes are not allowed in app/, components/, or examples/."
             exit 1
           else
             test "$?" -eq 1
@@ -87,6 +87,12 @@ jobs:
       - name: Install test
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: bash scripts/install-test.sh
+
+      # Build examples/real-chat in mock mode (no API key) and check that a
+      # real useChat request walks AgentState through every state in order.
+      - name: Real chat example
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: bash ../examples/real-chat/scripts/ci-test.sh
 
       # Preserve any screenshots produced, even when another step failed.
       - name: Upload screenshots

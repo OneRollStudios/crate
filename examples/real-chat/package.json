@@ -1,0 +1,31 @@
+{
+  "name": "crate-real-chat",
+  "private": true,
+  "description": "A minimal Next.js chat that wires the AI SDK's useChat to Crate's useAgentStatus.",
+  "scripts": {
+    "sync-crate": "node scripts/sync-crate.mjs",
+    "predev": "npm run sync-crate",
+    "prebuild": "npm run sync-crate",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.71",
+    "@ai-sdk/react": "^4.0.130",
+    "ai": "^7.0.127",
+    "lucide-react": "^1.52.0",
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.2"
+  }
+}
