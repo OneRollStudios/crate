@@ -7,13 +7,16 @@ name: Auto-merge
 # pull_request_target runs this file as it exists on main, never the PR's
 # copy, so a PR cannot change these rules for itself. It never checks out
 # or runs PR code; it only calls the GitHub API.
+#
+# It uses the AUTO_MERGE_TOKEN secret, not the built-in GITHUB_TOKEN. GitHub
+# merges as whoever enabled auto-merge, and merges made with GITHUB_TOKEN
+# neither close linked issues ("Closes #N") nor start CI on main.
 on:
   pull_request_target:
     types: [labeled, unlabeled, ready_for_review]
 
-permissions:
-  contents: write
-  pull-requests: write
+# The built-in token is not used; AUTO_MERGE_TOKEN carries the access.
+permissions: {}
 
 # Handle events for one PR in order, so a quick label/unlabel can't race.
 concurrency:
@@ -34,9 +37,14 @@ jobs:
     steps:
       - name: Enable squash auto-merge
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-        run: gh pr merge "$PR_URL" --auto --squash
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::AUTO_MERGE_TOKEN secret is missing."
+            exit 1
+          fi
+          gh pr merge "$PR_URL" --auto --squash
 
   disable:
     name: disable
@@ -45,9 +53,13 @@ jobs:
     steps:
       - name: Disable auto-merge
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
         run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::AUTO_MERGE_TOKEN secret is missing."
+            exit 1
+          fi
           # Only call disable when it is on, so real failures still fail.
           if [[ "$(gh pr view "$PR_URL" --json autoMergeRequest --jq '.autoMergeRequest != null')" == "true" ]]; then
             gh pr merge "$PR_URL" --disable-auto
