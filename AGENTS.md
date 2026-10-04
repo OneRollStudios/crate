@@ -51,7 +51,7 @@ Read ROADMAP.md for direction.
   system monospace for code only, colors from crate/theme.css.
 - One job per section. Do not repeat the same component demo in several sections.
 - Works at 390px wide with no sideways scrolling. Text contrast at least 4.5:1.
-- Keep the copy casing already used on the live page unless a task says otherwise.
+- Follow the casing rules under Copy rules.
 
 ## Copy rules
 These apply to public-facing copy: the website and the README's marketing
@@ -62,6 +62,16 @@ and companies when it's useful. The em dash rule applies everywhere.
 - Never promise "free forever". Paid crates are coming.
 - No em dashes anywhere.
 - Do not rewrite copy unless the task asks for it.
+
+### Casing
+- Headings, nav links, and buttons: Title Case. Headings include section,
+  card, and panel titles and component names. Lowercase a, an, the, and, but,
+  or, for, nor, of, to, in, on, at, by, as, with, unless first or last word.
+- Subtitles, body text, descriptions, component one-liners, captions, and
+  fake AI replies inside demos: sentence case.
+- Proper capitals always: AI, UI, React, Tailwind, GitHub. shadcn stays
+  lowercase (its official style).
+- Brand name: "Crate" in text. The logo wordmark stays lowercase.
 
 ## Never do
 - Never edit archive/.
