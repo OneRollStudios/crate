@@ -16,9 +16,11 @@ npm run build
 
 port="$(node -e 'const s=require("net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')"
 log="$(mktemp)"
+# Its own process group, so the trap stops npx and the next-server it starts.
+set -m
 npx next start -p "$port" > "$log" 2>&1 &
 app_pid=$!
-trap 'kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true; rm -f "$log"' EXIT
+trap 'kill -- "-$app_pid" 2>/dev/null || kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true; rm -f "$log"' EXIT
 
 for ((attempt = 0; attempt < 100; attempt++)); do
   if curl --fail --silent --output /dev/null "http://localhost:$port"; then

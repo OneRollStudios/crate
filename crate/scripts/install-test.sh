@@ -27,10 +27,13 @@ fi
 temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/crate-install.XXXXXX")"
 server_pid=""
 app_pid=""
+# Give each background server its own process group, so cleanup can stop the
+# whole tree: npx starts next start, which starts next-server.
+set -m
 cleanup() {
   for pid in "$server_pid" "$app_pid"; do
     if [[ -n "$pid" ]]; then
-      kill "$pid" 2>/dev/null || true
+      kill -- "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
       wait "$pid" 2>/dev/null || true
     fi
   done
