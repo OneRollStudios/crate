@@ -1,25 +1,27 @@
 name: Publish CLI
 
-# Publishes crate/cli (@onerollstudios/crate) to npm with npm Trusted
-# Publishing: GitHub Actions proves its identity to npm with a short-lived
-# OIDC token, so there is no npm token stored anywhere. npm adds provenance
-# (a signed link from the package to this repo, commit, and workflow).
+# Stages crate/cli (@onerollstudios/crate) on npm with staged publishing and
+# npm Trusted Publishing: GitHub Actions proves its identity to npm with a
+# short-lived OIDC token, so there is no npm token stored anywhere, and npm
+# adds provenance (a signed link from the package to this repo, commit, and
+# workflow). The Trusted Publisher allows staging only, so nothing goes live
+# until a maintainer approves the staged version on npmjs.com (with 2FA).
 #
-# npm only accepts this after the package's Trusted Publisher on npmjs.com
+# npm only accepts this while the package's Trusted Publisher on npmjs.com
 # names this repository and this workflow file (publish-cli.yml). Renaming
 # this file breaks publishing until that setting is updated.
 #
 # Release: bump "version" in crate/cli/package.json in a PR, merge it, then
 # push a matching tag from main, for example: git tag cli-v0.1.1 && git push origin cli-v0.1.1
-# Or run this workflow by hand from the Actions tab; "dry-run" checks
-# everything without publishing.
+# Then approve the staged version on npmjs.com. Or run this workflow by hand
+# from the Actions tab; "dry-run" checks everything without staging.
 on:
   push:
     tags: ["cli-v*"]
   workflow_dispatch:
     inputs:
       dry-run:
-        description: "Check everything but don't publish"
+        description: "Check everything but don't stage"
         type: boolean
         default: true
 
@@ -50,9 +52,12 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      # Trusted Publishing needs npm 11.5.1 or newer.
+      # Staged publishing needs a recent npm (npm stage).
       - name: Update npm
-        run: npm install --global npm@latest && npm --version
+        run: |
+          npm install --global npm@latest
+          npm --version
+          npm stage publish --help > /dev/null
 
       # A tag must match the version being published, so cli-v0.1.1 can only
       # publish 0.1.1.
@@ -67,6 +72,8 @@ jobs:
             echo "::error::Tag $REF_NAME does not match crate/cli/package.json version $version (expected cli-v$version)."
             exit 1
           fi
+          # Published versions only: npm itself refuses a version that is
+          # already staged.
           if npm view "@onerollstudios/crate@$version" version > /dev/null 2>&1; then
             echo "::error::@onerollstudios/crate@$version is already on npm. Bump the version in crate/cli/package.json first."
             exit 1
@@ -77,17 +84,32 @@ jobs:
           npm install --no-audit --no-fund
           npm test
 
-      - name: Publish
+      # Stages the version: it is on npm but not installable until approved.
+      - name: Stage
         env:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
         run: |
           if [[ "$DRY_RUN" == "true" ]]; then
-            npm publish --access public --provenance --dry-run
-          else
-            npm publish --access public --provenance
+            npm stage publish --access public --provenance --dry-run
+            exit 0
           fi
+          npm stage publish --access public --provenance 2>&1 | tee stage.log
+          stage_id="$(grep -oE 'staged with id [0-9a-fA-F-]+' stage.log | awk '{print $4}' | tail -n 1)"
+          version="$(node -p 'require("./package.json").version')"
+          {
+            echo "## @onerollstudios/crate@$version is staged"
+            echo
+            echo "Nothing is published until a maintainer approves it (2FA required):"
+            echo
+            echo "- On npmjs.com: open @onerollstudios/crate, find the staged version $version, and approve it."
+            if [[ -n "$stage_id" ]]; then
+              echo "- Or from a terminal: \`npm stage approve $stage_id\`"
+              echo
+              echo "Stage ID: \`$stage_id\`. To inspect it first: \`npm stage download $stage_id\`. To discard it: \`npm stage reject $stage_id\`."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Explain a failed publish
+      - name: Explain a failed stage
         if: failure()
         run: |
-          echo "::error::If the Publish step failed with ENEEDAUTH, 401, 403, or 404, check the package's Trusted Publisher on npmjs.com: organization OneRollStudios, repository crate, workflow publish-cli.yml, no environment. The first version of a new package must be published by hand before a Trusted Publisher can be set."
+          echo "::error::If the Stage step failed with ENEEDAUTH, 401, 403, or 404, check the package's Trusted Publisher on npmjs.com: organization OneRollStudios, repository crate, workflow publish-cli.yml, no environment, with staged publishing allowed. If it says the version exists, that version is already published or staged: bump the version, or reject the old staged version first."
