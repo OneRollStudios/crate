@@ -67,7 +67,8 @@ async function runInit(dir, name, options = {}) {
   const output = lines.join("\n") + "\n";
   const expectedFile = new URL(`./expected/${name}.txt`, import.meta.url);
   if (process.env.UPDATE) writeFileSync(expectedFile, output);
-  assert.equal(output, readFileSync(expectedFile, "utf8"), `output changed for ${name}; run UPDATE=1 npm test if that is deliberate`);
+  // Expected files may be checked out with CRLF on Windows.
+  assert.equal(output, readFileSync(expectedFile, "utf8").replace(/\r\n/g, "\n"), `output changed for ${name}; run UPDATE=1 npm test if that is deliberate`);
   return { ...result, commands, read: (file) => readFileSync(join(dir, file), "utf8") };
 }
 
@@ -166,4 +167,20 @@ test("An app without React or Tailwind gets a clear error", async () => {
 test("src/wiring.json matches the README examples", () => {
   const committed = JSON.parse(readFileSync(new URL("../src/wiring.json", import.meta.url), "utf8"));
   assert.deepEqual(committed, buildWiring(), "run npm run wiring in crate/cli");
+});
+
+test("CRLF files (Windows checkouts): edits keep CRLF, and a second run changes nothing", async () => {
+  const crlf = (text) => text.replace(/\n/g, "\r\n");
+  const css = crlf('@import "tailwindcss";\n\n:root {\n  --background: #fffdf7;\n}\n');
+  const dir = app({ "components.json": componentsJson(), "app/globals.css": css, "app/layout.tsx": crlf(nextLayout()) }, { next: "16" });
+  const first = await runInit(dir, "crlf");
+  for (const file of ["app/globals.css", "app/layout.tsx"]) {
+    const text = first.read(file);
+    assert.doesNotMatch(text, /[^\r]\n/, `${file} has a bare LF after crate init`);
+  }
+  assert.ok(first.read("app/globals.css").startsWith(css.trimEnd()));
+  assert.match(first.read("app/layout.tsx"), /<CrateProvider>\{children\}<\/CrateProvider>/);
+  const css2 = first.read("app/globals.css");
+  const second = await runInit(dir, "crlf-again");
+  assert.equal(second.read("app/globals.css"), css2);
 });

@@ -49,7 +49,9 @@ export function addProvider(source, { file, kind, importPath, locale }) {
   const imports = sf.statements.filter(ts.isImportDeclaration);
   const at = imports.length ? imports.at(-1).getEnd() : 0;
   const line = `import { CrateProvider } from "${importPath}";`;
-  const code = at ? `${wrapped.slice(0, at)}\n${line}${wrapped.slice(at)}` : `${line}\n${wrapped}`;
+  // Match the file's line endings (CRLF on many Windows checkouts).
+  const eol = source.includes("\r\n") ? "\r\n" : "\n";
+  const code = at ? `${wrapped.slice(0, at)}${eol}${line}${wrapped.slice(at)}` : `${line}${eol}${wrapped}`;
   return { code, reason: null };
 }
 

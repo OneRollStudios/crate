@@ -3,8 +3,10 @@
 // tests). Run after changing those examples: node scripts/wiring.mjs
 // The CLI's tests fail if src/wiring.json is out of date.
 import { readFileSync, writeFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
-const readme = readFileSync(new URL("../../README.md", import.meta.url), "utf8");
+// Normalize line endings: a Windows checkout (git autocrlf) has CRLF files.
+const readme = readFileSync(new URL("../../README.md", import.meta.url), "utf8").replace(/\r\n?/g, "\n");
 
 function section(heading) {
   const start = readme.indexOf(`\n## ${heading}\n`);
@@ -31,7 +33,7 @@ export function buildWiring() {
   };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   writeFileSync(new URL("../src/wiring.json", import.meta.url), JSON.stringify(buildWiring(), null, 2) + "\n");
   console.log("wrote src/wiring.json");
 }

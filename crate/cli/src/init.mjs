@@ -91,7 +91,9 @@ export async function init({ cwd, yes = false, dryRun = false, registry = DEFAUL
     const css = readFileSync(join(cwd, cssFile), "utf8");
     const theme = planTheme(css);
     if (theme.block) {
-      writeFileSync(join(cwd, cssFile), css.replace(/\s*$/, "\n") + theme.block);
+      // Match the file's line endings (CRLF on many Windows checkouts).
+      const eol = css.includes("\r\n") ? "\r\n" : "\n";
+      writeFileSync(join(cwd, cssFile), css.replace(/\s*$/, eol) + theme.block.replace(/\n/g, eol));
       changed.push(`${cssFile}: added ${theme.missing.length} missing theme variables`);
       themeNotes = theme.notes;
     }

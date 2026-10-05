@@ -1,0 +1,40 @@
+Crate init
+
+Detected:
+  Framework:  Next.js (App Router)
+  shadcn:     set up (CSS: app/globals.css)
+  AI stack:   none detected (any server-sent events)
+  Language:   en
+
+Plan:
+  1. Run: npx --yes shadcn@latest add https://crate.test/r/all.json https://crate.test/r/agent-stream.json --yes --overwrite
+  2. Add 16 missing theme variables to app/globals.css, in one marked block (existing variables stay as they are)
+  3. Wrap the app in CrateProvider in app/layout.tsx
+
+Done. Changed:
+  - Installed all, agent-stream (components in @/components/agent-wait-states)
+  - app/globals.css: added 16 missing theme variables
+  - app/layout.tsx: wrapped the app in CrateProvider
+
+Theme variables added (check these match your design):
+  - --foreground: shadcn's default (the app had no value for it)
+  - --primary: shadcn's default (the app had no value for it)
+  - --primary-foreground: shadcn's default (the app had no value for it)
+  - --muted: shadcn's default (the app had no value for it)
+  - --muted-foreground: shadcn's default (the app had no value for it)
+  - --border: shadcn's default (the app had no value for it)
+  - --destructive: shadcn's default (the app had no value for it)
+  - --radius: shadcn's default (the app had no value for it)
+
+Next: connect the components to your server's event stream:
+
+const stream = useAgentStream({
+  api: "/api/chat",
+  map: (message) => {
+    if (message.data === "[DONE]") return { type: "done" };
+    const delta = JSON.parse(message.data).choices[0]?.delta?.content;
+    return delta ? { type: "text", delta } : null;
+  },
+});
+
+Every component and prop: https://crate.test/llms.txt

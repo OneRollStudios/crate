@@ -10,8 +10,10 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-const root = fileURLToPath(new URL("..", import.meta.url));
-const read = (file) => readFileSync(`${root}${file}`, "utf8");
+// Forward slashes on Windows too, so paths match the TypeScript program's file names.
+const root = fileURLToPath(new URL("..", import.meta.url)).replace(/\\/g, "/");
+// Normalize line endings: a Windows checkout (git autocrlf) has CRLF files.
+const read = (file) => readFileSync(`${root}${file}`, "utf8").replace(/\r\n?/g, "\n");
 const registry = JSON.parse(read("registry.json"));
 const readme = read("README.md");
 const siteUrl = read("lib/config.ts").match(/SITE_URL = "([^"]+)"/)[1];
