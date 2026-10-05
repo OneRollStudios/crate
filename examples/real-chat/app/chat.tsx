@@ -1,26 +1,16 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
 import { useState } from "react";
-import { AgentState } from "@/components/agent-wait-states/agent-state";
-import { useAgentStatus } from "@/hooks/use-agent-status";
-
-function textOf(message: UIMessage) {
-  return message.parts.map((part) => (part.type === "text" ? part.text : "")).join("");
-}
+import { Messages } from "./messages";
 
 export function Chat({ mock, model }: { mock: boolean; model: string }) {
   // useChat posts to /api/chat (app/api/chat/route.ts) and reads its stream.
+  // Messages connects it to Crate (useAgentStatus) and renders the replies.
   const chat = useChat();
-  // One line connects the chat to Crate: the hook maps it to a wait state.
-  const status = useAgentStatus(chat);
   const [input, setInput] = useState("");
 
   const busy = chat.status === "submitted" || chat.status === "streaming";
-  const last = chat.messages.at(-1);
-  const live = busy && last?.role === "assistant" ? last : undefined;
-  const streamedText = live ? textOf(live) : undefined;
 
   function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,22 +31,7 @@ export function Chat({ mock, model }: { mock: boolean; model: string }) {
         </p>
       </header>
 
-      <ol className="flex flex-col gap-4">
-        {chat.messages.filter((message) => message !== live).map((message) => (
-          <li key={message.id} className={message.role === "user" ? "self-end rounded-lg bg-muted px-4 py-2" : "leading-7"}>
-            {textOf(message)}
-          </li>
-        ))}
-      </ol>
-
-      {chat.messages.length > 0 ? (
-        <AgentState
-          status={status}
-          text={streamedText}
-          errorMessage={chat.error?.message}
-          onRetry={() => chat.regenerate()}
-        />
-      ) : null}
+      <Messages chat={chat} />
 
       <form onSubmit={send} className="sticky bottom-4 mt-auto flex gap-2">
         <label htmlFor="prompt" className="sr-only">Message</label>
