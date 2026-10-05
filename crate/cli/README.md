@@ -50,3 +50,13 @@ npm run wiring      # after changing the README examples crate init prints
 ```
 
 The end-to-end run (real `shadcn init` and `add`, then a build and a browser check) is `bash scripts/install-test.sh init` from `crate/`.
+
+## Releasing
+
+Published from GitHub Actions with npm Trusted Publishing (`.github/workflows/publish-cli.yml`). No npm token is stored anywhere, and every version carries npm provenance linking it to this repository and commit.
+
+1. Bump `version` in `crate/cli/package.json` in a pull request, and merge it.
+2. From an up-to-date `main`, push a matching tag: `git tag cli-v0.1.1 && git push origin cli-v0.1.1`.
+3. The workflow checks that the tag matches the version, that the version isn't on npm yet, and that the tests pass, then publishes.
+
+To check a release without publishing, run **Publish CLI** from the Actions tab with "dry-run" ticked.

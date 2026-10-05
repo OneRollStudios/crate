@@ -1,0 +1,93 @@
+name: Publish CLI
+
+# Publishes crate/cli (@onerollstudios/crate) to npm with npm Trusted
+# Publishing: GitHub Actions proves its identity to npm with a short-lived
+# OIDC token, so there is no npm token stored anywhere. npm adds provenance
+# (a signed link from the package to this repo, commit, and workflow).
+#
+# npm only accepts this after the package's Trusted Publisher on npmjs.com
+# names this repository and this workflow file (publish-cli.yml). Renaming
+# this file breaks publishing until that setting is updated.
+#
+# Release: bump "version" in crate/cli/package.json in a PR, merge it, then
+# push a matching tag from main, for example: git tag cli-v0.1.1 && git push origin cli-v0.1.1
+# Or run this workflow by hand from the Actions tab; "dry-run" checks
+# everything without publishing.
+on:
+  push:
+    tags: ["cli-v*"]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Check everything but don't publish"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write # The OIDC token npm Trusted Publishing needs.
+
+concurrency:
+  group: publish-cli
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: crate/cli
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted Publishing needs npm 11.5.1 or newer.
+      - name: Update npm
+        run: npm install --global npm@latest && npm --version
+
+      # A tag must match the version being published, so cli-v0.1.1 can only
+      # publish 0.1.1.
+      - name: Check the version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          echo "Package version: $version"
+          if [[ "$REF_TYPE" == "tag" && "$REF_NAME" != "cli-v$version" ]]; then
+            echo "::error::Tag $REF_NAME does not match crate/cli/package.json version $version (expected cli-v$version)."
+            exit 1
+          fi
+          if npm view "@onerollstudios/crate@$version" version > /dev/null 2>&1; then
+            echo "::error::@onerollstudios/crate@$version is already on npm. Bump the version in crate/cli/package.json first."
+            exit 1
+          fi
+
+      - name: Test
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      - name: Publish
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
+        run: |
+          if [[ "$DRY_RUN" == "true" ]]; then
+            npm publish --access public --provenance --dry-run
+          else
+            npm publish --access public --provenance
+          fi
+
+      - name: Explain a failed publish
+        if: failure()
+        run: |
+          echo "::error::If the Publish step failed with ENEEDAUTH, 401, 403, or 404, check the package's Trusted Publisher on npmjs.com: organization OneRollStudios, repository crate, workflow publish-cli.yml, no environment. The first version of a new package must be published by hand before a Trusted Publisher can be set."
