@@ -47,6 +47,12 @@ const transport: ChatTransport<UIMessage> = {
 export default function Page() {
   const chat = useChat({ transport });
   const status = useAgentStatus(chat, { stallAfterMs: 1500 });
+  // The reply being written, shown inside AgentState (see the README's Show the Reply Once).
+  const busy = chat.status === "submitted" || chat.status === "streaming";
+  const last = chat.messages.at(-1);
+  const live = busy && last?.role === "assistant"
+    ? last.parts.map((part) => (part.type === "text" ? part.text : "")).join("")
+    : undefined;
 
   return (
     <main>
@@ -56,6 +62,7 @@ export default function Page() {
       <p data-testid="chat-status">{chat.status}</p>
       <AgentState
         status={status}
+        text={live}
         errorMessage={chat.error?.message}
         onRetry={() => chat.regenerate()}
       />

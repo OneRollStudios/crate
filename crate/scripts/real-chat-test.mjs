@@ -54,6 +54,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined });
   const results = [checkReadmeExample()];
   let checkedLiveReply = false;
+  let lastLive = "";
   try {
     const page = await browser.newPage({ viewport: { width: 900, height: 900 } });
     const errors = [];
@@ -86,7 +87,14 @@ async function main() {
           const times = await timesShown(page, live.slice(-24));
           if (times !== 1) throw new Error(`step ${index + 1}: the streaming reply is shown ${times} times`);
           checkedLiveReply = true;
+          lastLive = live;
         }
+      }
+      // A stall keeps the reply so far on screen, next to the notice.
+      if (state === "stalled" && lastLive) {
+        const times = await timesShown(page, lastLive.slice(-24));
+        if (times !== 1) throw new Error(`step ${index + 1}: the partial reply is shown ${times} times during the stall`);
+        results.push(`PASS step ${index + 1}: the partial reply stays visible during the stall`);
       }
     }
 
