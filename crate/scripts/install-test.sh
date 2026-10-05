@@ -113,6 +113,25 @@ if [[ "$mode" == "themed" ]]; then
 fi
 npx --yes shadcn@latest add "http://localhost:$port/r/all.json" --yes
 
+if [[ "$mode" == "next" ]]; then
+  # The @crate namespace and the agent skill, as the README sets them up.
+  npx --yes shadcn@latest registry add "@crate=http://localhost:$port/r/{name}.json"
+  npx --yes shadcn@latest search @crate > "$temp_dir/search.txt"
+  grep -q "@crate/thinking" "$temp_dir/search.txt"
+  npx --yes shadcn@latest view @crate/use-agent-status > /dev/null
+  npx --yes shadcn@latest add @crate/crate-skill --yes
+  for pair in \
+    "agent-skill/dist/claude/SKILL.md:.claude/skills/crate/SKILL.md" \
+    "agent-skill/dist/cursor/crate.mdc:.cursor/rules/crate.mdc" \
+    "agent-skill/dist/agents/crate.md:.agents/crate.md"; do
+    if ! cmp -s "$crate_dir/${pair%%:*}" "${pair#*:}"; then
+      echo "Agent skill file missing or different: ${pair#*:}" >&2
+      exit 1
+    fi
+  done
+  echo "PASS @crate namespace: search, view, and the agent skill for Claude Code, Cursor, and Codex"
+fi
+
 if [[ "$framework" == "next" ]]; then
   # Avoid remote font downloads.
   cat > app/layout.tsx <<'TSX'

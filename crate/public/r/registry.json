@@ -530,6 +530,30 @@
       ]
     },
     {
+      "name": "crate-skill",
+      "type": "registry:file",
+      "title": "Crate Agent Skill",
+      "description": "Teaches coding agents (Claude Code, Cursor, Codex) when to use each Crate component, how to install it, and how to wire it to the app's AI stream.",
+      "author": "One Roll Studios",
+      "files": [
+        {
+          "path": "agent-skill/dist/claude/SKILL.md",
+          "type": "registry:file",
+          "target": ".claude/skills/crate/SKILL.md"
+        },
+        {
+          "path": "agent-skill/dist/cursor/crate.mdc",
+          "type": "registry:file",
+          "target": ".cursor/rules/crate.mdc"
+        },
+        {
+          "path": "agent-skill/dist/agents/crate.md",
+          "type": "registry:file",
+          "target": ".agents/crate.md"
+        }
+      ]
+    },
+    {
       "name": "all",
       "type": "registry:item",
       "title": "Crate Wait States",

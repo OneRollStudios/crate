@@ -32,6 +32,27 @@ use-agent-status
 
 Stream adapters for backends other than the Vercel AI SDK are separate items. See [Stream Adapters](#stream-adapters).
 
+## Use With Coding Agents
+
+Crate ships a skill that teaches coding agents when to use each component, how to install it, and how to wire it to the app's AI stream (Vercel AI SDK, OpenAI Agents SDK, LangChain and LangGraph, or any server-sent events).
+
+```bash
+# 1. Add Crate as a shadcn registry, so agents can search and install it as @crate
+npx shadcn@latest registry add @crate=https://crate.onerollstudios.com/r/{name}.json
+# 2. Connect your agent to the shadcn MCP server
+npx shadcn@latest mcp init --client claude   # or cursor, codex
+# 3. Install the skill
+npx shadcn@latest add @crate/crate-skill
+```
+
+| Agent | Reads |
+| --- | --- |
+| Claude Code | `.claude/skills/crate/SKILL.md`, loaded when a task needs it |
+| Cursor | `.cursor/rules/crate.mdc`, a rule the agent applies when relevant |
+| Codex and other agents | `.agents/crate.md`. Add this line to your `AGENTS.md`: `When adding loading, thinking, or streaming states to the AI UI, follow .agents/crate.md.` |
+
+Then ask your agent, for example, "Add Crate wait states to the chat." The skill is generated from the same source as these docs on every build, so it always matches the current components. Crate never edits your `AGENTS.md` itself.
+
 ## AI SDK usage
 
 ```tsx
