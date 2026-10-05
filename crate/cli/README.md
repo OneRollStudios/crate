@@ -2,16 +2,8 @@
 
 Sets up [Crate](https://crate.onerollstudios.com) in a React AI app with one command.
 
-<!-- Hidden until 0.1.1 is published on npm:
 ```bash
 npx @onerollstudios/crate init
-```
--->
-
-The CLI isn't available on npm right now. Until it is, install Crate with shadcn:
-
-```bash
-npx shadcn@latest add https://crate.onerollstudios.com/r/all.json
 ```
 
 It looks at the app first, then shows a plan and asks before changing anything:
