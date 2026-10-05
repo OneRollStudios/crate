@@ -137,3 +137,46 @@ jobs:
           name: screenshots
           path: crate/screenshots/
           if-no-files-found: warn
+
+  # A Windows checkout has CRLF line endings (git autocrlf). Run the CLI tests
+  # and the generators that parse Markdown there, so CRLF bugs can't come back.
+  windows:
+    name: windows
+    runs-on: windows-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: crate
+        shell: bash
+
+    steps:
+      # Set CRLF explicitly instead of relying on the runner's default.
+      - name: Use CRLF checkouts
+        working-directory: .
+        run: git config --global core.autocrlf true
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check the checkout has CRLF
+        run: grep -q $'\r' README.md || { echo "::error::Expected README.md to have CRLF line endings"; exit 1; }
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: crate/package-lock.json
+
+      - name: CLI tests
+        working-directory: crate/cli
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      # The skill and llms.txt generators read README.md too.
+      - name: Markdown generators
+        run: |
+          npm ci
+          node scripts/agent-skill.mjs
+          node scripts/llms.mjs
