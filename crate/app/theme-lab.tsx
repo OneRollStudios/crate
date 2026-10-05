@@ -30,6 +30,8 @@ const languages: { code: string; name: string; reply: string; tool: string; labe
       stillThinking: "Toujours en réflexion…",
       runningTool: (toolName) => `Exécution de ${toolName}…`,
       runningToolUnnamed: "Exécution d’un outil…",
+      usedTool: (toolName) => `Outil utilisé\u00a0: ${toolName}`,
+      usedToolUnnamed: "Outil utilisé",
       toolActivity: "Activité de l’outil",
       responseStreaming: "Réponse en cours",
       done: "Terminé",
