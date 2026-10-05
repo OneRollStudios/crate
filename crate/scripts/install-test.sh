@@ -4,7 +4,8 @@ set -euo pipefail
 # Run after npm run build. Requires Node 22+, npm, Bash, curl, and Playwright's
 # Chromium (npx playwright install chromium, or set CHROMIUM_PATH).
 # From crate/: bash scripts/install-test.sh [next|vite|themed|init]
-#   next    install into a fresh Next.js app and drive every state (default)
+#   next    install into a fresh Next.js app, lint it with the app's default
+#           ESLint config, and drive every state (default)
 #   vite    the same in a fresh Vite + React app
 #   themed  install into a Next.js app with a non-default shadcn theme
 #           (colors, radius, font) and check every component uses that theme
@@ -179,6 +180,12 @@ else
   else
     cp "$crate_dir/scripts/fixtures/mock-chat.tsx" src/App.tsx
   fi
+fi
+if [[ "$framework" == "next" ]]; then
+  # create-next-app's own ESLint config (eslint-config-next, with the React
+  # Compiler rules), run over the installed components, hooks, and test page.
+  npm run lint
+  echo "PASS npm run lint: the default Next.js ESLint config"
 fi
 npm run build
 

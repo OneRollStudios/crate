@@ -77,33 +77,42 @@ function inspectMessages(messages: ChatLike["messages"], sourceTitle: string) {
 export function useAgentStatus(chat: ChatLike, options: UseAgentStatusOptions = {}): AgentStatusSnapshot {
   const { labels } = useCrate();
   const inspected = useMemo(() => inspectMessages(chat.messages, labels.sourceTitle), [chat.messages, labels.sourceTitle]);
-  const [now, setNow] = useState(() => Date.now());
-  const busySince = useRef<number | null>(null);
-  const lastContentAt = useRef(Date.now());
-  const previousSignature = useRef(inspected.contentSignature);
   const busy = chat.status === "submitted" || chat.status === "streaming";
+  const signature = inspected.contentSignature;
 
+  // Each busy period is a run, so timings from an earlier run are never shown.
+  const [run, setRun] = useState(0);
+  const [wasBusy, setWasBusy] = useState(busy);
+  if (busy !== wasBusy) {
+    setWasBusy(busy);
+    if (busy) setRun((value) => value + 1);
+  }
+
+  // When the content last changed. Written in an effect, read in the timer.
+  const lastContent = useRef({ signature, at: 0 });
   useEffect(() => {
-    if (busy && busySince.current === null) busySince.current = Date.now();
-    if (!busy) busySince.current = null;
-  }, [busy]);
+    lastContent.current = { signature, at: Date.now() };
+  }, [signature]);
 
-  useEffect(() => {
-    if (inspected.contentSignature !== previousSignature.current) {
-      previousSignature.current = inspected.contentSignature;
-      lastContentAt.current = Date.now();
-      setNow(Date.now());
-    }
-  }, [inspected.contentSignature]);
-
+  // Time is measured in the timer, never during render: how long this run has
+  // taken, and how long the content has been unchanged.
+  const [timing, setTiming] = useState({ run: -1, signature: "", elapsedMs: 0, quietMs: 0 });
   useEffect(() => {
     if (!busy) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 250);
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      const content = lastContent.current;
+      setTiming({ run, signature: content.signature, elapsedMs: now - startedAt, quietMs: now - content.at });
+    }, 250);
     return () => window.clearInterval(timer);
-  }, [busy]);
+  }, [busy, run]);
 
-  const elapsedMs = busySince.current ? Math.max(0, now - busySince.current) : 0;
-  const stalled = chat.status === "streaming" && now - lastContentAt.current >= (options.stallAfterMs ?? 5000);
+  const current = busy && timing.run === run;
+  const elapsedMs = current ? timing.elapsedMs : 0;
+  // A timing taken before the latest content arrived can't mean a stall.
+  const stalled = chat.status === "streaming" && current && timing.signature === signature
+    && timing.quietMs >= (options.stallAfterMs ?? 5000);
 
   let state: AgentStatus;
   if (options.manualStatus) state = options.manualStatus;

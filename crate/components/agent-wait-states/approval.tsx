@@ -16,9 +16,14 @@ export type ApprovalProps = WaitStateProps & {
 export function Approval({ className, accent = false, title, preview, onAllow, onDeny, expiresIn, labels }: ApprovalProps) {
   const { labels: l, format } = useCrate(labels);
   const [remaining, setRemaining] = useState(expiresIn);
+  // A new expiresIn restarts the countdown (adjusted during render, not in an effect).
+  const [startedFrom, setStartedFrom] = useState(expiresIn);
+  if (startedFrom !== expiresIn) {
+    setStartedFrom(expiresIn);
+    setRemaining(expiresIn);
+  }
 
   useEffect(() => {
-    setRemaining(expiresIn);
     if (expiresIn === undefined) return;
     const timer = window.setInterval(() => setRemaining((value) => value === undefined ? value : Math.max(0, value - 1)), 1000);
     return () => window.clearInterval(timer);
