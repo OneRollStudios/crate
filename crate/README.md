@@ -36,6 +36,8 @@ Stream adapters for backends other than the Vercel AI SDK are separate items. Se
 
 Crate ships a skill that teaches coding agents when to use each component, how to install it, and how to wire it to the app's AI stream (Vercel AI SDK, OpenAI Agents SDK, LangChain and LangGraph, or any server-sent events).
 
+Agents install Crate by running `npx shadcn@latest add`. If your coding agent blocks that command or asks every time, allow it in the agent's permission settings.
+
 ```bash
 # 1. Add Crate as a shadcn registry, so agents can search and install it as @crate
 npx shadcn@latest registry add @crate=https://crate.onerollstudios.com/r/{name}.json
