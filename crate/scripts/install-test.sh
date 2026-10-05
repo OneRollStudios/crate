@@ -3,17 +3,19 @@ set -euo pipefail
 
 # Run after npm run build. Requires Node 22+, npm, Bash, curl, and Playwright's
 # Chromium (npx playwright install chromium, or set CHROMIUM_PATH).
-# From crate/: bash scripts/install-test.sh [next|vite|themed]
+# From crate/: bash scripts/install-test.sh [next|vite|themed|init]
 #   next    install into a fresh Next.js app and drive every state (default)
 #   vite    the same in a fresh Vite + React app
 #   themed  install into a Next.js app with a non-default shadcn theme
 #           (colors, radius, font) and check every component uses that theme
+#   init    set up a fresh Next.js app (no shadcn yet) with crate init, then
+#           drive every state as in next
 mode="${1:-next}"
 case "$mode" in
-  next | themed) framework="next" ;;
+  next | themed | init) framework="next" ;;
   vite) framework="vite" ;;
   *)
-    echo "Usage: bash scripts/install-test.sh [next|vite|themed]" >&2
+    echo "Usage: bash scripts/install-test.sh [next|vite|themed|init]" >&2
     exit 2
     ;;
 esac
@@ -106,12 +108,36 @@ TS
   '
 fi
 
-npx --yes shadcn@latest init --defaults --yes
-if [[ "$mode" == "themed" ]]; then
-  # Make it an existing app with its own look before Crate arrives.
-  cat "$crate_dir/scripts/fixtures/host-theme.css" >> app/globals.css
+if [[ "$mode" == "init" ]]; then
+  # crate init does everything below itself: shadcn init, the install, the
+  # theme check, and CrateProvider. A French page checks the locale, and the
+  # AI SDK in package.json checks the stack detection.
+  cat > app/layout.tsx <<'TSX'
+import "./globals.css";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="fr">
+      <body>{children}</body>
+    </html>
+  );
+}
+TSX
+  npm install ai @ai-sdk/react
+  (cd "$crate_dir/cli" && npm install --no-audit --no-fund)
+  node "$crate_dir/cli/bin/crate.mjs" init --yes --registry "http://localhost:$port"
+  grep -q 'CrateProvider locale="fr"' app/layout.tsx
+  test -f components/agent-wait-states/agent-state.tsx
+  test -f hooks/use-agent-status.ts
+  echo "PASS crate init: shadcn set up, Crate installed, CrateProvider added with locale fr"
+else
+  npx --yes shadcn@latest init --defaults --yes
+  if [[ "$mode" == "themed" ]]; then
+    # Make it an existing app with its own look before Crate arrives.
+    cat "$crate_dir/scripts/fixtures/host-theme.css" >> app/globals.css
+  fi
+  npx --yes shadcn@latest add "http://localhost:$port/r/all.json" --yes
 fi
-npx --yes shadcn@latest add "http://localhost:$port/r/all.json" --yes
 
 if [[ "$mode" == "next" ]]; then
   # The @crate namespace and the agent skill, as the README sets them up.
@@ -132,7 +158,7 @@ if [[ "$mode" == "next" ]]; then
   echo "PASS @crate namespace: search, view, and the agent skill for Claude Code, Cursor, and Codex"
 fi
 
-if [[ "$framework" == "next" ]]; then
+if [[ "$framework" == "next" && "$mode" != "init" ]]; then
   # Avoid remote font downloads.
   cat > app/layout.tsx <<'TSX'
 import "./globals.css";

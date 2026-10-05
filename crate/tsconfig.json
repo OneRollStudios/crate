@@ -39,6 +39,7 @@
     "node_modules",
     "design",
     "scripts/fixtures",
-    "tests"
+    "tests",
+    "cli"
   ]
 }

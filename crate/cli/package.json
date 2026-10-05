@@ -1,0 +1,20 @@
+{
+  "name": "@onerollstudios/crate",
+  "version": "0.1.0",
+  "description": "Set up Crate in a React AI app with one command: detects the framework, shadcn theme, and AI stack, installs Crate, and adds CrateProvider.",
+  "license": "MIT",
+  "author": "One Roll Studios",
+  "homepage": "https://crate.onerollstudios.com",
+  "repository": { "type": "git", "url": "https://github.com/OneRollStudios/crate.git", "directory": "crate/cli" },
+  "type": "module",
+  "bin": { "crate": "bin/crate.mjs" },
+  "files": ["bin", "src"],
+  "engines": { "node": ">=20.10" },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "wiring": "node scripts/wiring.mjs"
+  },
+  "dependencies": {
+    "typescript": "^5.9.2"
+  }
+}

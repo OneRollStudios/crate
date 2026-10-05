@@ -12,7 +12,7 @@ jobs:
   checks:
     name: checks
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: crate
@@ -70,6 +70,14 @@ jobs:
           npm install --no-audit --no-fund
           npm test
 
+      # crate init against fixture apps, with a fake npx.
+      - name: CLI tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        working-directory: crate/cli
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
       # Report every em dash, and treat search errors as failures too.
       - name: Copy guard
         if: ${{ !cancelled() }}
@@ -108,6 +116,12 @@ jobs:
       - name: Themed host test
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: bash scripts/install-test.sh themed
+
+      # Set up a fresh Next.js app with crate init (shadcn init, install,
+      # theme, CrateProvider), then drive every state in a browser.
+      - name: crate init test
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: bash scripts/install-test.sh init
 
       # Build examples/real-chat in mock mode (no API key) and check that a
       # real useChat request walks AgentState through every state in order.

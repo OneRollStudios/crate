@@ -1,0 +1,52 @@
+Crate init
+
+Detected:
+  Framework:  Vite
+  shadcn:     set up (CSS: src/index.css)
+  AI stack:   OpenAI Agents SDK
+  Language:   de (CrateProvider locale="de")
+
+Plan:
+  1. Run: npx --yes shadcn@latest add https://crate.test/r/all.json https://crate.test/r/openai-agents-adapter.json --yes --overwrite
+  2. Theme: no change (src/index.css defines every variable Crate reads)
+  3. Wrap the app in CrateProvider in src/main.tsx
+
+Done. Changed:
+  - Installed all, openai-agents-adapter (components in @/components/agent-wait-states)
+  - src/main.tsx: wrapped the app in CrateProvider
+
+Next: connect the components to your OpenAI Agents SDK stream:
+
+// Server route
+import { Agent, run } from "@openai/agents";
+import { agentEventsResponse } from "@/lib/agent-stream";
+import { fromOpenAIAgents } from "@/lib/agent-stream-openai-agents";
+
+const agent = new Agent({ name: "Assistant", instructions: "Help the user." });
+
+export async function POST(request: Request) {
+  const { message } = await request.json();
+  return agentEventsResponse(fromOpenAIAgents(await run(agent, message, { stream: true })));
+}
+
+// Client
+"use client";
+
+import { AgentState } from "@/components/agent-wait-states/agent-state";
+import { useAgentStatus } from "@/hooks/use-agent-status";
+import { useAgentStream } from "@/hooks/use-agent-stream";
+
+export function Assistant() {
+  const stream = useAgentStream({ api: "/api/agent" });
+  const status = useAgentStatus(stream);
+  const ask = () => stream.send({ message: "Plan my week" });
+
+  return (
+    <>
+      <button type="button" onClick={ask}>Ask</button>
+      <AgentState status={status} text={stream.text} errorMessage={stream.error?.message} onRetry={ask} />
+    </>
+  );
+}
+
+Every component and prop: https://crate.test/llms.txt
