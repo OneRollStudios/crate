@@ -5,11 +5,22 @@
   "license": "MIT",
   "author": "One Roll Studios",
   "homepage": "https://crate.onerollstudios.com",
-  "repository": { "type": "git", "url": "https://github.com/OneRollStudios/crate.git", "directory": "crate/cli" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OneRollStudios/crate.git",
+    "directory": "crate/cli"
+  },
   "type": "module",
-  "bin": { "crate": "bin/crate.mjs" },
-  "files": ["bin", "src"],
-  "engines": { "node": ">=20.10" },
+  "bin": {
+    "crate": "bin/crate.mjs"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "engines": {
+    "node": ">=20.10"
+  },
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "wiring": "node scripts/wiring.mjs"
