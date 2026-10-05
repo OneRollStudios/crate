@@ -6,6 +6,9 @@ Sets up [Crate](https://crate.onerollstudios.com) in a React AI app with one com
 npx @onerollstudios/crate init
 ```
 
+Not on npm yet. Until it is, run it from a clone of this repository:
+`node crate/cli/bin/crate.mjs init --cwd path/to/your/app` (after `npm install` in `crate/cli`).
+
 It looks at the app first, then shows a plan and asks before changing anything:
 
 | It detects | From |
