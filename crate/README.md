@@ -30,6 +30,8 @@ agent-state
 use-agent-status
 ```
 
+Stream adapters for backends other than the Vercel AI SDK are separate items. See [Stream Adapters](#stream-adapters).
+
 ## AI SDK usage
 
 ```tsx
@@ -62,6 +64,85 @@ type AgentStatusSnapshot = {
 ```
 
 Pass `manualStatus` to use the hook with an external state source. `AgentPlan`, `Approval`, `Queue`, and `FileProcessing` are intentionally prop-driven because they describe application workflows rather than AI SDK message parts.
+
+## Stream Adapters
+
+`useAgentStatus` reads the Vercel AI SDK's `useChat` directly. For other backends, an adapter converts the framework's stream into a small set of agent events on the server, and `useAgentStream` reads them in the browser and returns the shape `useAgentStatus` needs.
+
+| Backend | Install |
+| --- | --- |
+| OpenAI Agents SDK | `npx shadcn@latest add https://crate.onerollstudios.com/r/openai-agents-adapter.json` |
+| LangChain and LangGraph | `npx shadcn@latest add https://crate.onerollstudios.com/r/langchain-adapter.json` |
+| Any server-sent events | `npx shadcn@latest add https://crate.onerollstudios.com/r/agent-stream.json` |
+
+The adapters read each framework's events by shape, so they add no dependencies. Errors in a run become the error state instead of a broken stream.
+
+OpenAI Agents SDK route (Next.js shown; any server that returns a `Response` works):
+
+```ts
+import { Agent, run } from "@openai/agents";
+import { agentEventsResponse } from "@/lib/agent-stream";
+import { fromOpenAIAgents } from "@/lib/agent-stream-openai-agents";
+
+const agent = new Agent({ name: "Assistant", instructions: "Help the user." });
+
+export async function POST(request: Request) {
+  const { message } = await request.json();
+  return agentEventsResponse(fromOpenAIAgents(await run(agent, message, { stream: true })));
+}
+```
+
+LangChain or LangGraph route (any runnable: a chain, an agent, or a compiled graph):
+
+```ts
+import { agentEventsResponse } from "@/lib/agent-stream";
+import { fromLangChain } from "@/lib/agent-stream-langchain";
+import { graph } from "./graph";
+
+export async function POST(request: Request) {
+  const { message } = await request.json();
+  const events = graph.streamEvents({ messages: [{ role: "user", content: message }] }, { version: "v2" });
+  return agentEventsResponse(fromLangChain(events));
+}
+```
+
+The client is the same for both:
+
+```tsx
+"use client";
+
+import { AgentState } from "@/components/agent-wait-states/agent-state";
+import { useAgentStatus } from "@/hooks/use-agent-status";
+import { useAgentStream } from "@/hooks/use-agent-stream";
+
+export function Assistant() {
+  const stream = useAgentStream({ api: "/api/agent" });
+  const status = useAgentStatus(stream);
+  const ask = () => stream.send({ message: "Plan my week" });
+
+  return (
+    <>
+      <button type="button" onClick={ask}>Ask</button>
+      <AgentState status={status} text={stream.text} errorMessage={stream.error?.message} onRetry={ask} />
+    </>
+  );
+}
+```
+
+For a server that already streams server-sent events in its own format, pass `map` to turn each event into agent events. For example, a chat-completions style stream:
+
+```tsx
+const stream = useAgentStream({
+  api: "/api/chat",
+  map: (message) => {
+    if (message.data === "[DONE]") return { type: "done" };
+    const delta = JSON.parse(message.data).choices[0]?.delta?.content;
+    return delta ? { type: "text", delta } : null;
+  },
+});
+```
+
+Agent events: `text` and `reasoning` (deltas), `source`, `tool-start` and `tool-end`, `error`, and `done`. The OpenAI Agents SDK adapter maps text, reasoning, tool calls, and handoffs. The LangChain adapter maps model text, reasoning and thinking blocks, and tool starts, ends, and errors. To send events from anything else, yield them from an async generator and pass it to `agentEventsResponse`.
 
 ## Labels and languages
 

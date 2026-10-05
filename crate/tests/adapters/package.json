@@ -1,0 +1,16 @@
+{
+  "name": "crate-adapter-tests",
+  "private": true,
+  "description": "Tests for Crate's stream adapters against the real OpenAI Agents SDK and LangChain/LangGraph, with mocked models. Uses React from crate/node_modules, so run npm ci in crate/ first.",
+  "type": "module",
+  "scripts": {
+    "test": "node --import tsx --test *.test.ts"
+  },
+  "devDependencies": {
+    "@langchain/core": "^1.2.14",
+    "@langchain/langgraph": "^1.4.19",
+    "@openai/agents": "^0.18.0",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.5"
+  }
+}
