@@ -150,16 +150,17 @@ jobs:
         shell: bash
 
     steps:
-      # Set CRLF explicitly instead of relying on the runner's default.
-      - name: Use CRLF checkouts
-        working-directory: .
-        run: git config --global core.autocrlf true
-
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Check the checkout has CRLF
-        run: grep -q $'\r' README.md || { echo "::error::Expected README.md to have CRLF line endings"; exit 1; }
+      # Re-check out every file with CRLF, as a Windows clone with
+      # core.autocrlf=true has them, instead of relying on runner defaults.
+      - name: Use CRLF line endings
+        working-directory: .
+        run: |
+          git config core.autocrlf true
+          git rm -rq --cached .
+          git reset -q --hard
 
       - name: Set up Node 22
         uses: actions/setup-node@v7
@@ -167,6 +168,15 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: crate/package-lock.json
+
+      # Node reads the raw bytes (Git Bash's grep may hide CRs).
+      - name: Check the checkout has CRLF
+        run: |
+          node -e '
+            const crs = (require("node:fs").readFileSync("README.md", "utf8").match(/\r\n/g) ?? []).length;
+            console.log(`README.md has ${crs} CRLF line endings`);
+            if (!crs) { console.log("::error::Expected README.md to have CRLF line endings"); process.exit(1); }
+          '
 
       - name: CLI tests
         working-directory: crate/cli
