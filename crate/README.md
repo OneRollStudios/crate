@@ -10,6 +10,8 @@ Made by [One Roll Studios](https://onerollstudios.com). MIT licensed.
 npx shadcn@latest add https://crate.onerollstudios.com/r/all.json
 ```
 
+Or let `npx @onerollstudios/crate init` do the setup: it detects the app's framework, theme, and AI stack, shows a plan, then installs Crate, the right stream adapter, and `CrateProvider`.
+
 Install individual items by replacing `all` with one of:
 
 ```text

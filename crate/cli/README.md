@@ -6,9 +6,6 @@ Sets up [Crate](https://crate.onerollstudios.com) in a React AI app with one com
 npx @onerollstudios/crate init
 ```
 
-Not on npm yet. Until it is, run it from a clone of this repository:
-`node crate/cli/bin/crate.mjs init --cwd path/to/your/app` (after `npm install` in `crate/cli`).
-
 It looks at the app first, then shows a plan and asks before changing anything:
 
 | It detects | From |
@@ -53,10 +50,11 @@ The end-to-end run (real `shadcn init` and `add`, then a build and a browser che
 
 ## Releasing
 
-Published from GitHub Actions with npm Trusted Publishing (`.github/workflows/publish-cli.yml`). No npm token is stored anywhere, and every version carries npm provenance linking it to this repository and commit.
+Releases are staged from GitHub Actions (`.github/workflows/publish-cli.yml`) with npm Trusted Publishing and staged publishing. No npm token is stored anywhere, every version carries npm provenance linking it to this repository and commit, and nothing goes live until a maintainer approves it with 2FA.
 
 1. Bump `version` in `crate/cli/package.json` in a pull request, and merge it.
 2. From an up-to-date `main`, push a matching tag: `git tag cli-v0.1.1 && git push origin cli-v0.1.1`.
-3. The workflow checks that the tag matches the version, that the version isn't on npm yet, and that the tests pass, then publishes.
+3. The workflow checks that the tag matches the version, that the version isn't on npm yet, and that the tests pass, then stages the version with `npm stage publish`. The run's summary shows the stage ID.
+4. A maintainer approves the staged version on npmjs.com (2FA), or runs `npm stage approve <stage-id>`. Only then can people install it. `npm stage download <stage-id>` fetches the staged tarball to inspect first, and `npm stage reject <stage-id>` discards it.
 
-To check a release without publishing, run **Publish CLI** from the Actions tab with "dry-run" ticked.
+To check a release without staging anything, run **Publish CLI** from the Actions tab with "dry-run" ticked.
