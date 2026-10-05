@@ -138,6 +138,21 @@ const docs = [];
 const problems = [];
 for (const item of registry.items) {
   if (item.type === "registry:item") continue; // "all" bundle, listed in llms.txt only
+  if (item.type === "registry:file") {
+    // The agent skill: files for coding agents, not code.
+    const lines = [`# ${item.title}`, "", `> ${item.description}`, ""];
+    lines.push("## Install", "", `${fence}bash`, installCommand(item.name), fence, "");
+    lines.push("## Files", "", "| File | For |", "| --- | --- |");
+    const readers = { ".claude/": "Claude Code (a skill)", ".cursor/": "Cursor (a rule)", ".agents/": "Codex and other agents: add a line to `AGENTS.md` pointing to this file" };
+    for (const file of item.files) {
+      const reader = Object.entries(readers).find(([prefix]) => file.target.startsWith(prefix));
+      if (!reader) problems.push(`${item.name}: no known agent reads ${file.target}`);
+      lines.push(`| \`${file.target}\` | ${reader?.[1] ?? ""} |`);
+    }
+    lines.push("", `The skill itself: ${siteUrl}/r/${item.name}.json`, "");
+    docs.push({ item, exportName: item.title, markdown: lines.join("\n") });
+    continue;
+  }
   if (item.type === "registry:lib") {
     // Stream adapters: functions, not components. Document every export of the
     // item's own files, and the README examples that use them.
@@ -259,6 +274,10 @@ const index = [
   "## Stream Adapters",
   "",
   ...docs.filter((d) => d.item.type === "registry:lib").map(entry),
+  "",
+  "## For Coding Agents",
+  "",
+  ...docs.filter((d) => d.item.type === "registry:file").map(entry),
   "",
   "## Registry",
   "",
