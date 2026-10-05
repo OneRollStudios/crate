@@ -33,6 +33,7 @@ function codeBlocks(text) {
 const componentExamples = codeBlocks(readmeSection("Components")).flatMap((block) => block.code.split("\n"));
 const usageBlock = codeBlocks(readmeSection("AI SDK usage")).find((block) => block.lang === "tsx");
 const labelsBlock = codeBlocks(readmeSection("Labels and languages")).find((block) => block.lang === "tsx");
+const adapterBlocks = codeBlocks(readmeSection("Stream Adapters")).filter((block) => block.lang === "ts" || block.lang === "tsx");
 
 // ---------- TypeScript ----------
 const sourceFiles = [...new Set(registry.items.flatMap((item) => item.files.map((file) => `${root}${file.path}`)))];
@@ -121,6 +122,14 @@ function propsTable(props, defaults) {
 function labelsTable(keys) {
   return ["| Label | English default |", "| --- | --- |", ...keys.map((k) => `| \`${k}\` | ${code(defaultLabelText[k])} |`)].join("\n");
 }
+function docOf(node) {
+  const symbol = node.name && checker.getSymbolAtLocation(node.name);
+  return symbol ? ts.displayPartsToString(symbol.getDocumentationComment(checker)).replace(/\s+/g, " ").trim() : "";
+}
+function signatureOf(fn, sf) {
+  const params = fn.parameters.map((p) => p.getText(sf).replace(/\s+/g, " ")).join(", ");
+  return `${fn.name.text}(${params})${fn.type ? `: ${fn.type.getText(sf)}` : ""}`;
+}
 const installCommand = (name) => `npx shadcn@latest add ${siteUrl}/r/${name}.json`;
 const docUrl = (name) => `${siteUrl}/llms/${name}.md`;
 
@@ -129,6 +138,34 @@ const docs = [];
 const problems = [];
 for (const item of registry.items) {
   if (item.type === "registry:item") continue; // "all" bundle, listed in llms.txt only
+  if (item.type === "registry:lib") {
+    // Stream adapters: functions, not components. Document every export of the
+    // item's own files, and the README examples that use them.
+    const ownFiles = item.files.filter((file, index) => index === 0 || file.type === "registry:hook");
+    const lines = [`# ${item.title}`, "", `> ${item.description}`, ""];
+    lines.push("## Install", "", `${fence}bash`, installCommand(item.name), fence, "");
+    const names = [];
+    const imports = [];
+    const functions = [];
+    const types = [];
+    for (const file of ownFiles) {
+      const sf = sourceOf(file.path);
+      const fns = exportedFunctions(sf);
+      if (!fns.length) problems.push(`${item.name}: no exported function in ${file.path}`);
+      names.push(...fns.map((fn) => fn.name.text));
+      if (fns.length) imports.push(`import { ${fns.map((fn) => fn.name.text).join(", ")} } from "@/${file.path.replace(/\.tsx?$/, "")}";`);
+      for (const fn of fns) functions.push(`### ${fn.name.text}`, "", `${fence}ts`, signatureOf(fn, sf), fence, "", docOf(fn), "");
+      types.push(...exportedTypes(sf, new Set()));
+    }
+    lines.push("## Import", "", `${fence}ts`, ...imports, fence, "");
+    lines.push("## Functions", "", ...functions);
+    if (types.length) lines.push("## Types", "", `${fence}ts`, types.join("\n\n"), fence, "");
+    const examples = adapterBlocks.filter((block) => names.some((name) => new RegExp(`\\b${name}\\(`).test(block.code)));
+    if (!examples.length) { problems.push(`${item.name}: no example in the README's Stream Adapters section`); continue; }
+    lines.push("## Example", "", ...examples.flatMap((block) => [`${fence}${block.lang}`, block.code, fence, ""]));
+    docs.push({ item, exportName: item.title, markdown: lines.join("\n").replace(/\n{3,}/g, "\n\n") });
+    continue;
+  }
   const mainFile = item.files[0].path;
   const sf = sourceOf(mainFile);
   const sourceText = sf.getFullText();
@@ -218,6 +255,10 @@ const index = [
   "## Components",
   "",
   ...docs.filter(isComponent).map(entry),
+  "",
+  "## Stream Adapters",
+  "",
+  ...docs.filter((d) => d.item.type === "registry:lib").map(entry),
   "",
   "## Registry",
   "",

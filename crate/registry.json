@@ -463,6 +463,73 @@
       ]
     },
     {
+      "name": "agent-stream",
+      "type": "registry:lib",
+      "title": "AgentStream",
+      "description": "Streams any AI backend into useAgentStatus: one small event format, server-sent events in and out (including a raw SSE adapter), and the useAgentStream hook.",
+      "author": "One Roll Studios",
+      "files": [
+        {
+          "path": "lib/agent-stream.ts",
+          "type": "registry:lib",
+          "target": "lib/agent-stream.ts"
+        },
+        {
+          "path": "hooks/use-agent-stream.ts",
+          "type": "registry:hook",
+          "target": "hooks/use-agent-stream.ts"
+        }
+      ]
+    },
+    {
+      "name": "openai-agents-adapter",
+      "type": "registry:lib",
+      "title": "OpenAI Agents SDK Adapter",
+      "description": "Converts a streamed OpenAI Agents SDK run into agent stream events for useAgentStatus.",
+      "author": "One Roll Studios",
+      "files": [
+        {
+          "path": "lib/agent-stream-openai-agents.ts",
+          "type": "registry:lib",
+          "target": "lib/agent-stream-openai-agents.ts"
+        },
+        {
+          "path": "lib/agent-stream.ts",
+          "type": "registry:lib",
+          "target": "lib/agent-stream.ts"
+        },
+        {
+          "path": "hooks/use-agent-stream.ts",
+          "type": "registry:hook",
+          "target": "hooks/use-agent-stream.ts"
+        }
+      ]
+    },
+    {
+      "name": "langchain-adapter",
+      "type": "registry:lib",
+      "title": "LangChain Adapter",
+      "description": "Converts LangChain and LangGraph streamEvents into agent stream events for useAgentStatus.",
+      "author": "One Roll Studios",
+      "files": [
+        {
+          "path": "lib/agent-stream-langchain.ts",
+          "type": "registry:lib",
+          "target": "lib/agent-stream-langchain.ts"
+        },
+        {
+          "path": "lib/agent-stream.ts",
+          "type": "registry:lib",
+          "target": "lib/agent-stream.ts"
+        },
+        {
+          "path": "hooks/use-agent-stream.ts",
+          "type": "registry:hook",
+          "target": "hooks/use-agent-stream.ts"
+        }
+      ]
+    },
+    {
       "name": "all",
       "type": "registry:item",
       "title": "Crate Wait States",

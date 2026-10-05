@@ -60,6 +60,15 @@ jobs:
           done
           echo "llms.txt links $(echo "$links" | wc -l) files, all present."
 
+      # Stream adapters against the real OpenAI Agents SDK and LangChain/LangGraph,
+      # with mocked models, checked through the real useAgentStatus hook.
+      - name: Adapter tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        working-directory: crate/tests/adapters
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
       # Report every em dash, and treat search errors as failures too.
       - name: Copy guard
         if: ${{ !cancelled() }}
