@@ -10,8 +10,13 @@ export type QueueProps = WaitStateProps & { variant?: "line" | "rate-limit"; pos
 export function Queue({ className, accent = false, variant = "line", position, retryIn, labels }: QueueProps) {
   const { labels: l, format } = useCrate(labels);
   const [secondsLeft, setSecondsLeft] = useState(retryIn);
-  useEffect(() => {
+  // A new retryIn restarts the countdown (adjusted during render, not in an effect).
+  const [startedFrom, setStartedFrom] = useState(retryIn);
+  if (startedFrom !== retryIn) {
+    setStartedFrom(retryIn);
     setSecondsLeft(retryIn);
+  }
+  useEffect(() => {
     if (variant !== "rate-limit" || retryIn === undefined) return;
     const timer = window.setInterval(() => setSecondsLeft((current) => current === undefined ? current : Math.max(0, current - 1)), 1000);
     return () => window.clearInterval(timer);
