@@ -1,0 +1,31 @@
+Crate init
+
+Detected:
+  Framework:  Next.js (App Router)
+  shadcn:     not set up
+  AI stack:   none detected (any server-sent events)
+  Language:   fr (CrateProvider locale="fr")
+
+Plan:
+  1. Run: npx shadcn@latest init --defaults (shadcn isn't set up, and Crate installs through it)
+  2. Run: npx --yes shadcn@latest add https://crate.test/r/all.json https://crate.test/r/agent-stream.json --yes --overwrite
+  3. Check the theme in the CSS file shadcn creates, and add any variable Crate needs that is missing
+  4. Wrap the app in CrateProvider in app/layout.tsx
+
+Done. Changed:
+  - components.json and the app's CSS (shadcn init)
+  - Installed all, agent-stream (components in @/components/agent-wait-states)
+  - app/layout.tsx: wrapped the app in CrateProvider
+
+Next: connect the components to your server's event stream:
+
+const stream = useAgentStream({
+  api: "/api/chat",
+  map: (message) => {
+    if (message.data === "[DONE]") return { type: "done" };
+    const delta = JSON.parse(message.data).choices[0]?.delta?.content;
+    return delta ? { type: "text", delta } : null;
+  },
+});
+
+Every component and prop: https://crate.test/llms.txt

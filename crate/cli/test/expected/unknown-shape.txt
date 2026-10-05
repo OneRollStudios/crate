@@ -1,0 +1,37 @@
+Crate init
+
+Detected:
+  Framework:  Next.js (App Router)
+  shadcn:     set up (CSS: app/globals.css)
+  AI stack:   none detected (any server-sent events)
+  Language:   not set
+
+Plan:
+  1. Run: npx --yes shadcn@latest add https://crate.test/r/all.json https://crate.test/r/agent-stream.json --yes --overwrite
+  2. Theme: no change (app/globals.css defines every variable Crate reads)
+  3. CrateProvider: app/layout.tsx isn't in a shape crate init can edit safely, so it stays as it is; the lines to add are printed at the end
+
+Done. Changed:
+  - Installed all, agent-stream (components in @/components/agent-wait-states)
+
+Add CrateProvider yourself:
+
+import { CrateProvider } from "@/components/agent-wait-states/crate-provider";
+
+// Wrap inside <body> in your root layout:
+<CrateProvider>
+  {children}
+</CrateProvider>
+
+Next: connect the components to your server's event stream:
+
+const stream = useAgentStream({
+  api: "/api/chat",
+  map: (message) => {
+    if (message.data === "[DONE]") return { type: "done" };
+    const delta = JSON.parse(message.data).choices[0]?.delta?.content;
+    return delta ? { type: "text", delta } : null;
+  },
+});
+
+Every component and prop: https://crate.test/llms.txt

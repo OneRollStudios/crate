@@ -1,0 +1,50 @@
+Crate init
+
+Detected:
+  Framework:  Next.js (App Router)
+  shadcn:     set up (CSS: app/globals.css)
+  AI stack:   LangChain or LangGraph
+  Language:   en
+
+Plan:
+  1. Run: npx --yes shadcn@latest add https://crate.test/r/all.json https://crate.test/r/langchain-adapter.json --yes --overwrite
+  2. Theme: no change (app/globals.css defines every variable Crate reads)
+  3. CrateProvider: no change (app/layout.tsx already uses it)
+
+Done. Changed:
+  - Installed all, langchain-adapter (components in @/components/agent-wait-states)
+
+Next: connect the components to your LangChain or LangGraph stream:
+
+// Server route
+import { agentEventsResponse } from "@/lib/agent-stream";
+import { fromLangChain } from "@/lib/agent-stream-langchain";
+import { graph } from "./graph";
+
+export async function POST(request: Request) {
+  const { message } = await request.json();
+  const events = graph.streamEvents({ messages: [{ role: "user", content: message }] }, { version: "v2" });
+  return agentEventsResponse(fromLangChain(events));
+}
+
+// Client
+"use client";
+
+import { AgentState } from "@/components/agent-wait-states/agent-state";
+import { useAgentStatus } from "@/hooks/use-agent-status";
+import { useAgentStream } from "@/hooks/use-agent-stream";
+
+export function Assistant() {
+  const stream = useAgentStream({ api: "/api/agent" });
+  const status = useAgentStatus(stream);
+  const ask = () => stream.send({ message: "Plan my week" });
+
+  return (
+    <>
+      <button type="button" onClick={ask}>Ask</button>
+      <AgentState status={status} text={stream.text} errorMessage={stream.error?.message} onRetry={ask} />
+    </>
+  );
+}
+
+Every component and prop: https://crate.test/llms.txt

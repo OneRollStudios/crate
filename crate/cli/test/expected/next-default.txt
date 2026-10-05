@@ -1,0 +1,30 @@
+Crate init
+
+Detected:
+  Framework:  Next.js (App Router)
+  shadcn:     set up (CSS: app/globals.css)
+  AI stack:   Vercel AI SDK
+  Language:   en
+
+Plan:
+  1. Run: npx --yes shadcn@latest add https://crate.test/r/all.json --yes --overwrite
+  2. Theme: no change (app/globals.css defines every variable Crate reads)
+  3. Wrap the app in CrateProvider in app/layout.tsx
+
+Done. Changed:
+  - Installed all (components in @/components/agent-wait-states)
+  - app/layout.tsx: wrapped the app in CrateProvider
+
+Next: connect the components to your Vercel AI SDK stream:
+
+const chat = useChat();
+const status = useAgentStatus(chat);
+
+<AgentState
+  status={status}
+  text={streamedText}
+  reasoning={status.reasoning}
+  sources={status.sources}
+/>
+
+Every component and prop: https://crate.test/llms.txt

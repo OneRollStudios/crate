@@ -69,6 +69,14 @@ jobs:
           npm install --no-audit --no-fund
           npm test
 
+      # crate init against fixture apps, with a fake npx.
+      - name: CLI tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        working-directory: crate/cli
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
       # Report every em dash, and treat search errors as failures too.
       - name: Copy guard
         if: ${{ !cancelled() }}
