@@ -88,6 +88,8 @@ type AgentStatusSnapshot = {
 };
 ```
 
+`AgentState` keeps a tool call or sources that end in under 600 ms on screen until 600 ms have passed, shown as finished ("Used searchDocs"), so they can be read instead of flashing past. Errors, approvals, and stalls always show at once. Set `minDisplayMs` to change the time, or to `0` to turn this off. When a reply stalls, the reply so far (`text`) stays visible above the stalled notice.
+
 Pass `manualStatus` to use the hook with an external state source. `AgentPlan`, `Approval`, `Queue`, and `FileProcessing` are intentionally prop-driven because they describe application workflows rather than AI SDK message parts.
 
 ## Show the Reply Once

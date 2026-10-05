@@ -5,7 +5,13 @@ import { useCrate } from "./crate-provider";
 import { cx, type WaitStateProps } from "./types";
 
 export type ToolStep = { id?: string; label: string; toolName?: string; state?: "pending" | "active" | "complete" };
-export type ToolCallProps = WaitStateProps & { steps?: ToolStep[]; toolName?: string; label?: string };
+export type ToolCallProps = WaitStateProps & {
+  steps?: ToolStep[];
+  toolName?: string;
+  label?: string;
+  /** The call has finished: every step shows as complete, and the default label says "Used". */
+  done?: boolean;
+};
 
 function ToolIcon({ name, active }: { name?: string; active: boolean }) {
   const iconClass = "size-3.5";
@@ -15,9 +21,14 @@ function ToolIcon({ name, active }: { name?: string; active: boolean }) {
   return <Wrench className={iconClass} />;
 }
 
-export function ToolCall({ className, accent = false, steps, toolName, label, labels }: ToolCallProps) {
+export function ToolCall({ className, accent = false, steps, toolName, label, done = false, labels }: ToolCallProps) {
   const { labels: l } = useCrate(labels);
-  const items = steps?.length ? steps : [{ label: label ?? (toolName ? l.runningTool(toolName) : l.runningToolUnnamed), toolName, state: "active" as const }];
+  const defaultLabel = done
+    ? toolName ? l.usedTool(toolName) : l.usedToolUnnamed
+    : toolName ? l.runningTool(toolName) : l.runningToolUnnamed;
+  const items: ToolStep[] = steps?.length
+    ? done ? steps.map((step) => ({ ...step, state: "complete" })) : steps
+    : [{ label: label ?? defaultLabel, toolName, state: done ? "complete" : "active" }];
   return (
     <div className={cx("w-full max-w-sm rounded-sm border border-border bg-background p-2 text-foreground shadow-[0_14px_34px_-24px_color-mix(in_srgb,var(--primary)_30%,transparent)]", className)} aria-live="polite" aria-label={l.toolActivity}>
       <ol className="space-y-1">

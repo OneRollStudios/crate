@@ -21,6 +21,8 @@ export type CrateLabels = {
   toolActivity: string;
   runningTool: (toolName: string) => string;
   runningToolUnnamed: string;
+  usedTool: (toolName: string) => string;
+  usedToolUnnamed: string;
   stalled: string;
   error: string;
   retry: string;
@@ -60,6 +62,8 @@ export const defaultLabels: CrateLabels = {
   toolActivity: "Agent tool activity",
   runningTool: (toolName) => `Running ${toolName}…`,
   runningToolUnnamed: "Running a tool…",
+  usedTool: (toolName) => `Used ${toolName}`,
+  usedToolUnnamed: "Used a tool",
   stalled: "Still working…",
   error: "Something went wrong.",
   retry: "Retry",

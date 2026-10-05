@@ -1,6 +1,10 @@
 # Proposal: An Honest Minimum Display Time (#79)
 
-Status: proposal, waiting for approval. Nothing here is built yet.
+Status: approved and built. Decisions from review:
+
+- Default `minDisplayMs`: 600 ms.
+- Held states: `tool` and `sources` only. `reasoning` is not held.
+- Finished tool label: "Used search_docs" (labels `usedTool` and `usedToolUnnamed`).
 
 ## Problem
 
@@ -18,7 +22,7 @@ half a second. The state is real, but it disappears before anyone can read it:
    steps, no progress that isn't there, no artificial delay before the answer.
 2. **What is on screen is true.** If a state is kept on screen after it has
    ended, it must say that it ended. A tool call that finished shows as
-   finished ("Ran search_docs", with a check), never as "Running search_docs…".
+   finished ("Used search_docs", with a check), never as "Running search_docs…".
 3. **Important states never wait.** `error`, `approval`, and `stalled` replace
    whatever is showing at once.
 4. **A hold is short and bounded.** A state is kept at most `minDisplayMs` from
@@ -35,7 +39,7 @@ off. When the status changes:
 | From | To | What happens |
 | --- | --- | --- |
 | A state shown for at least `minDisplayMs` | anything | Switch at once, as today |
-| `tool`, `sources`, or `reasoning` shown for less | another in-progress state, `streaming`, or `done` | Keep the current state until it has been shown for `minDisplayMs`, in its **finished** form, then switch to the latest status |
+| `tool` or `sources` shown for less | another in-progress state, `streaming`, or `done` | Keep the current state until it has been shown for `minDisplayMs`, in its **finished** form, then switch to the latest status |
 | anything | `error`, `approval`, `stalled` | Switch at once |
 
 If the status changes several times during a hold, only the latest one is shown
@@ -45,11 +49,10 @@ What the finished forms are:
 
 | State | While held after it ended |
 | --- | --- |
-| `tool` | The step with a check: "Ran search_docs" (new label `ranTool`, overridable through `CrateProvider` like every label) |
+| `tool` | The step with a check: "Used search_docs" (new labels `usedTool` and `usedToolUnnamed`, overridable through `CrateProvider` like every label) |
 | `sources` | The source list as it was (sources don't change once found) |
-| `reasoning` | The reasoning trace with `done` set |
 
-`thinking` is never held: it ends when content arrives, and that content should show at once.
+`thinking` and `reasoning` are never held: they end when new content arrives, and that content should show at once.
 
 So in practice the hold covers the case the test hit: a tool call that starts
 and ends within a fraction of a second stays readable, marked as done, for at
@@ -76,15 +79,15 @@ with `prefers-reduced-motion` too.
 The install test's mocked stream (`scripts/stream-test.mjs`) gets new cases:
 
 - A tool call that starts and ends 100 ms apart, followed by text: the tool
-  state appears, switches to its finished form ("Ran …"), stays at least
+  state appears, switches to its finished form ("Used …"), stays at least
   600 ms in total, then streaming shows.
 - An error during a hold: the error shows at once.
 - A tool call longer than 600 ms: no change from today (no extra wait after it
   ends).
 - `minDisplayMs={0}`: today's behavior exactly.
 
-## Questions for Review
+## Decisions
 
-1. Is 600 ms the right default, or should it be shorter (400 ms)?
-2. Should `sources` and `reasoning` be held too, or only `tool`?
-3. Wording of the finished tool label: "Ran search_docs" or "Used search_docs"?
+1. Default: 600 ms.
+2. Held: `tool` and `sources`. Not `reasoning`.
+3. Finished tool label: "Used search_docs".
