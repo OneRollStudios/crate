@@ -51,7 +51,7 @@ npx shadcn@latest add @crate/crate-skill
 | Cursor | `.cursor/rules/crate.mdc`, a rule the agent applies when relevant |
 | Codex and other agents | `.agents/crate.md`. Add this line to your `AGENTS.md`: `When adding loading, thinking, or streaming states to the AI UI, follow .agents/crate.md.` |
 
-Then ask your agent, for example, "Add Crate wait states to the chat." The skill is generated from the same source as these docs on every build, so it always matches the current components. Crate never edits your `AGENTS.md` itself.
+Then ask your agent, for example, "Add Crate wait states to my chat (crate.onerollstudios.com)." The skill is generated from the same source as these docs on every build, so it always matches the current components. Crate never edits your `AGENTS.md` itself.
 
 ## AI SDK usage
 
