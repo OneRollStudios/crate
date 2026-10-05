@@ -2,6 +2,7 @@
 // Next.js route, useChat, and useAgentStatus, and checks that AgentState shows
 // each state of the scripted stream in order. Saves a screenshot per state.
 // Usage: node scripts/real-chat-test.mjs http://localhost:3000
+import { readFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
 
@@ -24,6 +25,22 @@ const markers = {
 };
 const expected = ["thinking", "reasoning", "sources", "tool", "streaming", "stalled", "streaming", "done"];
 
+// The README's "Show the Reply Once" example must be the example's real
+// app/messages.tsx, which this test drives below.
+function checkReadmeExample() {
+  const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8").replace(/\r\n?/g, "\n");
+  const section = read("../README.md").split("\n## Show the Reply Once\n")[1]?.split("\n## ")[0];
+  const example = section?.match(/```tsx\n([\s\S]*?)```/)?.[1].trimEnd();
+  const file = read("../../examples/real-chat/app/messages.tsx").trimEnd();
+  if (example !== file) throw new Error('README.md "## Show the Reply Once" example differs from examples/real-chat/app/messages.tsx');
+  return "PASS README example matches examples/real-chat/app/messages.tsx";
+}
+
+// How many times a piece of text appears on the page.
+async function timesShown(page, text) {
+  return page.evaluate((value) => document.body.innerText.split(value).length - 1, text);
+}
+
 async function visibleStates(page) {
   const found = [];
   for (const [state, selector] of Object.entries(markers)) {
@@ -35,7 +52,8 @@ async function visibleStates(page) {
 async function main() {
   await mkdir(screenshotDir, { recursive: true });
   const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined });
-  const results = [];
+  const results = [checkReadmeExample()];
+  let checkedLiveReply = false;
   try {
     const page = await browser.newPage({ viewport: { width: 900, height: 900 } });
     const errors = [];
@@ -61,11 +79,24 @@ async function main() {
       }
       await page.screenshot({ path: `${screenshotDir}/real-chat-${index + 1}-${state}.png` });
       results.push(`PASS step ${index + 1}: ${state}`);
+      // The reply being written shows once: in AgentState, not also in the list.
+      if (state === "streaming") {
+        const live = (await page.locator(markers.streaming).first().innerText()).trim();
+        if (live) {
+          const times = await timesShown(page, live.slice(-24));
+          if (times !== 1) throw new Error(`step ${index + 1}: the streaming reply is shown ${times} times`);
+          checkedLiveReply = true;
+        }
+      }
     }
 
     const reply = await page.locator("li").last().textContent();
     if (!reply?.includes("useAgentStatus switches to it")) throw new Error(`final reply missing: ${reply}`);
     results.push("PASS final reply rendered");
+    if (!checkedLiveReply) throw new Error("no streaming step had reply text to check");
+    const finished = await timesShown(page, reply.trim().slice(-24));
+    if (finished !== 1) throw new Error(`the finished reply is shown ${finished} times`);
+    results.push("PASS the reply shows once, while streaming and when finished");
     if (errors.length) throw new Error(`page errors: ${errors.join(" | ")}`);
     console.log(results.join("\n"));
   } finally {
