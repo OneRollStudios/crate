@@ -15,19 +15,24 @@ name: Publish CLI
 # push a matching tag from main, for example: git tag cli-v0.1.1 && git push origin cli-v0.1.1
 # Then approve the staged version on npmjs.com. Or run this workflow by hand
 # from the Actions tab; "dry-run" checks everything without staging.
+#
+# "pack" tests and packs the CLI on Linux and uploads the .tgz as a workflow
+# artifact, without publishing. Use it when a maintainer has to publish by
+# hand (a brand new package has no Trusted Publisher yet): publishing that
+# .tgz from any machine, Windows included, ships these exact LF files.
 on:
   push:
     tags: ["cli-v*"]
   workflow_dispatch:
     inputs:
-      dry-run:
-        description: "Check everything but don't stage"
-        type: boolean
-        default: true
+      mode:
+        description: "dry-run: check everything but don't stage. stage: stage on npm. pack: upload the .tgz as an artifact, publish nothing."
+        type: choice
+        options: [dry-run, stage, pack]
+        default: dry-run
 
 permissions:
   contents: read
-  id-token: write # The OIDC token npm Trusted Publishing needs.
 
 concurrency:
   group: publish-cli
@@ -36,7 +41,11 @@ concurrency:
 jobs:
   publish:
     name: publish
+    if: github.event_name != 'workflow_dispatch' || inputs.mode != 'pack'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # The OIDC token npm Trusted Publishing needs.
     timeout-minutes: 15
     defaults:
       run:
@@ -89,7 +98,7 @@ jobs:
       # logs at that level (a failed exchange otherwise shows up as a bare 401).
       - name: Stage
         env:
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' }}
         run: |
           if [[ "$DRY_RUN" == "true" ]]; then
             npm stage publish --access public --provenance --dry-run --loglevel verbose
@@ -115,3 +124,89 @@ jobs:
         if: failure()
         run: |
           echo "::error::If the Stage step failed with ENEEDAUTH, 401, 403, or 404, check the package's Trusted Publisher on npmjs.com: organization OneRollStudios, repository crate, workflow publish-cli.yml, no environment, with staged publishing allowed. If it says the version exists, that version is already published or staged: bump the version, or reject the old staged version first."
+
+  pack:
+    name: pack
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'pack'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: crate/cli
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Check the version
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          echo "Package version: $version"
+          if npm view "@onerollstudios/crate@$version" version > /dev/null 2>&1; then
+            echo "::error::@onerollstudios/crate@$version is already on npm. Bump the version in crate/cli/package.json first."
+            exit 1
+          fi
+
+      - name: Test
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+      # The tarball is what gets published, byte for byte, so check it has no
+      # CRLF line endings (a Windows pack would add them, shebang included).
+      - name: Pack
+        run: |
+          npm pack --json > pack.json
+          file="$(node -p 'require("./pack.json")[0].filename')"
+          mkdir unpacked
+          tar -xzf "$file" -C unpacked
+          if grep -rlI $'\r' unpacked; then
+            echo "::error::The files above have CRLF line endings."
+            exit 1
+          fi
+          head -n 1 unpacked/package/bin/crate.mjs
+          # The README becomes the package's npm page, so it must not still say
+          # the CLI isn't on npm (see issue #72).
+          if grep -qE "Hidden until|isn't available on npm" unpacked/package/README.md; then
+            echo "::error::crate/cli/README.md still hides the npx command. Restore it (issue #72) before packing."
+            exit 1
+          fi
+          node -e '
+            const [p] = require("./pack.json");
+            console.log(`${p.name}@${p.version}: ${p.filename}, ${p.entryCount} files`);
+            console.log(`shasum: ${p.shasum}`);
+            console.log(`integrity: ${p.integrity}`);
+          '
+          node -e '
+            const [p] = require("./pack.json");
+            const lines = [
+              `## ${p.name}@${p.version} packed`,
+              "",
+              `Download the \`${p.filename}\` artifact below, unzip it, then publish the .tgz as is:`,
+              "",
+              "```",
+              `npm publish ${p.filename} --access public`,
+              "```",
+              "",
+              `After publishing, \`npm view ${p.name}@${p.version} dist.shasum\` should print \`${p.shasum}\`.`,
+              "",
+              "Files:",
+              "",
+              ...p.files.map((f) => `- \`${f.path}\` (${f.size} bytes)`),
+            ];
+            require("node:fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+          '
+          echo "TGZ=$file" >> "$GITHUB_ENV"
+
+      - name: Upload the tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.TGZ }}
+          path: crate/cli/${{ env.TGZ }}
+          if-no-files-found: error
+          retention-days: 7
