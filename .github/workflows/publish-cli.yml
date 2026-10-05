@@ -85,15 +85,17 @@ jobs:
           npm test
 
       # Stages the version: it is on npm but not installable until approved.
+      # Verbose logging shows npm's OIDC token exchange result, which npm only
+      # logs at that level (a failed exchange otherwise shows up as a bare 401).
       - name: Stage
         env:
           DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
         run: |
           if [[ "$DRY_RUN" == "true" ]]; then
-            npm stage publish --access public --provenance --dry-run
+            npm stage publish --access public --provenance --dry-run --loglevel verbose
             exit 0
           fi
-          npm stage publish --access public --provenance 2>&1 | tee stage.log
+          npm stage publish --access public --provenance --loglevel verbose 2>&1 | tee stage.log
           stage_id="$(grep -oE 'staged with id [0-9a-fA-F-]+' stage.log | awk '{print $4}' | tail -n 1)"
           version="$(node -p 'require("./package.json").version')"
           {
