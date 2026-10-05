@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Crate's components are copied in by scripts/sync-crate.mjs and gitignored, and
+   Tailwind skips gitignored files when it looks for classes, so name them here. */
+@source "../components/agent-wait-states";
+
 /* shadcn's default neutral theme. Crate's components read these variables. */
 :root {
   --radius: 0.625rem;
