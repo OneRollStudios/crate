@@ -1,0 +1,14 @@
+{
+  "thinking": "The request is sent and nothing has come back yet. useAgentStatus picks it automatically.",
+  "reasoning-trace": "The model streams its reasoning before the answer. Automatic with useAgentStatus.",
+  "sources": "The answer cites documents or web pages as it streams. Automatic with useAgentStatus.",
+  "tool-call": "The agent is running a tool (search, file read, API call). Automatic with useAgentStatus.",
+  "streaming": "Answer text is arriving. Automatic with useAgentStatus.",
+  "stalled": "The stream is open but nothing new has arrived for a while (5 seconds by default). Automatic with useAgentStatus.",
+  "error": "The request or stream failed and the user can retry. Automatic with useAgentStatus.",
+  "done": "The answer finished. A quiet check that fades. Automatic with useAgentStatus.",
+  "agent-plan": "The agent shows a multi-step plan and progresses through it. The app passes the steps.",
+  "approval": "The agent needs a person to allow or deny an action before it continues. The app passes the action and callbacks.",
+  "queue": "The request waits in a queue or is rate-limited. The app passes the real position or retry time.",
+  "file-processing": "An uploaded file is being read and prepared. The app passes the real stage and progress."
+}
