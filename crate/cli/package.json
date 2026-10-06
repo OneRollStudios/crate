@@ -1,6 +1,6 @@
 {
   "name": "@onerollstudios/crate",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Set up Crate in a React AI app with one command: detects the framework, shadcn theme, and AI stack, installs Crate, and adds CrateProvider.",
   "license": "MIT",
   "author": "One Roll Studios",
