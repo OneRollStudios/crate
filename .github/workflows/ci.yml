@@ -43,12 +43,12 @@ jobs:
         id: build
         run: npm run build
 
-      # Include newly generated files when detecting an outdated registry or
-      # agent skill.
+      # Include newly generated files when detecting an outdated registry,
+      # agent skill, or docs data (the /docs pages read it).
       - name: Registry in sync
         run: |
-          git add --intent-to-add -- public/r/ registry.json agent-skill/dist/
-          git diff --exit-code -- public/r/ registry.json agent-skill/dist/
+          git add --intent-to-add -- public/r/ registry.json agent-skill/dist/ lib/docs.generated.json
+          git diff --exit-code -- public/r/ registry.json agent-skill/dist/ lib/docs.generated.json
 
       # Every link in llms.txt must point at a file in the static export.
       - name: LLM docs
