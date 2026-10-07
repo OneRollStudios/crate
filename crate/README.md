@@ -60,7 +60,9 @@ Then ask your agent, for example, "Add Crate wait states to my chat (crate.onero
 ## AI SDK usage
 
 ```tsx
-const chat = useChat();
+// Give the chat a fixed id. Without one, useChat makes a random id while
+// rendering, which Next.js with Cache Components refuses to prerender.
+const chat = useChat({ id: "chat" });
 const status = useAgentStatus(chat);
 
 <AgentState
@@ -227,6 +229,8 @@ Agent events: `text` and `reasoning` (deltas), `source`, `tool-start` and `tool-
 Every piece of text in the components can be replaced. Wrap your app (or any part of it) in `CrateProvider` to set labels and a locale for every component inside it. Any label you leave out falls back to English.
 
 ```tsx
+"use client";
+
 import { CrateProvider, type CrateLabels } from "@/components/agent-wait-states";
 
 const fr: Partial<CrateLabels> = {
@@ -252,6 +256,7 @@ const fr: Partial<CrateLabels> = {
 ```
 
 - Labels that contain a number are functions. They receive the value and a formatter `f` built from the locale with `Intl`: `f.number()` for counts, `f.seconds()` for times and countdowns, and `f.plural(value, { one, other, ... })` for plural forms.
+- Because those labels are functions, set them in a client component (`"use client"`, as above). A server component, such as a Next.js layout, can't pass functions to `CrateProvider`; wrap your app in a client component that renders it instead.
 - Each component also takes a `labels` prop that overrides the provider for that component only, for example `<Done labels={{ done: "Fini !" }} />`. Existing text props such as `label`, `message`, and `title` still win over both.
 - `useAgentStatus` reads the provider too, so `status.label` follows your locale.
 - Nested providers inherit the outer locale and labels and override only what they set.

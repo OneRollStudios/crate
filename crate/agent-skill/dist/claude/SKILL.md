@@ -83,7 +83,9 @@ For a single component, replace `all` with its item name from the table above. I
 ### Vercel AI SDK
 
 ```tsx
-const chat = useChat();
+// Give the chat a fixed id. Without one, useChat makes a random id while
+// rendering, which Next.js with Cache Components refuses to prerender.
+const chat = useChat({ id: "chat" });
 const status = useAgentStatus(chat);
 
 <AgentState
@@ -216,6 +218,8 @@ To change text or language for every component, wrap the app (or the chat) in
 `CrateProvider`:
 
 ```tsx
+"use client";
+
 import { CrateProvider, type CrateLabels } from "@/components/agent-wait-states";
 
 const fr: Partial<CrateLabels> = {

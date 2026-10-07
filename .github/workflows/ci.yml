@@ -123,6 +123,14 @@ jobs:
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: bash scripts/install-test.sh init
 
+      # Build the README's code examples in a fresh create-next-app@latest app
+      # (lint, next build with its prerendering, then load the page), so a new
+      # Next.js or AI SDK release can't silently break them. Also runs daily:
+      # .github/workflows/docs-examples.yml.
+      - name: Docs examples
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: bash scripts/install-test.sh docs
+
       # Build examples/real-chat in mock mode (no API key) and check that a
       # real useChat request walks AgentState through every state in order.
       - name: Real chat example

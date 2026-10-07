@@ -2967,7 +2967,7 @@
           {
             "type": "code",
             "lang": "tsx",
-            "code": "import { CrateProvider, type CrateLabels } from \"@/components/agent-wait-states\";\n\nconst fr: Partial<CrateLabels> = {\n  thinking: \"Réflexion…\",\n  stillThinking: \"Toujours en réflexion…\",\n  cancel: \"Annuler\",\n  done: \"Terminé\",\n  retry: \"Réessayer\",\n  error: \"Une erreur est survenue.\",\n  showThinking: \"Afficher le raisonnement\",\n  thoughtFor: (seconds, f) => `Réflexion pendant ${f.seconds(seconds)}`,\n  moreSources: (count, f) => `+${f.number(count)} ${f.plural(count, { one: \"autre\", other: \"autres\" })}`,\n  planProgress: (current, total, f) => `${f.number(current)} sur ${f.number(total)}`,\n  expiresIn: (seconds, f) => `Expire dans ${f.seconds(seconds)}`,\n  deny: \"Refuser\",\n  allow: \"Autoriser\",\n  queuePosition: (position, f) => `Vous êtes n° ${f.number(position)} dans la file`,\n};\n\n<CrateProvider locale=\"fr\" labels={fr}>\n  <AgentState status={status} />\n</CrateProvider>"
+            "code": "\"use client\";\n\nimport { CrateProvider, type CrateLabels } from \"@/components/agent-wait-states\";\n\nconst fr: Partial<CrateLabels> = {\n  thinking: \"Réflexion…\",\n  stillThinking: \"Toujours en réflexion…\",\n  cancel: \"Annuler\",\n  done: \"Terminé\",\n  retry: \"Réessayer\",\n  error: \"Une erreur est survenue.\",\n  showThinking: \"Afficher le raisonnement\",\n  thoughtFor: (seconds, f) => `Réflexion pendant ${f.seconds(seconds)}`,\n  moreSources: (count, f) => `+${f.number(count)} ${f.plural(count, { one: \"autre\", other: \"autres\" })}`,\n  planProgress: (current, total, f) => `${f.number(current)} sur ${f.number(total)}`,\n  expiresIn: (seconds, f) => `Expire dans ${f.seconds(seconds)}`,\n  deny: \"Refuser\",\n  allow: \"Autoriser\",\n  queuePosition: (position, f) => `Vous êtes n° ${f.number(position)} dans la file`,\n};\n\n<CrateProvider locale=\"fr\" labels={fr}>\n  <AgentState status={status} />\n</CrateProvider>"
           }
         ]
       }
@@ -3460,7 +3460,7 @@
           {
             "type": "code",
             "lang": "tsx",
-            "code": "const chat = useChat();\nconst status = useAgentStatus(chat);\n\n<AgentState\n  status={status}\n  text={streamedText}\n  reasoning={status.reasoning}\n  sources={status.sources}\n/>"
+            "code": "// Give the chat a fixed id. Without one, useChat makes a random id while\n// rendering, which Next.js with Cache Components refuses to prerender.\nconst chat = useChat({ id: \"chat\" });\nconst status = useAgentStatus(chat);\n\n<AgentState\n  status={status}\n  text={streamedText}\n  reasoning={status.reasoning}\n  sources={status.sources}\n/>"
           }
         ]
       }
@@ -3829,7 +3829,7 @@
           {
             "type": "code",
             "lang": "tsx",
-            "code": "const chat = useChat();\nconst status = useAgentStatus(chat);\n\n<AgentState\n  status={status}\n  text={streamedText}\n  reasoning={status.reasoning}\n  sources={status.sources}\n/>"
+            "code": "// Give the chat a fixed id. Without one, useChat makes a random id while\n// rendering, which Next.js with Cache Components refuses to prerender.\nconst chat = useChat({ id: \"chat\" });\nconst status = useAgentStatus(chat);\n\n<AgentState\n  status={status}\n  text={streamedText}\n  reasoning={status.reasoning}\n  sources={status.sources}\n/>"
           }
         ]
       }
