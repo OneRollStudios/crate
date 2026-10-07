@@ -34,7 +34,7 @@ function codeBlocks(text) {
 }
 const componentExamples = codeBlocks(readmeSection("Components")).flatMap((block) => block.code.split("\n"));
 const usageBlock = codeBlocks(readmeSection("AI SDK usage")).find((block) => block.lang === "tsx");
-const labelsBlock = codeBlocks(readmeSection("Labels and languages")).find((block) => block.lang === "tsx");
+const providerExample = codeBlocks(readmeSection("Labels and languages")).find((block) => block.lang === "tsx");
 const adapterBlocks = codeBlocks(readmeSection("Stream Adapters")).filter((block) => block.lang === "ts" || block.lang === "tsx");
 
 // ---------- TypeScript ----------
@@ -112,17 +112,25 @@ function labelsUsed(text) {
   return [...new Set([...direct, ...named])].filter((key) => key in defaultLabelText);
 }
 
-// ---------- Markdown helpers ----------
-const cell = (text) => String(text).replace(/\|/g, "\\|").replace(/\n/g, " ");
-// Inline code that may itself contain backticks (template-string labels).
-const code = (text) => (String(text).includes("`") ? `\`\` ${cell(text)} \`\`` : `\`${cell(text)}\``);
-function propsTable(props, defaults) {
-  if (!props.length) return "None.";
-  const rows = props.map((p) => `| \`${p.name}\` | ${code(p.type)} | ${p.optional ? "no" : "yes"} | ${defaults[p.name] ? code(defaults[p.name]) : ""} | ${cell(p.doc)} |`);
-  return ["| Prop | Type | Required | Default | Notes |", "| --- | --- | --- | --- | --- |", ...rows].join("\n");
+// ---------- Doc blocks ----------
+// Each doc is built once as sections of blocks, then written two ways: Markdown for
+// agents (public/llms) and JSON for the docs pages (lib/docs.generated.json).
+// A table cell is plain text or { code } for inline code.
+const text = (value) => ({ type: "text", text: value });
+const codeBlock = (lang, value) => ({ type: "code", lang, code: value });
+const table = (head, rows) => ({ type: "table", head, rows });
+const list = (items) => ({ type: "list", items });
+const subheading = (value) => ({ type: "h3", text: value });
+const inline = (value) => ({ code: String(value) });
+
+function propsBlock(props, defaults) {
+  if (!props.length) return text("None.");
+  return table(["Prop", "Type", "Required", "Default", "Notes"], props.map((p) => [
+    inline(p.name), inline(p.type), p.optional ? "no" : "yes", defaults[p.name] ? inline(defaults[p.name]) : "", p.doc,
+  ]));
 }
-function labelsTable(keys) {
-  return ["| Label | English default |", "| --- | --- |", ...keys.map((k) => `| \`${k}\` | ${code(defaultLabelText[k])} |`)].join("\n");
+function labelsBlock(keys) {
+  return table(["Label", "English default"], keys.map((k) => [inline(k), inline(defaultLabelText[k])]));
 }
 function docOf(node) {
   const symbol = node.name && checker.getSymbolAtLocation(node.name);
@@ -135,32 +143,49 @@ function signatureOf(fn, sf) {
 const installCommand = (name) => `npx shadcn@latest add ${siteUrl}/r/${name}.json`;
 const docUrl = (name) => `${siteUrl}/llms/${name}.md`;
 
+// ---------- Markdown ----------
+const cell = (value) => String(value).replace(/\|/g, "\\|").replace(/\n/g, " ");
+// Inline code that may itself contain backticks (template-string labels).
+const mdCode = (value) => (String(value).includes("`") ? `\`\` ${cell(value)} \`\`` : `\`${cell(value)}\``);
+const mdCell = (value) => (typeof value === "object" ? mdCode(value.code) : cell(value));
+function mdBlock(block) {
+  if (block.type === "text") return block.text;
+  if (block.type === "h3") return `### ${block.text}`;
+  if (block.type === "list") return block.items.map((item) => `- ${item}`).join("\n");
+  if (block.type === "code") return `${fence}${block.lang}\n${block.code}\n${fence}`;
+  return [`| ${block.head.join(" | ")} |`, `| ${block.head.map(() => "---").join(" | ")} |`, ...block.rows.map((row) => `| ${row.map(mdCell).join(" | ")} |`)].join("\n");
+}
+function markdownOf(doc) {
+  const lines = [`# ${doc.title}`, "", `> ${doc.description}`, ""];
+  for (const section of doc.sections) {
+    lines.push(`## ${section.heading}`, "");
+    for (const block of section.blocks) lines.push(mdBlock(block), "");
+  }
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n");
+}
+
 // ---------- Per item ----------
 const docs = [];
 const problems = [];
 for (const item of registry.items) {
   if (item.type === "registry:item") continue; // "all" bundle, listed in llms.txt only
+  const install = { heading: "Install", blocks: [codeBlock("bash", installCommand(item.name))] };
   if (item.type === "registry:file") {
     // The agent skill: files for coding agents, not code.
-    const lines = [`# ${item.title}`, "", `> ${item.description}`, ""];
-    lines.push("## Install", "", `${fence}bash`, installCommand(item.name), fence, "");
-    lines.push("## Files", "", "| File | For |", "| --- | --- |");
     const readers = { ".claude/": "Claude Code (a skill)", ".cursor/": "Cursor (a rule)", ".agents/": "Codex and other agents: add a line to `AGENTS.md` pointing to this file" };
-    for (const file of item.files) {
+    const rows = item.files.map((file) => {
       const reader = Object.entries(readers).find(([prefix]) => file.target.startsWith(prefix));
       if (!reader) problems.push(`${item.name}: no known agent reads ${file.target}`);
-      lines.push(`| \`${file.target}\` | ${reader?.[1] ?? ""} |`);
-    }
-    lines.push("", `The skill itself: ${siteUrl}/r/${item.name}.json`, "");
-    docs.push({ item, exportName: item.title, markdown: lines.join("\n") });
+      return [inline(file.target), reader?.[1] ?? ""];
+    });
+    const sections = [install, { heading: "Files", blocks: [table(["File", "For"], rows), text(`The skill itself: ${siteUrl}/r/${item.name}.json`)] }];
+    docs.push({ item, exportName: item.title, sections });
     continue;
   }
   if (item.type === "registry:lib") {
     // Stream adapters: functions, not components. Document every export of the
     // item's own files, and the README examples that use them.
     const ownFiles = item.files.filter((file, index) => index === 0 || file.type === "registry:hook");
-    const lines = [`# ${item.title}`, "", `> ${item.description}`, ""];
-    lines.push("## Install", "", `${fence}bash`, installCommand(item.name), fence, "");
     const names = [];
     const imports = [];
     const functions = [];
@@ -171,16 +196,19 @@ for (const item of registry.items) {
       if (!fns.length) problems.push(`${item.name}: no exported function in ${file.path}`);
       names.push(...fns.map((fn) => fn.name.text));
       if (fns.length) imports.push(`import { ${fns.map((fn) => fn.name.text).join(", ")} } from "@/${file.path.replace(/\.tsx?$/, "")}";`);
-      for (const fn of fns) functions.push(`### ${fn.name.text}`, "", `${fence}ts`, signatureOf(fn, sf), fence, "", docOf(fn), "");
+      for (const fn of fns) {
+        functions.push(subheading(fn.name.text), codeBlock("ts", signatureOf(fn, sf)));
+        const doc = docOf(fn);
+        if (doc) functions.push(text(doc));
+      }
       types.push(...exportedTypes(sf, new Set()));
     }
-    lines.push("## Import", "", `${fence}ts`, ...imports, fence, "");
-    lines.push("## Functions", "", ...functions);
-    if (types.length) lines.push("## Types", "", `${fence}ts`, types.join("\n\n"), fence, "");
+    const sections = [install, { heading: "Import", blocks: [codeBlock("ts", imports.join("\n"))] }, { heading: "Functions", blocks: functions }];
+    if (types.length) sections.push({ heading: "Types", blocks: [codeBlock("ts", types.join("\n\n"))] });
     const examples = adapterBlocks.filter((block) => names.some((name) => new RegExp(`\\b${name}\\(`).test(block.code)));
     if (!examples.length) { problems.push(`${item.name}: no example in the README's Stream Adapters section`); continue; }
-    lines.push("## Example", "", ...examples.flatMap((block) => [`${fence}${block.lang}`, block.code, fence, ""]));
-    docs.push({ item, exportName: item.title, markdown: lines.join("\n").replace(/\n{3,}/g, "\n\n") });
+    sections.push({ heading: "Example", blocks: examples.map((block) => codeBlock(block.lang, block.code)) });
+    docs.push({ item, exportName: item.title, sections });
     continue;
   }
   const mainFile = item.files[0].path;
@@ -191,25 +219,24 @@ for (const item of registry.items) {
   if (!fn) { problems.push(`${item.name}: no exported function found in ${mainFile}`); continue; }
   const exportName = fn.name.text;
   const importPath = `@/${mainFile.replace(/\.(tsx?|ts)$/, "")}`;
-  const lines = [`# ${exportName}`, "", `> ${item.description}`, ""];
-  lines.push("## Install", "", `${fence}bash`, installCommand(item.name), fence, "");
-  lines.push("## Import", "", `${fence}tsx`, `import { ${exportName} } from "${importPath}";`, fence, "");
+  const sections = [install, { heading: "Import", blocks: [codeBlock("tsx", `import { ${exportName} } from "${importPath}";`)] }];
 
   const skipTypes = new Set();
   let example = null;
+  let playground = null;
 
   if (item.type === "registry:hook") {
     const optionsAlias = typeAlias(sf, "UseAgentStatusOptions");
     if (!optionsAlias) problems.push(`${item.name}: no UseAgentStatusOptions type`);
     skipTypes.add("UseAgentStatusOptions");
     const signature = `${exportName}(${fn.parameters.map((p) => p.getText(sf).replace(/\s*=\s*\{\}$/, "")).join(", ")}): ${fn.type?.getText(sf) ?? "unknown"}`;
-    lines.push("## Signature", "", `${fence}ts`, signature, fence, "");
-    lines.push("## Options", "", optionsAlias ? propsTable(propsOf(optionsAlias), {}) : "None.", "");
+    sections.push({ heading: "Signature", blocks: [codeBlock("ts", signature)] });
+    sections.push({ heading: "Options", blocks: [optionsAlias ? propsBlock(propsOf(optionsAlias), {}) : text("None.")] });
     const snapshot = typeAlias(sourceOf("components/agent-wait-states/types.ts"), "AgentStatusSnapshot");
     const status = typeAlias(sourceOf("components/agent-wait-states/types.ts"), "AgentStatus");
-    lines.push("## Returns", "", `${fence}ts`, status.getText(), "", snapshot.getText(), fence, "");
+    sections.push({ heading: "Returns", blocks: [codeBlock("ts", `${status.getText()}\n\n${snapshot.getText()}`)] });
     const used = labelsUsed(sourceText);
-    if (used.length) lines.push("## Labels", "", "Read from the nearest `CrateProvider`.", "", labelsTable(used), "");
+    if (used.length) sections.push({ heading: "Labels", blocks: [text("Read from the nearest `CrateProvider`."), labelsBlock(used)] });
     example = usageBlock?.code;
   } else {
     const propsName = `${exportName}Props`;
@@ -217,34 +244,47 @@ for (const item of registry.items) {
     if (!alias) { problems.push(`${item.name}: no exported ${propsName} type`); continue; }
     skipTypes.add(propsName);
     const props = propsOf(alias);
-    lines.push("## Props", "", propsTable(props, defaultsOf(fn)), "");
+    const defaults = defaultsOf(fn);
+    sections.push({ heading: "Props", blocks: [propsBlock(props, defaults)] });
 
     const states = props.filter((p) => p.literals);
     if (exportName === "AgentState") {
-      const map = [...sourceText.matchAll(/state === "(\w+)" \? <(\w+)/g)].map((m) => `| \`${m[1]}\` | \`${m[2]}\` |`);
-      lines.push("## States", "", "`status` is an `AgentStatus` string or the snapshot from `useAgentStatus`. Each state renders one component:", "", "| State | Renders |", "| --- | --- |", ...map, "");
+      const map = [...sourceText.matchAll(/state === "(\w+)" \? <(\w+)/g)];
+      sections.push({ heading: "States", blocks: [
+        text("`status` is an `AgentStatus` string or the snapshot from `useAgentStatus`. Each state renders one component:"),
+        table(["State", "Renders"], map.map((m) => [inline(m[1]), inline(m[2])])),
+      ] });
+      // The playground offers every state AgentState renders.
+      const status = props.find((p) => p.name === "status");
+      if (status) status.literals = map.map((m) => m[1]);
     } else if (states.length) {
-      lines.push("## States", "", ...states.map((p) => `- \`${p.name}\`: ${p.literals.map((v) => `\`${v}\``).join(", ")}`), "");
+      sections.push({ heading: "States", blocks: [list(states.map((p) => `\`${p.name}\`: ${p.literals.map((v) => `\`${v}\``).join(", ")}`))] });
     }
 
     if (exportName === "CrateProvider") {
-      lines.push("## Labels", "", "Every label key, with its English default. Labels with a number are functions that receive the value and a locale formatter (`f.number`, `f.seconds`, `f.plural`).", "", labelsTable(Object.keys(defaultLabelText)), "");
-      example = labelsBlock?.code;
-    } else if (exportName === "AgentState") {
-      lines.push("## Labels", "", "Pass `labels` to override labels for whichever state is showing. See the CrateProvider doc for every key.", "");
-      example = usageBlock?.code;
+      sections.push({ heading: "Labels", blocks: [
+        text("Every label key, with its English default. Labels with a number are functions that receive the value and a locale formatter (`f.number`, `f.seconds`, `f.plural`)."),
+        labelsBlock(Object.keys(defaultLabelText)),
+      ] });
+      example = providerExample?.code;
     } else {
-      const used = labelsUsed(sourceText);
-      if (used.length) lines.push("## Labels", "", "Override with the `labels` prop or a `CrateProvider`.", "", labelsTable(used), "");
-      example = componentExamples.filter((line) => line.trim().startsWith(`<${exportName} `) || line.trim().startsWith(`<${exportName}>`)).join("\n");
+      if (exportName === "AgentState") {
+        sections.push({ heading: "Labels", blocks: [text("Pass `labels` to override labels for whichever state is showing. See the CrateProvider doc for every key.")] });
+        example = usageBlock?.code;
+      } else {
+        const used = labelsUsed(sourceText);
+        if (used.length) sections.push({ heading: "Labels", blocks: [text("Override with the `labels` prop or a `CrateProvider`."), labelsBlock(used)] });
+        example = componentExamples.filter((line) => line.trim().startsWith(`<${exportName} `) || line.trim().startsWith(`<${exportName}>`)).join("\n");
+      }
+      playground = props.map((p) => ({ name: p.name, type: p.type, optional: p.optional, literals: p.literals, default: defaults[p.name] ?? null }));
     }
   }
 
   const extraTypes = exportedTypes(sf, skipTypes);
-  if (extraTypes.length) lines.push("## Types", "", `${fence}ts`, extraTypes.join("\n\n"), fence, "");
+  if (extraTypes.length) sections.push({ heading: "Types", blocks: [codeBlock("ts", extraTypes.join("\n\n"))] });
   if (!example) { problems.push(`${item.name}: no example for ${exportName} in README.md`); continue; }
-  lines.push("## Example", "", `${fence}tsx`, example, fence, "");
-  docs.push({ item, exportName, markdown: lines.join("\n") });
+  sections.push({ heading: "Example", blocks: [codeBlock("tsx", example)] });
+  docs.push({ item, exportName, sections, playground });
 }
 
 if (problems.length) {
@@ -290,6 +330,18 @@ const index = [
 
 rmSync(`${root}public/llms`, { recursive: true, force: true });
 mkdirSync(`${root}public/llms`, { recursive: true });
-for (const d of docs) writeFileSync(`${root}public/llms/${d.item.name}.md`, d.markdown);
+for (const d of docs) writeFileSync(`${root}public/llms/${d.item.name}.md`, markdownOf({ title: d.exportName, description: d.item.description, sections: d.sections }));
 writeFileSync(`${root}public/llms.txt`, index);
-console.log(`llms: wrote public/llms.txt and ${docs.length} docs in public/llms/`);
+// The same docs for the site's /docs pages, grouped as in llms.txt.
+const groupOf = (d) => (["use-agent-status", "agent-state", "crate-provider"].includes(d.item.name) ? "start"
+  : d.item.type === "registry:lib" ? "adapters" : d.item.type === "registry:file" ? "agents" : "components");
+const siteDocs = docs.map((d) => ({
+  name: d.item.name,
+  title: d.exportName,
+  description: d.item.description,
+  group: groupOf(d),
+  sections: d.sections,
+  playground: d.playground ?? null,
+}));
+writeFileSync(`${root}lib/docs.generated.json`, JSON.stringify(siteDocs, null, 2) + "\n");
+console.log(`llms: wrote public/llms.txt, ${docs.length} docs in public/llms/, and lib/docs.generated.json`);

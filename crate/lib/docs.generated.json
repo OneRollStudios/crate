@@ -1,0 +1,4226 @@
+[
+  {
+    "name": "thinking",
+    "title": "Thinking",
+    "description": "Pulsing dots with time-based thinking and cancel states.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/thinking.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Thinking } from \"@/components/agent-wait-states/thinking\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "elapsedMs"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                {
+                  "code": "0"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "onCancel"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "label"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "stillThinking"
+                },
+                {
+                  "code": "\"Still thinking…\""
+                }
+              ],
+              [
+                {
+                  "code": "thinking"
+                },
+                {
+                  "code": "\"Thinking…\""
+                }
+              ],
+              [
+                {
+                  "code": "cancel"
+                },
+                {
+                  "code": "\"Cancel\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Thinking elapsedMs={elapsedMs} onCancel={cancel} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "elapsedMs",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": "0"
+      },
+      {
+        "name": "onCancel",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "streaming",
+    "title": "Streaming",
+    "description": "Streaming text with a soft cursor.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/streaming.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Streaming } from \"@/components/agent-wait-states/streaming\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "children"
+                },
+                {
+                  "code": "ReactNode"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "text"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "responseStreaming"
+                },
+                {
+                  "code": "\"Response streaming\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Streaming text={content} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "children",
+        "type": "ReactNode",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "tool-call",
+    "title": "ToolCall",
+    "description": "Animated single or multi-step tool activity.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/tool-call.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { ToolCall } from \"@/components/agent-wait-states/tool-call\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "steps"
+                },
+                {
+                  "code": "ToolStep[]"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "toolName"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "label"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "done"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                "The call has finished: every step shows as complete, and the default label says \"Used\"."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "usedTool"
+                },
+                {
+                  "code": "(toolName) => `Used ${toolName}`"
+                }
+              ],
+              [
+                {
+                  "code": "usedToolUnnamed"
+                },
+                {
+                  "code": "\"Used a tool\""
+                }
+              ],
+              [
+                {
+                  "code": "runningTool"
+                },
+                {
+                  "code": "(toolName) => `Running ${toolName}…`"
+                }
+              ],
+              [
+                {
+                  "code": "runningToolUnnamed"
+                },
+                {
+                  "code": "\"Running a tool…\""
+                }
+              ],
+              [
+                {
+                  "code": "toolActivity"
+                },
+                {
+                  "code": "\"Agent tool activity\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type ToolStep = { id?: string; label: string; toolName?: string; state?: \"pending\" | \"active\" | \"complete\" };"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<ToolCall steps={toolSteps} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "steps",
+        "type": "ToolStep[]",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "toolName",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "done",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      }
+    ]
+  },
+  {
+    "name": "stalled",
+    "title": "Stalled",
+    "description": "A calm state for streams with no new content.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/stalled.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Stalled } from \"@/components/agent-wait-states/stalled\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "message"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "text"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                "The reply so far. It stays visible above the notice while the stream is quiet."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "stalled"
+                },
+                {
+                  "code": "\"Still working…\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Stalled message=\"Still working…\" accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "error",
+    "title": "ErrorState",
+    "description": "An error message with an accessible retry action.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/error.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { ErrorState } from \"@/components/agent-wait-states/error-state\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "message"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onRetry"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "error"
+                },
+                {
+                  "code": "\"Something went wrong.\""
+                }
+              ],
+              [
+                {
+                  "code": "retry"
+                },
+                {
+                  "code": "\"Retry\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<ErrorState message={error.message} onRetry={retry} />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "message",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onRetry",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "done",
+    "title": "Done",
+    "description": "A quiet completion check that fades away.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/done.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Done } from \"@/components/agent-wait-states/done\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "label"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "done"
+                },
+                {
+                  "code": "\"Done\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Done accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "reasoning-trace",
+    "title": "ReasoningTrace",
+    "description": "A collapsible streaming reasoning trace.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/reasoning-trace.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { ReasoningTrace } from \"@/components/agent-wait-states/reasoning-trace\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "text"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                {
+                  "code": "\"\""
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "done"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "durationSeconds"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "defaultOpen"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "showThinking"
+                },
+                {
+                  "code": "\"Show thinking\""
+                }
+              ],
+              [
+                {
+                  "code": "thoughtDone"
+                },
+                {
+                  "code": "\"Done thinking\""
+                }
+              ],
+              [
+                {
+                  "code": "thoughtFor"
+                },
+                {
+                  "code": "(seconds, f) => `Thought for ${f.seconds(seconds)}`"
+                }
+              ],
+              [
+                {
+                  "code": "reasoningPlaceholder"
+                },
+                {
+                  "code": "\"Working through the details…\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<ReasoningTrace text={reasoning} done={finished} durationSeconds={12} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": "\"\""
+      },
+      {
+        "name": "done",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "durationSeconds",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "defaultOpen",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "sources",
+    "title": "Sources",
+    "description": "Progressively revealed citation chips.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/sources.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Sources } from \"@/components/agent-wait-states/sources\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "sources"
+                },
+                {
+                  "code": "AgentSource[]"
+                },
+                "yes",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "maxVisible"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                {
+                  "code": "3"
+                },
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "sources"
+                },
+                {
+                  "code": "\"Sources\""
+                }
+              ],
+              [
+                {
+                  "code": "sourceFallback"
+                },
+                {
+                  "code": "\"source\""
+                }
+              ],
+              [
+                {
+                  "code": "moreSources"
+                },
+                {
+                  "code": "(count, f) => `+${f.number(count)} more`"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type SourceItem = AgentSource;"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Sources sources={sources} maxVisible={3} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "sources",
+        "type": "AgentSource[]",
+        "optional": false,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "maxVisible",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": "3"
+      }
+    ]
+  },
+  {
+    "name": "agent-plan",
+    "title": "AgentPlan",
+    "description": "A self-updating plan with progress and failures.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/agent-plan.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { AgentPlan } from \"@/components/agent-wait-states/agent-plan\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "steps"
+                },
+                {
+                  "code": "PlanStep[]"
+                },
+                "yes",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "plan"
+                },
+                {
+                  "code": "\"Plan\""
+                }
+              ],
+              [
+                {
+                  "code": "planProgress"
+                },
+                {
+                  "code": "(current, total, f) => `${f.number(current)} of ${f.number(total)}`"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type PlanStep = { id?: string; label: string; state: \"pending\" | \"active\" | \"complete\" | \"failed\" };"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<AgentPlan steps={planSteps} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "steps",
+        "type": "PlanStep[]",
+        "optional": false,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "approval",
+    "title": "Approval",
+    "description": "A human approval prompt with optional expiry.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/approval.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Approval } from \"@/components/agent-wait-states/approval\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "title"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "preview"
+                },
+                {
+                  "code": "ReactNode"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onAllow"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onDeny"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "expiresIn"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "approvalRequired"
+                },
+                {
+                  "code": "\"Approval required\""
+                }
+              ],
+              [
+                {
+                  "code": "approvalTitle"
+                },
+                {
+                  "code": "\"The agent wants to send this email\""
+                }
+              ],
+              [
+                {
+                  "code": "expiresIn"
+                },
+                {
+                  "code": "(seconds, f) => `Expires in ${f.seconds(seconds)}`"
+                }
+              ],
+              [
+                {
+                  "code": "approvalPreview"
+                },
+                {
+                  "code": "\"Review this action before it runs.\""
+                }
+              ],
+              [
+                {
+                  "code": "deny"
+                },
+                {
+                  "code": "\"Deny\""
+                }
+              ],
+              [
+                {
+                  "code": "allow"
+                },
+                {
+                  "code": "\"Allow\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Approval preview={action} onAllow={allow} onDeny={deny} expiresIn={30} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "preview",
+        "type": "ReactNode",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onAllow",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onDeny",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "expiresIn",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "queue",
+    "title": "Queue",
+    "description": "Queue position and rate-limit countdown states.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/queue.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { Queue } from \"@/components/agent-wait-states/queue\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "variant"
+                },
+                {
+                  "code": "\"line\" | \"rate-limit\""
+                },
+                "no",
+                {
+                  "code": "\"line\""
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "position"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "retryIn"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "States",
+        "blocks": [
+          {
+            "type": "list",
+            "items": [
+              "`variant`: `line`, `rate-limit`"
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "queueWaiting"
+                },
+                {
+                  "code": "\"Waiting in line…\""
+                }
+              ],
+              [
+                {
+                  "code": "queuePosition"
+                },
+                {
+                  "code": "(position, f) => `You’re #${f.number(position)} in line`"
+                }
+              ],
+              [
+                {
+                  "code": "rateLimitedUnknown"
+                },
+                {
+                  "code": "\"Slow down. Try again shortly.\""
+                }
+              ],
+              [
+                {
+                  "code": "rateLimited"
+                },
+                {
+                  "code": "(seconds, f) => `Slow down. Try again in ${f.seconds(seconds)}`"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<Queue position={3} accent />\n<Queue variant=\"rate-limit\" retryIn={20} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "variant",
+        "type": "\"line\" | \"rate-limit\"",
+        "optional": true,
+        "literals": [
+          "line",
+          "rate-limit"
+        ],
+        "default": "\"line\""
+      },
+      {
+        "name": "position",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "retryIn",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      }
+    ]
+  },
+  {
+    "name": "file-processing",
+    "title": "FileProcessing",
+    "description": "File upload and processing stage progress.",
+    "group": "components",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/file-processing.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { FileProcessing } from \"@/components/agent-wait-states/file-processing\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "filename"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "size"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "stage"
+                },
+                {
+                  "code": "FileStage"
+                },
+                "no",
+                {
+                  "code": "\"uploading\""
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "progress"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                {
+                  "code": "0"
+                },
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "States",
+        "blocks": [
+          {
+            "type": "list",
+            "items": [
+              "`stage`: `uploading`, `reading`, `chunking`, `ready`"
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Override with the `labels` prop or a `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "fileProgress"
+                },
+                {
+                  "code": "(percent, f) => `${f.number(percent)}%`"
+                }
+              ],
+              [
+                {
+                  "code": "fileUploading"
+                },
+                {
+                  "code": "\"Upload\""
+                }
+              ],
+              [
+                {
+                  "code": "fileReading"
+                },
+                {
+                  "code": "\"Reading\""
+                }
+              ],
+              [
+                {
+                  "code": "fileChunking"
+                },
+                {
+                  "code": "\"Chunking\""
+                }
+              ],
+              [
+                {
+                  "code": "fileReady"
+                },
+                {
+                  "code": "\"Ready\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type FileStage = \"uploading\" | \"reading\" | \"chunking\" | \"ready\";"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "<FileProcessing filename=\"report.pdf\" size=\"2.4 MB\" stage=\"chunking\" progress={72} accent />"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "filename",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "size",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "stage",
+        "type": "FileStage",
+        "optional": true,
+        "literals": [
+          "uploading",
+          "reading",
+          "chunking",
+          "ready"
+        ],
+        "default": "\"uploading\""
+      },
+      {
+        "name": "progress",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": "0"
+      }
+    ]
+  },
+  {
+    "name": "crate-provider",
+    "title": "CrateProvider",
+    "description": "Sets labels and locale for every crate wait state, so all text can be replaced or translated.",
+    "group": "start",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/crate-provider.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { CrateProvider } from \"@/components/agent-wait-states/crate-provider\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Any labels to replace. Missing ones fall back to English."
+              ],
+              [
+                {
+                  "code": "locale"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                "BCP 47 locale for numbers, times, and plurals, e.g. \"fr\" or \"ar-EG\". Inherited when omitted."
+              ],
+              [
+                {
+                  "code": "children"
+                },
+                {
+                  "code": "ReactNode"
+                },
+                "yes",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Every label key, with its English default. Labels with a number are functions that receive the value and a locale formatter (`f.number`, `f.seconds`, `f.plural`)."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "thinking"
+                },
+                {
+                  "code": "\"Thinking…\""
+                }
+              ],
+              [
+                {
+                  "code": "stillThinking"
+                },
+                {
+                  "code": "\"Still thinking…\""
+                }
+              ],
+              [
+                {
+                  "code": "cancel"
+                },
+                {
+                  "code": "\"Cancel\""
+                }
+              ],
+              [
+                {
+                  "code": "responseStreaming"
+                },
+                {
+                  "code": "\"Response streaming\""
+                }
+              ],
+              [
+                {
+                  "code": "toolActivity"
+                },
+                {
+                  "code": "\"Agent tool activity\""
+                }
+              ],
+              [
+                {
+                  "code": "runningTool"
+                },
+                {
+                  "code": "(toolName) => `Running ${toolName}…`"
+                }
+              ],
+              [
+                {
+                  "code": "runningToolUnnamed"
+                },
+                {
+                  "code": "\"Running a tool…\""
+                }
+              ],
+              [
+                {
+                  "code": "usedTool"
+                },
+                {
+                  "code": "(toolName) => `Used ${toolName}`"
+                }
+              ],
+              [
+                {
+                  "code": "usedToolUnnamed"
+                },
+                {
+                  "code": "\"Used a tool\""
+                }
+              ],
+              [
+                {
+                  "code": "stalled"
+                },
+                {
+                  "code": "\"Still working…\""
+                }
+              ],
+              [
+                {
+                  "code": "error"
+                },
+                {
+                  "code": "\"Something went wrong.\""
+                }
+              ],
+              [
+                {
+                  "code": "retry"
+                },
+                {
+                  "code": "\"Retry\""
+                }
+              ],
+              [
+                {
+                  "code": "done"
+                },
+                {
+                  "code": "\"Done\""
+                }
+              ],
+              [
+                {
+                  "code": "showThinking"
+                },
+                {
+                  "code": "\"Show thinking\""
+                }
+              ],
+              [
+                {
+                  "code": "thoughtFor"
+                },
+                {
+                  "code": "(seconds, f) => `Thought for ${f.seconds(seconds)}`"
+                }
+              ],
+              [
+                {
+                  "code": "thoughtDone"
+                },
+                {
+                  "code": "\"Done thinking\""
+                }
+              ],
+              [
+                {
+                  "code": "reasoningPlaceholder"
+                },
+                {
+                  "code": "\"Working through the details…\""
+                }
+              ],
+              [
+                {
+                  "code": "sources"
+                },
+                {
+                  "code": "\"Sources\""
+                }
+              ],
+              [
+                {
+                  "code": "sourceFallback"
+                },
+                {
+                  "code": "\"source\""
+                }
+              ],
+              [
+                {
+                  "code": "sourceTitle"
+                },
+                {
+                  "code": "\"Source\""
+                }
+              ],
+              [
+                {
+                  "code": "moreSources"
+                },
+                {
+                  "code": "(count, f) => `+${f.number(count)} more`"
+                }
+              ],
+              [
+                {
+                  "code": "plan"
+                },
+                {
+                  "code": "\"Plan\""
+                }
+              ],
+              [
+                {
+                  "code": "planProgress"
+                },
+                {
+                  "code": "(current, total, f) => `${f.number(current)} of ${f.number(total)}`"
+                }
+              ],
+              [
+                {
+                  "code": "approvalRequired"
+                },
+                {
+                  "code": "\"Approval required\""
+                }
+              ],
+              [
+                {
+                  "code": "approvalTitle"
+                },
+                {
+                  "code": "\"The agent wants to send this email\""
+                }
+              ],
+              [
+                {
+                  "code": "approvalPreview"
+                },
+                {
+                  "code": "\"Review this action before it runs.\""
+                }
+              ],
+              [
+                {
+                  "code": "expiresIn"
+                },
+                {
+                  "code": "(seconds, f) => `Expires in ${f.seconds(seconds)}`"
+                }
+              ],
+              [
+                {
+                  "code": "deny"
+                },
+                {
+                  "code": "\"Deny\""
+                }
+              ],
+              [
+                {
+                  "code": "allow"
+                },
+                {
+                  "code": "\"Allow\""
+                }
+              ],
+              [
+                {
+                  "code": "queuePosition"
+                },
+                {
+                  "code": "(position, f) => `You’re #${f.number(position)} in line`"
+                }
+              ],
+              [
+                {
+                  "code": "queueWaiting"
+                },
+                {
+                  "code": "\"Waiting in line…\""
+                }
+              ],
+              [
+                {
+                  "code": "rateLimited"
+                },
+                {
+                  "code": "(seconds, f) => `Slow down. Try again in ${f.seconds(seconds)}`"
+                }
+              ],
+              [
+                {
+                  "code": "rateLimitedUnknown"
+                },
+                {
+                  "code": "\"Slow down. Try again shortly.\""
+                }
+              ],
+              [
+                {
+                  "code": "fileUploading"
+                },
+                {
+                  "code": "\"Upload\""
+                }
+              ],
+              [
+                {
+                  "code": "fileReading"
+                },
+                {
+                  "code": "\"Reading\""
+                }
+              ],
+              [
+                {
+                  "code": "fileChunking"
+                },
+                {
+                  "code": "\"Chunking\""
+                }
+              ],
+              [
+                {
+                  "code": "fileReady"
+                },
+                {
+                  "code": "\"Ready\""
+                }
+              ],
+              [
+                {
+                  "code": "fileProgress"
+                },
+                {
+                  "code": "(percent, f) => `${f.number(percent)}%`"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type CrateFormat = {\n  locale: string;\n  /** 1234 -> \"1,234\" (en) or \"1 234\" (fr). */\n  number: (value: number) => string;\n  /** 30 -> \"30s\" in en. Other locales use their own short unit format. */\n  seconds: (value: number) => string;\n  /** Picks a form by Intl plural rules, e.g. plural(n, { one: \"source\", other: \"sources\" }). */\n  plural: (value: number, forms: Partial<Record<Intl.LDMLPluralRule, string>> & { other: string }) => string;\n};\n\nexport type CrateLabels = {\n  thinking: string;\n  stillThinking: string;\n  cancel: string;\n  responseStreaming: string;\n  toolActivity: string;\n  runningTool: (toolName: string) => string;\n  runningToolUnnamed: string;\n  usedTool: (toolName: string) => string;\n  usedToolUnnamed: string;\n  stalled: string;\n  error: string;\n  retry: string;\n  done: string;\n  showThinking: string;\n  thoughtFor: (seconds: number, format: CrateFormat) => string;\n  thoughtDone: string;\n  reasoningPlaceholder: string;\n  sources: string;\n  sourceFallback: string;\n  sourceTitle: string;\n  moreSources: (count: number, format: CrateFormat) => string;\n  plan: string;\n  planProgress: (current: number, total: number, format: CrateFormat) => string;\n  approvalRequired: string;\n  approvalTitle: string;\n  approvalPreview: string;\n  expiresIn: (seconds: number, format: CrateFormat) => string;\n  deny: string;\n  allow: string;\n  queuePosition: (position: number, format: CrateFormat) => string;\n  queueWaiting: string;\n  rateLimited: (seconds: number, format: CrateFormat) => string;\n  rateLimitedUnknown: string;\n  fileUploading: string;\n  fileReading: string;\n  fileChunking: string;\n  fileReady: string;\n  fileProgress: (percent: number, format: CrateFormat) => string;\n};"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { CrateProvider, type CrateLabels } from \"@/components/agent-wait-states\";\n\nconst fr: Partial<CrateLabels> = {\n  thinking: \"Réflexion…\",\n  stillThinking: \"Toujours en réflexion…\",\n  cancel: \"Annuler\",\n  done: \"Terminé\",\n  retry: \"Réessayer\",\n  error: \"Une erreur est survenue.\",\n  showThinking: \"Afficher le raisonnement\",\n  thoughtFor: (seconds, f) => `Réflexion pendant ${f.seconds(seconds)}`,\n  moreSources: (count, f) => `+${f.number(count)} ${f.plural(count, { one: \"autre\", other: \"autres\" })}`,\n  planProgress: (current, total, f) => `${f.number(current)} sur ${f.number(total)}`,\n  expiresIn: (seconds, f) => `Expire dans ${f.seconds(seconds)}`,\n  deny: \"Refuser\",\n  allow: \"Autoriser\",\n  queuePosition: (position, f) => `Vous êtes n° ${f.number(position)} dans la file`,\n};\n\n<CrateProvider locale=\"fr\" labels={fr}>\n  <AgentState status={status} />\n</CrateProvider>"
+          }
+        ]
+      }
+    ],
+    "playground": null
+  },
+  {
+    "name": "agent-state",
+    "title": "AgentState",
+    "description": "A state wrapper that renders and transitions the complete wait-state set.",
+    "group": "start",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/agent-state.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { AgentState } from \"@/components/agent-wait-states/agent-state\";"
+          }
+        ]
+      },
+      {
+        "heading": "Props",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "className"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "accent"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                {
+                  "code": "false"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "labels"
+                },
+                {
+                  "code": "Partial<CrateLabels>"
+                },
+                "no",
+                "",
+                "Replace any of this component's labels. Overrides CrateProvider."
+              ],
+              [
+                {
+                  "code": "status"
+                },
+                {
+                  "code": "AgentStatus | AgentStatusSnapshot"
+                },
+                "yes",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "text"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "toolName"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "steps"
+                },
+                {
+                  "code": "ToolStep[]"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "errorMessage"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onRetry"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onCancel"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "reasoning"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "reasoningDone"
+                },
+                {
+                  "code": "boolean"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "reasoningDurationSeconds"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "sources"
+                },
+                {
+                  "code": "AgentSource[]"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "planSteps"
+                },
+                {
+                  "code": "PlanStep[]"
+                },
+                "no",
+                {
+                  "code": "[]"
+                },
+                ""
+              ],
+              [
+                {
+                  "code": "approvalTitle"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "approvalPreview"
+                },
+                {
+                  "code": "ReactNode"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onAllow"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onDeny"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "approvalExpiresIn"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "queueVariant"
+                },
+                {
+                  "code": "\"line\" | \"rate-limit\""
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "queuePosition"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "retryIn"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "filename"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "fileSize"
+                },
+                {
+                  "code": "string"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "fileStage"
+                },
+                {
+                  "code": "FileStage"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "fileProgress"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "minDisplayMs"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                {
+                  "code": "600"
+                },
+                "How long a tool call or sources stay on screen at least, in ms. One that ends sooner stays, shown as finished, until this has passed. Errors, approvals, and stalls never wait. 0 turns it off."
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "States",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "`status` is an `AgentStatus` string or the snapshot from `useAgentStatus`. Each state renders one component:"
+          },
+          {
+            "type": "table",
+            "head": [
+              "State",
+              "Renders"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "thinking"
+                },
+                {
+                  "code": "Thinking"
+                }
+              ],
+              [
+                {
+                  "code": "reasoning"
+                },
+                {
+                  "code": "ReasoningTrace"
+                }
+              ],
+              [
+                {
+                  "code": "sources"
+                },
+                {
+                  "code": "Sources"
+                }
+              ],
+              [
+                {
+                  "code": "tool"
+                },
+                {
+                  "code": "ToolCall"
+                }
+              ],
+              [
+                {
+                  "code": "plan"
+                },
+                {
+                  "code": "AgentPlan"
+                }
+              ],
+              [
+                {
+                  "code": "approval"
+                },
+                {
+                  "code": "Approval"
+                }
+              ],
+              [
+                {
+                  "code": "queue"
+                },
+                {
+                  "code": "Queue"
+                }
+              ],
+              [
+                {
+                  "code": "file"
+                },
+                {
+                  "code": "FileProcessing"
+                }
+              ],
+              [
+                {
+                  "code": "streaming"
+                },
+                {
+                  "code": "Streaming"
+                }
+              ],
+              [
+                {
+                  "code": "stalled"
+                },
+                {
+                  "code": "Stalled"
+                }
+              ],
+              [
+                {
+                  "code": "error"
+                },
+                {
+                  "code": "ErrorState"
+                }
+              ],
+              [
+                {
+                  "code": "done"
+                },
+                {
+                  "code": "Done"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Pass `labels` to override labels for whichever state is showing. See the CrateProvider doc for every key."
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "const chat = useChat();\nconst status = useAgentStatus(chat);\n\n<AgentState\n  status={status}\n  text={streamedText}\n  reasoning={status.reasoning}\n  sources={status.sources}\n/>"
+          }
+        ]
+      }
+    ],
+    "playground": [
+      {
+        "name": "className",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "accent",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": "false"
+      },
+      {
+        "name": "labels",
+        "type": "Partial<CrateLabels>",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "status",
+        "type": "AgentStatus | AgentStatusSnapshot",
+        "optional": false,
+        "literals": [
+          "thinking",
+          "reasoning",
+          "sources",
+          "tool",
+          "plan",
+          "approval",
+          "queue",
+          "file",
+          "streaming",
+          "stalled",
+          "error",
+          "done"
+        ],
+        "default": null
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "toolName",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "steps",
+        "type": "ToolStep[]",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "errorMessage",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onRetry",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onCancel",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "reasoning",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "reasoningDone",
+        "type": "boolean",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "reasoningDurationSeconds",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "sources",
+        "type": "AgentSource[]",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "planSteps",
+        "type": "PlanStep[]",
+        "optional": true,
+        "literals": null,
+        "default": "[]"
+      },
+      {
+        "name": "approvalTitle",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "approvalPreview",
+        "type": "ReactNode",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onAllow",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "onDeny",
+        "type": "(() => void)",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "approvalExpiresIn",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "queueVariant",
+        "type": "\"line\" | \"rate-limit\"",
+        "optional": true,
+        "literals": [
+          "line",
+          "rate-limit"
+        ],
+        "default": null
+      },
+      {
+        "name": "queuePosition",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "retryIn",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "filename",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "fileSize",
+        "type": "string",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "fileStage",
+        "type": "FileStage",
+        "optional": true,
+        "literals": [
+          "uploading",
+          "reading",
+          "chunking",
+          "ready"
+        ],
+        "default": null
+      },
+      {
+        "name": "fileProgress",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": null
+      },
+      {
+        "name": "minDisplayMs",
+        "type": "number",
+        "optional": true,
+        "literals": null,
+        "default": "600"
+      }
+    ]
+  },
+  {
+    "name": "use-agent-status",
+    "title": "useAgentStatus",
+    "description": "Maps AI SDK status, reasoning, sources, text, and tool parts to wait states.",
+    "group": "start",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/use-agent-status.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "import { useAgentStatus } from \"@/hooks/use-agent-status\";"
+          }
+        ]
+      },
+      {
+        "heading": "Signature",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "useAgentStatus(chat: ChatLike, options: UseAgentStatusOptions): AgentStatusSnapshot"
+          }
+        ]
+      },
+      {
+        "heading": "Options",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "Prop",
+              "Type",
+              "Required",
+              "Default",
+              "Notes"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "manualStatus"
+                },
+                {
+                  "code": "AgentStatus"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "onCancel"
+                },
+                {
+                  "code": "(() => void)"
+                },
+                "no",
+                "",
+                ""
+              ],
+              [
+                {
+                  "code": "stallAfterMs"
+                },
+                {
+                  "code": "number"
+                },
+                "no",
+                "",
+                ""
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Returns",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type AgentStatus =\n  | \"thinking\"\n  | \"reasoning\"\n  | \"sources\"\n  | \"tool\"\n  | \"plan\"\n  | \"approval\"\n  | \"queue\"\n  | \"file\"\n  | \"streaming\"\n  | \"stalled\"\n  | \"error\"\n  | \"done\";\n\nexport type AgentStatusSnapshot = {\n  state: AgentStatus;\n  activeToolName?: string;\n  reasoning?: string;\n  sources: AgentSource[];\n  elapsedMs: number;\n  showCancel: boolean;\n  label: string;\n  cancel?: () => void;\n};"
+          }
+        ]
+      },
+      {
+        "heading": "Labels",
+        "blocks": [
+          {
+            "type": "text",
+            "text": "Read from the nearest `CrateProvider`."
+          },
+          {
+            "type": "table",
+            "head": [
+              "Label",
+              "English default"
+            ],
+            "rows": [
+              [
+                {
+                  "code": "sourceTitle"
+                },
+                {
+                  "code": "\"Source\""
+                }
+              ],
+              [
+                {
+                  "code": "stillThinking"
+                },
+                {
+                  "code": "\"Still thinking…\""
+                }
+              ],
+              [
+                {
+                  "code": "thinking"
+                },
+                {
+                  "code": "\"Thinking…\""
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "const chat = useChat();\nconst status = useAgentStatus(chat);\n\n<AgentState\n  status={status}\n  text={streamedText}\n  reasoning={status.reasoning}\n  sources={status.sources}\n/>"
+          }
+        ]
+      }
+    ],
+    "playground": null
+  },
+  {
+    "name": "agent-stream",
+    "title": "AgentStream",
+    "description": "Streams any AI backend into useAgentStatus: one small event format, server-sent events in and out (including a raw SSE adapter), and the useAgentStream hook.",
+    "group": "adapters",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/agent-stream.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { agentStreamText, reduceAgentStream, readSSE, agentEventsFromSSE, agentEventsToSSE, agentEventsResponse } from \"@/lib/agent-stream\";\nimport { useAgentStream } from \"@/hooks/use-agent-stream\";"
+          }
+        ]
+      },
+      {
+        "heading": "Functions",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "agentStreamText"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "agentStreamText(state: AgentStreamState)"
+          },
+          {
+            "type": "text",
+            "text": "All text streamed so far in the current turn."
+          },
+          {
+            "type": "h3",
+            "text": "reduceAgentStream"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "reduceAgentStream(state: AgentStreamState, action: AgentStreamAction): AgentStreamState"
+          },
+          {
+            "type": "text",
+            "text": "Applies one event to the state. Pure, so it works with useReducer or anywhere else."
+          },
+          {
+            "type": "h3",
+            "text": "readSSE"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "readSSE(body: ReadableStream<Uint8Array>): AsyncGenerator<SSEMessage>"
+          },
+          {
+            "type": "text",
+            "text": "Parses a server-sent events body into messages, following the SSE format."
+          },
+          {
+            "type": "h3",
+            "text": "agentEventsFromSSE"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "agentEventsFromSSE(body: ReadableStream<Uint8Array>, map: SSEMapper = defaultSSEMapper): AsyncGenerator<AgentStreamEvent>"
+          },
+          {
+            "type": "text",
+            "text": "The raw SSE adapter: reads any server-sent events stream as AgentStreamEvents."
+          },
+          {
+            "type": "h3",
+            "text": "agentEventsToSSE"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "agentEventsToSSE(events: AsyncIterable<AgentStreamEvent>): ReadableStream<Uint8Array>"
+          },
+          {
+            "type": "text",
+            "text": "Encodes AgentStreamEvents as server-sent events. Errors thrown by the source become an error event."
+          },
+          {
+            "type": "h3",
+            "text": "agentEventsResponse"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "agentEventsResponse(events: AsyncIterable<AgentStreamEvent>, init?: ResponseInit)"
+          },
+          {
+            "type": "text",
+            "text": "A streaming Response for route handlers (Next.js, Hono, Remix, and others)."
+          },
+          {
+            "type": "h3",
+            "text": "useAgentStream"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "useAgentStream({ api = \"/api/agent\", fetch: request, map }: UseAgentStreamOptions = {}): AgentStream"
+          },
+          {
+            "type": "text",
+            "text": "Streams a response from any backend that sends server-sent events, and returns the chat shape useAgentStatus reads: useAgentStatus(useAgentStream(...))."
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type AgentStreamEvent =\n  | { type: \"text\"; delta: string }\n  | { type: \"reasoning\"; delta: string }\n  | { type: \"source\"; title: string; url?: string; id?: string }\n  | { type: \"tool-start\"; id: string; name: string }\n  | { type: \"tool-end\"; id: string; error?: boolean }\n  | { type: \"error\"; message: string }\n  | { type: \"done\" };\n\nexport type AgentStreamPart =\n  | { type: \"text\"; text: string }\n  | { type: \"reasoning\"; text: string }\n  | { type: \"source-url\"; sourceId?: string; url?: string; title: string }\n  | { type: \"dynamic-tool\"; toolCallId: string; toolName: string; state: \"input-available\" | \"output-available\" | \"output-error\" };\n\nexport type AgentStreamState = {\n  /** The same values as the AI SDK's useChat, so useAgentStatus reads it directly. */\n  status: \"ready\" | \"submitted\" | \"streaming\" | \"error\";\n  /** The assistant turn being streamed, as one message of parts. */\n  messages: Array<{ role: \"assistant\"; parts: AgentStreamPart[] }>;\n  error?: Error;\n};\n\nexport type AgentStreamAction = AgentStreamEvent | { type: \"request\" } | { type: \"stopped\" };\n\nexport type SSEMessage = { event?: string; data: string; id?: string };\n\nexport type SSEMapper = (message: SSEMessage) => AgentStreamEvent | AgentStreamEvent[] | null | undefined;\n\nexport type UseAgentStreamOptions = {\n  /** Endpoint that responds with server-sent events. send(body) POSTs JSON to it. */\n  api?: string;\n  /** Replaces the default request, for custom headers, methods, or bodies. */\n  fetch?: (body: unknown, signal: AbortSignal) => Promise<Response>;\n  /** Maps each server-sent event to AgentStreamEvents. Defaults to Crate's JSON events. */\n  map?: SSEMapper;\n};\n\nexport type AgentStream = AgentStreamState & {\n  /** All text streamed so far in the current turn. */\n  text: string;\n  /** Starts a new turn. */\n  send: (body?: unknown) => Promise<void>;\n  /** Cancels the current turn. */\n  stop: () => void;\n};"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { Agent, run } from \"@openai/agents\";\nimport { agentEventsResponse } from \"@/lib/agent-stream\";\nimport { fromOpenAIAgents } from \"@/lib/agent-stream-openai-agents\";\n\nconst agent = new Agent({ name: \"Assistant\", instructions: \"Help the user.\" });\n\nexport async function POST(request: Request) {\n  const { message } = await request.json();\n  return agentEventsResponse(fromOpenAIAgents(await run(agent, message, { stream: true })));\n}"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { agentEventsResponse } from \"@/lib/agent-stream\";\nimport { fromLangChain } from \"@/lib/agent-stream-langchain\";\nimport { graph } from \"./graph\";\n\nexport async function POST(request: Request) {\n  const { message } = await request.json();\n  const events = graph.streamEvents({ messages: [{ role: \"user\", content: message }] }, { version: \"v2\" });\n  return agentEventsResponse(fromLangChain(events));\n}"
+          },
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "\"use client\";\n\nimport { AgentState } from \"@/components/agent-wait-states/agent-state\";\nimport { useAgentStatus } from \"@/hooks/use-agent-status\";\nimport { useAgentStream } from \"@/hooks/use-agent-stream\";\n\nexport function Assistant() {\n  const stream = useAgentStream({ api: \"/api/agent\" });\n  const status = useAgentStatus(stream);\n  const ask = () => stream.send({ message: \"Plan my week\" });\n\n  return (\n    <>\n      <button type=\"button\" onClick={ask}>Ask</button>\n      <AgentState status={status} text={stream.text} errorMessage={stream.error?.message} onRetry={ask} />\n    </>\n  );\n}"
+          },
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "const stream = useAgentStream({\n  api: \"/api/chat\",\n  map: (message) => {\n    if (message.data === \"[DONE]\") return { type: \"done\" };\n    const delta = JSON.parse(message.data).choices[0]?.delta?.content;\n    return delta ? { type: \"text\", delta } : null;\n  },\n});"
+          }
+        ]
+      }
+    ],
+    "playground": null
+  },
+  {
+    "name": "openai-agents-adapter",
+    "title": "OpenAI Agents SDK Adapter",
+    "description": "Converts a streamed OpenAI Agents SDK run into agent stream events for useAgentStatus.",
+    "group": "adapters",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/openai-agents-adapter.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { fromOpenAIAgents } from \"@/lib/agent-stream-openai-agents\";\nimport { useAgentStream } from \"@/hooks/use-agent-stream\";"
+          }
+        ]
+      },
+      {
+        "heading": "Functions",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "fromOpenAIAgents"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "fromOpenAIAgents(stream: AsyncIterable<unknown>): AsyncGenerator<AgentStreamEvent>"
+          },
+          {
+            "type": "text",
+            "text": "Yields AgentStreamEvents for a streamed run: agentEventsResponse(fromOpenAIAgents(await run(agent, input, { stream: true })))."
+          },
+          {
+            "type": "h3",
+            "text": "useAgentStream"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "useAgentStream({ api = \"/api/agent\", fetch: request, map }: UseAgentStreamOptions = {}): AgentStream"
+          },
+          {
+            "type": "text",
+            "text": "Streams a response from any backend that sends server-sent events, and returns the chat shape useAgentStatus reads: useAgentStatus(useAgentStream(...))."
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type OpenAIAgentsStreamEvent = {\n  type: string;\n  data?: { type?: string; delta?: string; event?: { type?: string; delta?: string } };\n  name?: string;\n  item?: { type?: string; rawItem?: RawItem };\n};\n\nexport type UseAgentStreamOptions = {\n  /** Endpoint that responds with server-sent events. send(body) POSTs JSON to it. */\n  api?: string;\n  /** Replaces the default request, for custom headers, methods, or bodies. */\n  fetch?: (body: unknown, signal: AbortSignal) => Promise<Response>;\n  /** Maps each server-sent event to AgentStreamEvents. Defaults to Crate's JSON events. */\n  map?: SSEMapper;\n};\n\nexport type AgentStream = AgentStreamState & {\n  /** All text streamed so far in the current turn. */\n  text: string;\n  /** Starts a new turn. */\n  send: (body?: unknown) => Promise<void>;\n  /** Cancels the current turn. */\n  stop: () => void;\n};"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { Agent, run } from \"@openai/agents\";\nimport { agentEventsResponse } from \"@/lib/agent-stream\";\nimport { fromOpenAIAgents } from \"@/lib/agent-stream-openai-agents\";\n\nconst agent = new Agent({ name: \"Assistant\", instructions: \"Help the user.\" });\n\nexport async function POST(request: Request) {\n  const { message } = await request.json();\n  return agentEventsResponse(fromOpenAIAgents(await run(agent, message, { stream: true })));\n}"
+          },
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "\"use client\";\n\nimport { AgentState } from \"@/components/agent-wait-states/agent-state\";\nimport { useAgentStatus } from \"@/hooks/use-agent-status\";\nimport { useAgentStream } from \"@/hooks/use-agent-stream\";\n\nexport function Assistant() {\n  const stream = useAgentStream({ api: \"/api/agent\" });\n  const status = useAgentStatus(stream);\n  const ask = () => stream.send({ message: \"Plan my week\" });\n\n  return (\n    <>\n      <button type=\"button\" onClick={ask}>Ask</button>\n      <AgentState status={status} text={stream.text} errorMessage={stream.error?.message} onRetry={ask} />\n    </>\n  );\n}"
+          },
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "const stream = useAgentStream({\n  api: \"/api/chat\",\n  map: (message) => {\n    if (message.data === \"[DONE]\") return { type: \"done\" };\n    const delta = JSON.parse(message.data).choices[0]?.delta?.content;\n    return delta ? { type: \"text\", delta } : null;\n  },\n});"
+          }
+        ]
+      }
+    ],
+    "playground": null
+  },
+  {
+    "name": "langchain-adapter",
+    "title": "LangChain Adapter",
+    "description": "Converts LangChain and LangGraph streamEvents into agent stream events for useAgentStatus.",
+    "group": "adapters",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/langchain-adapter.json"
+          }
+        ]
+      },
+      {
+        "heading": "Import",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { fromLangChain } from \"@/lib/agent-stream-langchain\";\nimport { useAgentStream } from \"@/hooks/use-agent-stream\";"
+          }
+        ]
+      },
+      {
+        "heading": "Functions",
+        "blocks": [
+          {
+            "type": "h3",
+            "text": "fromLangChain"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "fromLangChain(events: AsyncIterable<LangChainStreamEvent>): AsyncGenerator<AgentStreamEvent>"
+          },
+          {
+            "type": "text",
+            "text": "Yields AgentStreamEvents for a LangChain or LangGraph run: agentEventsResponse(fromLangChain(graph.streamEvents(input, { version: \"v2\" })))."
+          },
+          {
+            "type": "h3",
+            "text": "useAgentStream"
+          },
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "useAgentStream({ api = \"/api/agent\", fetch: request, map }: UseAgentStreamOptions = {}): AgentStream"
+          },
+          {
+            "type": "text",
+            "text": "Streams a response from any backend that sends server-sent events, and returns the chat shape useAgentStatus reads: useAgentStatus(useAgentStream(...))."
+          }
+        ]
+      },
+      {
+        "heading": "Types",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "export type LangChainStreamEvent = {\n  event: string;\n  name?: string;\n  run_id?: string;\n  data?: { chunk?: { content?: string | ContentBlock[] }; error?: unknown };\n};\n\nexport type UseAgentStreamOptions = {\n  /** Endpoint that responds with server-sent events. send(body) POSTs JSON to it. */\n  api?: string;\n  /** Replaces the default request, for custom headers, methods, or bodies. */\n  fetch?: (body: unknown, signal: AbortSignal) => Promise<Response>;\n  /** Maps each server-sent event to AgentStreamEvents. Defaults to Crate's JSON events. */\n  map?: SSEMapper;\n};\n\nexport type AgentStream = AgentStreamState & {\n  /** All text streamed so far in the current turn. */\n  text: string;\n  /** Starts a new turn. */\n  send: (body?: unknown) => Promise<void>;\n  /** Cancels the current turn. */\n  stop: () => void;\n};"
+          }
+        ]
+      },
+      {
+        "heading": "Example",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "ts",
+            "code": "import { agentEventsResponse } from \"@/lib/agent-stream\";\nimport { fromLangChain } from \"@/lib/agent-stream-langchain\";\nimport { graph } from \"./graph\";\n\nexport async function POST(request: Request) {\n  const { message } = await request.json();\n  const events = graph.streamEvents({ messages: [{ role: \"user\", content: message }] }, { version: \"v2\" });\n  return agentEventsResponse(fromLangChain(events));\n}"
+          },
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "\"use client\";\n\nimport { AgentState } from \"@/components/agent-wait-states/agent-state\";\nimport { useAgentStatus } from \"@/hooks/use-agent-status\";\nimport { useAgentStream } from \"@/hooks/use-agent-stream\";\n\nexport function Assistant() {\n  const stream = useAgentStream({ api: \"/api/agent\" });\n  const status = useAgentStatus(stream);\n  const ask = () => stream.send({ message: \"Plan my week\" });\n\n  return (\n    <>\n      <button type=\"button\" onClick={ask}>Ask</button>\n      <AgentState status={status} text={stream.text} errorMessage={stream.error?.message} onRetry={ask} />\n    </>\n  );\n}"
+          },
+          {
+            "type": "code",
+            "lang": "tsx",
+            "code": "const stream = useAgentStream({\n  api: \"/api/chat\",\n  map: (message) => {\n    if (message.data === \"[DONE]\") return { type: \"done\" };\n    const delta = JSON.parse(message.data).choices[0]?.delta?.content;\n    return delta ? { type: \"text\", delta } : null;\n  },\n});"
+          }
+        ]
+      }
+    ],
+    "playground": null
+  },
+  {
+    "name": "crate-skill",
+    "title": "Crate Agent Skill",
+    "description": "Teaches coding agents (Claude Code, Cursor, Codex) when to use each Crate component, how to install it, and how to wire it to the app's AI stream.",
+    "group": "agents",
+    "sections": [
+      {
+        "heading": "Install",
+        "blocks": [
+          {
+            "type": "code",
+            "lang": "bash",
+            "code": "npx shadcn@latest add https://crate.onerollstudios.com/r/crate-skill.json"
+          }
+        ]
+      },
+      {
+        "heading": "Files",
+        "blocks": [
+          {
+            "type": "table",
+            "head": [
+              "File",
+              "For"
+            ],
+            "rows": [
+              [
+                {
+                  "code": ".claude/skills/crate/SKILL.md"
+                },
+                "Claude Code (a skill)"
+              ],
+              [
+                {
+                  "code": ".cursor/rules/crate.mdc"
+                },
+                "Cursor (a rule)"
+              ],
+              [
+                {
+                  "code": ".agents/crate.md"
+                },
+                "Codex and other agents: add a line to `AGENTS.md` pointing to this file"
+              ]
+            ]
+          },
+          {
+            "type": "text",
+            "text": "The skill itself: https://crate.onerollstudios.com/r/crate-skill.json"
+          }
+        ]
+      }
+    ],
+    "playground": null
+  }
+]
