@@ -21,7 +21,7 @@
 .docs-code-wrap{position:relative;margin:12px 0}
 .docs-code{margin:0;background:#0f171f;color:#e2ebd5;border-radius:4px;padding:16px 18px;font-size:13px;line-height:1.65;overflow-x:auto;white-space:pre}
 .docs-code-wrap .docs-code{padding-right:52px}
-.docs-code-wrap .copy-button{position:absolute;top:8px;right:8px;color:#d7e6c6}
+.docs-code-wrap .copy-button{position:absolute;top:8px;right:8px;color:#d7e6c6;background:#0f171f}
 .docs-code code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
 .docs-table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.55}
 .docs-table th{text-align:left;font-weight:600;font-size:13px;color:#4f5a45;border-bottom:1px solid #c9cfbb;padding:8px 10px 8px 0}
@@ -58,4 +58,26 @@
   .docs-table td:before{content:attr(data-label);display:block;font-size:12px;color:#5d6555}
   .playground{padding:12px}
   .playground-stage{padding:14px}
+}
+/* Dark mode: the site's dark palette (the landing page's dark sections and demos). */
+@media (prefers-color-scheme:dark){
+  .docs{background:#0a0e1a;color:#f6f4ed;color-scheme:dark;--line:#2e382c}
+  .docs-header nav{border-color:#2e382c}
+  .docs-header nav a:hover{background:#1a2420}
+  .docs-logo .logo-period{color:#d4ff3d}
+  .docs-lead,.docs-breadcrumb,.docs-note,.docs-index span,.playground-note{color:#b4beb0}
+  .docs-section>p,.docs-section>ul{color:#dfe6d6}
+  .docs-section>p code,.docs-section>ul code,.docs-table code,.playground-note code,.playground-control code{background:#1e2723;color:#e2ebd5}
+  .docs-code{background:#11191e;border:1px solid #2e382c}
+  .docs-code-wrap .copy-button{background:#11191e}
+  .docs-table th{color:#b4beb0;border-bottom-color:#3b4438}
+  .docs-table td:before{color:#b4beb0}
+  .docs-index a{background:#11191e;border-color:#2e382c}
+  .docs-index a:hover{border-color:#7f9461}
+  .docs-breadcrumb a,.docs-note a{color:#d4ff3d}
+  .playground{background:#11191e;border-color:#2e382c}
+  .playground-stage{background:#151d23;border-color:#39453c;--background:#151d23;--foreground:#f6f4ed;--primary:#d4ff3d;--primary-foreground:#0a0e1a;--muted:#242e33;--muted-foreground:#b9c5ba;--border:#39453c;color:#f6f4ed}
+  .playground-control input[type=text],.playground-control input[type=number],.playground-control select{background:#0a0e1a;color:#f6f4ed;border-color:#3b4931}
+  .playground-control input[type=checkbox]{accent-color:#d4ff3d}
+  .playground-control :focus-visible{outline-color:#d4ff3d}
 }
