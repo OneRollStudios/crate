@@ -2156,6 +2156,10 @@
         "heading": "States",
         "blocks": [
           {
+            "type": "text",
+            "text": "Queue shows a different state for each value of `variant`:"
+          },
+          {
             "type": "list",
             "items": [
               "`variant`: `line`, `rate-limit`"
@@ -2401,6 +2405,10 @@
       {
         "heading": "States",
         "blocks": [
+          {
+            "type": "text",
+            "text": "FileProcessing shows a different state for each value of `stage`:"
+          },
           {
             "type": "list",
             "items": [
@@ -3328,7 +3336,7 @@
         "blocks": [
           {
             "type": "text",
-            "text": "`status` is an `AgentStatus` string or the snapshot from `useAgentStatus`. Each state renders one component:"
+            "text": "Pass a `status` (an `AgentStatus` string, or the snapshot from `useAgentStatus`), and AgentState shows the matching component for each state:"
           },
           {
             "type": "table",

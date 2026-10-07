@@ -251,14 +251,18 @@ for (const item of registry.items) {
     if (exportName === "AgentState") {
       const map = [...sourceText.matchAll(/state === "(\w+)" \? <(\w+)/g)];
       sections.push({ heading: "States", blocks: [
-        text("`status` is an `AgentStatus` string or the snapshot from `useAgentStatus`. Each state renders one component:"),
+        text("Pass a `status` (an `AgentStatus` string, or the snapshot from `useAgentStatus`), and AgentState shows the matching component for each state:"),
         table(["State", "Renders"], map.map((m) => [inline(m[1]), inline(m[2])])),
       ] });
       // The playground offers every state AgentState renders.
       const status = props.find((p) => p.name === "status");
       if (status) status.literals = map.map((m) => m[1]);
     } else if (states.length) {
-      sections.push({ heading: "States", blocks: [list(states.map((p) => `\`${p.name}\`: ${p.literals.map((v) => `\`${v}\``).join(", ")}`))] });
+      const names = states.map((p) => `\`${p.name}\``).join(" and ");
+      sections.push({ heading: "States", blocks: [
+        text(`${exportName} shows a different state for each value of ${names}:`),
+        list(states.map((p) => `\`${p.name}\`: ${p.literals.map((v) => `\`${v}\``).join(", ")}`)),
+      ] });
     }
 
     if (exportName === "CrateProvider") {
