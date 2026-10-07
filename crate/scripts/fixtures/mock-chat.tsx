@@ -45,7 +45,10 @@ const transport: ChatTransport<UIMessage> = {
 };
 
 export default function Page() {
-  const chat = useChat({ transport });
+  // A fixed id: without one, useChat makes a random id while rendering, which
+  // Next.js 16.4 with Cache Components (create-next-app's new default) refuses
+  // to prerender.
+  const chat = useChat({ id: "crate-test", transport });
   const status = useAgentStatus(chat, { stallAfterMs: 1500 });
   // The reply being written, shown inside AgentState (see the README's Show the Reply Once).
   const busy = chat.status === "submitted" || chat.status === "streaming";
