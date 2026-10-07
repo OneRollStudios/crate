@@ -1,0 +1,84 @@
+name: Docs examples
+
+# Builds the README's code examples in a fresh create-next-app@latest app every
+# day (crate/scripts/install-test.sh docs), so a new Next.js, AI SDK, or shadcn
+# release that breaks them is caught even when no pull request is open. CI runs
+# the same check on every pull request.
+# If it fails, it opens an issue labeled "human" (or comments on the open one).
+on:
+  schedule:
+    # Every day at 06:47 UTC.
+    - cron: "47 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  docs-examples:
+    name: docs-examples
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: crate
+        shell: bash
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: crate/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The registry the test installs from.
+      - name: Build
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Docs examples
+        run: bash scripts/install-test.sh docs 2>&1 | tee docs-examples.log
+
+      - name: Open or update a failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          title="Docs examples failed"
+          {
+            echo "The README's code examples no longer build in a fresh create-next-app@latest app."
+            echo
+            echo "- Run: $RUN_URL"
+            echo "- Commit on main: $COMMIT"
+            echo
+            echo "<details><summary>Last 100 lines of output</summary>"
+            echo
+            echo '```text'
+            tail -n 100 docs-examples.log 2>/dev/null || echo "No output captured."
+            echo '```'
+            echo
+            echo "</details>"
+          } > issue.md
+          # One open issue at a time: later failures comment on it.
+          existing="$(gh issue list --state open --label human --search "\"$title\" in:title" --json number,title \
+            --jq ".[] | select(.title == \"$title\") | .number" | head -n 1)"
+          if [[ -n "$existing" ]]; then
+            gh issue comment "$existing" --body-file issue.md
+          else
+            gh issue create --title "$title" --label human --body-file issue.md
+          fi

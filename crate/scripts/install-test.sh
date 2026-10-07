@@ -11,12 +11,14 @@ set -euo pipefail
 #           (colors, radius, font) and check every component uses that theme
 #   init    set up a fresh Next.js app (no shadcn yet) with crate init, then
 #           drive every state as in next
+#   docs    build the README's code examples in a fresh Next.js app (lint,
+#           next build, then load the page), see scripts/docs-examples.mjs
 mode="${1:-next}"
 case "$mode" in
-  next | themed | init) framework="next" ;;
+  next | themed | init | docs) framework="next" ;;
   vite) framework="vite" ;;
   *)
-    echo "Usage: bash scripts/install-test.sh [next|vite|themed|init]" >&2
+    echo "Usage: bash scripts/install-test.sh [next|vite|themed|init|docs]" >&2
     exit 2
     ;;
 esac
@@ -138,6 +140,10 @@ else
     cat "$crate_dir/scripts/fixtures/host-theme.css" >> app/globals.css
   fi
   npx --yes shadcn@latest add "http://localhost:$port/r/all.json" --yes
+  if [[ "$mode" == "docs" ]]; then
+    # The Stream Adapters examples use useAgentStream.
+    npx --yes shadcn@latest add "http://localhost:$port/r/agent-stream.json" --yes
+  fi
 fi
 
 if [[ "$mode" == "next" ]]; then
@@ -172,6 +178,10 @@ fi
 if [[ "$mode" == "themed" ]]; then
   # Every component, side by side.
   cp "$crate_dir/scripts/fixtures/themed-page.tsx" app/page.tsx
+elif [[ "$mode" == "docs" ]]; then
+  # The README's examples, as files in the app.
+  npm install ai @ai-sdk/react
+  node "$crate_dir/scripts/docs-examples.mjs" write "$app_dir"
 else
   # Drive useAgentStatus with a real useChat and a mocked AI SDK stream.
   npm install ai @ai-sdk/react
@@ -211,6 +221,8 @@ done
 cd "$crate_dir"
 if [[ "$mode" == "themed" ]]; then
   node "$crate_dir/scripts/theme-check.mjs" "http://localhost:$app_port"
+elif [[ "$mode" == "docs" ]]; then
+  node "$crate_dir/scripts/docs-examples.mjs" check "http://localhost:$app_port"
 else
   node "$crate_dir/scripts/stream-test.mjs" "http://localhost:$app_port"
 fi

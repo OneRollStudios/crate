@@ -7,7 +7,7 @@ thinking, reasoning, sources, tool calls, streaming, stalled, error, and done.
 The whole integration is two lines in `app/chat.tsx`:
 
 ```tsx
-const chat = useChat();
+const chat = useChat({ id: "chat" });
 const status = useAgentStatus(chat);
 ```
 

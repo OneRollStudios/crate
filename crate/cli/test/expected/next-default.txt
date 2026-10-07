@@ -17,7 +17,9 @@ Done. Changed:
 
 Next: connect the components to your Vercel AI SDK stream:
 
-const chat = useChat();
+// Give the chat a fixed id. Without one, useChat makes a random id while
+// rendering, which Next.js with Cache Components refuses to prerender.
+const chat = useChat({ id: "chat" });
 const status = useAgentStatus(chat);
 
 <AgentState

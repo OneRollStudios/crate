@@ -7,7 +7,9 @@ import { Messages } from "./messages";
 export function Chat({ mock, model }: { mock: boolean; model: string }) {
   // useChat posts to /api/chat (app/api/chat/route.ts) and reads its stream.
   // Messages connects it to Crate (useAgentStatus) and renders the replies.
-  const chat = useChat();
+  // A fixed id: without one, useChat makes a random id while rendering, which
+  // Next.js with Cache Components refuses to prerender.
+  const chat = useChat({ id: "chat" });
   const [input, setInput] = useState("");
 
   const busy = chat.status === "submitted" || chat.status === "streaming";
