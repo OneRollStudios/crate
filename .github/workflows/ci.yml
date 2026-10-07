@@ -82,8 +82,8 @@ jobs:
       - name: Copy guard
         if: ${{ !cancelled() }}
         run: |
-          if grep -rnF --exclude-dir=node_modules -- $'\u2014' app/ components/ ../examples/; then
-            echo "Em dashes are not allowed in app/, components/, or examples/."
+          if grep -rnF --exclude-dir=node_modules -- $'\u2014' app/ components/ elements/ ../examples/; then
+            echo "Em dashes are not allowed in app/, components/, elements/, or examples/."
             exit 1
           else
             test "$?" -eq 1
@@ -128,6 +128,19 @@ jobs:
       - name: Real chat example
         if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         run: bash ../examples/real-chat/scripts/ci-test.sh
+
+      # The Web Components package (@onerollstudios/crate-elements): build
+      # (fails over its size budget), typecheck, parity with the React
+      # components, a plain HTML page, and a fresh Vite + Vue app, in Chromium.
+      - name: Elements
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        working-directory: crate/elements
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          npm run typecheck
+          npm test
+          npm run test:vue
 
       # Preserve any screenshots produced, even when another step failed.
       - name: Upload screenshots

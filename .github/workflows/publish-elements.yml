@@ -1,0 +1,219 @@
+name: Publish Elements
+
+# Stages crate/elements (@onerollstudios/crate-elements) on npm, the same way
+# publish-cli.yml stages the CLI: npm Trusted Publishing (a short-lived OIDC
+# token, no npm token stored, with provenance) and staged publishing, so
+# nothing goes live until a maintainer approves the staged version on
+# npmjs.com (with 2FA).
+#
+# npm only accepts this while the package's Trusted Publisher on npmjs.com
+# names this repository and this workflow file (publish-elements.yml).
+# Renaming this file breaks publishing until that setting is updated.
+#
+# Release: bump "version" in crate/elements/package.json in a PR, merge it,
+# then run this workflow on main with mode "stage", or push a matching tag:
+# git tag elements-v0.1.1 && git push origin elements-v0.1.1
+# Then approve the staged version on npmjs.com.
+#
+# "pack" builds, tests, and packs on Linux and uploads the .tgz as a workflow
+# artifact, without publishing: for the first version, which has to be
+# published by hand because a new package has no Trusted Publisher yet.
+on:
+  push:
+    tags: ["elements-v*"]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run: check everything but don't stage. stage: stage on npm. pack: upload the .tgz as an artifact, publish nothing."
+        type: choice
+        options: [dry-run, stage, pack]
+        default: dry-run
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-elements
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish
+    if: github.event_name != 'workflow_dispatch' || inputs.mode != 'pack'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # The OIDC token npm Trusted Publishing needs.
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: crate/elements
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Staged publishing needs a recent npm (npm stage).
+      - name: Update npm
+        run: |
+          npm install --global npm@latest
+          npm --version
+          npm stage publish --help > /dev/null
+
+      # A tag must match the version being published, so elements-v0.1.1 can only
+      # publish 0.1.1.
+      - name: Check the version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          echo "Package version: $version"
+          if [[ "$REF_TYPE" == "tag" && "$REF_NAME" != "elements-v$version" ]]; then
+            echo "::error::Tag $REF_NAME does not match crate/elements/package.json version $version (expected elements-v$version)."
+            exit 1
+          fi
+          # Published versions only: npm itself refuses a version that is
+          # already staged.
+          if npm view "@onerollstudios/crate-elements@$version" version > /dev/null 2>&1; then
+            echo "::error::@onerollstudios/crate-elements@$version is already on npm. Bump the version in crate/elements/package.json first."
+            exit 1
+          fi
+
+      # The elements bundle crate's components, so crate's dependencies are
+      # needed too. The browser test uses crate's Playwright.
+      - name: Test
+        run: |
+          (cd .. && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
+          npm install --no-audit --no-fund
+          npm run build
+          npm run typecheck
+          npm test
+
+      # Stages the version: it is on npm but not installable until approved.
+      # Verbose logging shows npm's OIDC token exchange result, which npm only
+      # logs at that level (a failed exchange otherwise shows up as a bare 401).
+      - name: Stage
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'dry-run' }}
+        run: |
+          if [[ "$DRY_RUN" == "true" ]]; then
+            npm stage publish --access public --provenance --dry-run --loglevel verbose
+            exit 0
+          fi
+          npm stage publish --access public --provenance --loglevel verbose 2>&1 | tee stage.log
+          stage_id="$(grep -oE 'staged with id [0-9a-fA-F-]+' stage.log | awk '{print $4}' | tail -n 1)"
+          version="$(node -p 'require("./package.json").version')"
+          {
+            echo "## @onerollstudios/crate-elements@$version is staged"
+            echo
+            echo "Nothing is published until a maintainer approves it (2FA required):"
+            echo
+            echo "- On npmjs.com: open @onerollstudios/crate-elements, find the staged version $version, and approve it."
+            if [[ -n "$stage_id" ]]; then
+              echo "- Or from a terminal: \`npm stage approve $stage_id\`"
+              echo
+              echo "Stage ID: \`$stage_id\`. To inspect it first: \`npm stage download $stage_id\`. To discard it: \`npm stage reject $stage_id\`."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Explain a failed stage
+        if: failure()
+        run: |
+          echo "::error::If the Stage step failed with ENEEDAUTH, 401, 403, or 404, check the package's Trusted Publisher on npmjs.com: organization OneRollStudios, repository crate, workflow publish-elements.yml, no environment, with staged publishing allowed. If it says the version exists, that version is already published or staged: bump the version, or reject the old staged version first."
+
+  pack:
+    name: pack
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'pack'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: crate/elements
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Check the version
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          echo "Package version: $version"
+          if npm view "@onerollstudios/crate-elements@$version" version > /dev/null 2>&1; then
+            echo "::error::@onerollstudios/crate-elements@$version is already on npm. Bump the version in crate/elements/package.json first."
+            exit 1
+          fi
+
+      # The elements bundle crate's components, so crate's dependencies are
+      # needed too. The browser test uses crate's Playwright.
+      - name: Test
+        run: |
+          (cd .. && npm ci --no-audit --no-fund && npx playwright install --with-deps chromium)
+          npm install --no-audit --no-fund
+          npm run build
+          npm run typecheck
+          npm test
+
+      # The tarball is what gets published, byte for byte, so check it has no
+      # CRLF line endings (a Windows pack would add them, shebang included).
+      - name: Pack
+        run: |
+          npm pack --json > pack.json
+          file="$(node -p 'require("./pack.json")[0].filename')"
+          mkdir unpacked
+          tar -xzf "$file" -C unpacked
+          if grep -rlI $'\r' unpacked; then
+            echo "::error::The files above have CRLF line endings."
+            exit 1
+          fi
+          # The README becomes the package's npm page, so it must not still say
+          # the package isn't on npm.
+          if grep -q "Not on npm yet" unpacked/package/README.md; then
+            echo "::error::crate/elements/README.md still says it isn't on npm. Remove that note before packing."
+            exit 1
+          fi
+          node -e '
+            const [p] = require("./pack.json");
+            console.log(`${p.name}@${p.version}: ${p.filename}, ${p.entryCount} files`);
+            console.log(`shasum: ${p.shasum}`);
+            console.log(`integrity: ${p.integrity}`);
+          '
+          node -e '
+            const [p] = require("./pack.json");
+            const lines = [
+              `## ${p.name}@${p.version} packed`,
+              "",
+              `Download the \`${p.filename}\` artifact below, unzip it, then publish the .tgz as is:`,
+              "",
+              "```",
+              `npm publish ${p.filename} --access public`,
+              "```",
+              "",
+              `After publishing, \`npm view ${p.name}@${p.version} dist.shasum\` should print \`${p.shasum}\`.`,
+              "",
+              "Files:",
+              "",
+              ...p.files.map((f) => `- \`${f.path}\` (${f.size} bytes)`),
+            ];
+            require("node:fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join("\n") + "\n");
+          '
+          echo "TGZ=$file" >> "$GITHUB_ENV"
+
+      - name: Upload the tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.TGZ }}
+          path: crate/elements/${{ env.TGZ }}
+          if-no-files-found: error
+          retention-days: 7

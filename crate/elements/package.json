@@ -1,0 +1,45 @@
+{
+  "name": "@onerollstudios/crate-elements",
+  "version": "0.1.0",
+  "description": "Crate's AI wait states as Web Components, for Vue, Svelte, Angular, plain HTML, or any framework.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OneRollStudios/crate.git",
+    "directory": "crate/elements"
+  },
+  "homepage": "https://crate.onerollstudios.com",
+  "keywords": [
+    "web-components",
+    "custom-elements",
+    "ai",
+    "loading",
+    "streaming",
+    "agent"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node test/parity.mjs && node test/plain-html.mjs",
+    "test:vue": "node test/vue.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.13",
+    "esbuild": "^0.25.0",
+    "preact": "^10.27.0",
+    "preact-render-to-string": "^6.6.0",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2"
+  }
+}

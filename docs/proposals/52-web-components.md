@@ -1,6 +1,19 @@
 # Proposal: Framework-Agnostic Components via Web Components (#52)
 
-Status: proposal, waiting for approval. Nothing here is built yet.
+Status: approved. Decisions from review:
+
+- Runtime: `preact/compat`.
+- Package: `@onerollstudios/crate-elements`.
+- Shadow DOM, with `::part()` on the key pieces (`container`, `button`, `icon`)
+  so hosts can restyle them.
+- Events, all bubbling and composed: `crate-retry`, `crate-cancel`,
+  `crate-approve` (React's `onAllow`), `crate-deny`.
+- Consumer tests: plain HTML and Vue.
+
+Built so far: steps 1 and 2 of the plan (every element, `<crate-provider>`,
+events, parts, the parity test, both consumer tests, and the size budget),
+plus the publish workflow from step 4. Next: the status core (step 3) and the
+docs pages (rest of step 4).
 
 ## Goal
 
@@ -101,7 +114,7 @@ React-only API fails this test, not a user's app.
 - **Data props are JS properties:** `element.steps = [...]`,
   `element.sources = [...]`. Every attribute is also a property.
 - **Callbacks become DOM events** that bubble out of the shadow root:
-  `crate-retry`, `crate-cancel`, `crate-allow`, `crate-deny`. They work in
+  `crate-retry`, `crate-cancel`, `crate-approve`, `crate-deny`. They work in
   every framework, for example `@crate-retry` in Vue or `on:crate-retry` in
   Svelte.
 - **Labels and locale:** a `<crate-provider locale="fr">` element, with a
@@ -187,15 +200,10 @@ The shadcn registry is React-oriented, so the elements ship separately:
 
 Each step is its own PR.
 
-## Questions for Review
+## Decisions
 
-1. `preact/compat` (about 15 KB gzip of JS) or bundled React (about 77 KB gzip)
-   for exact React behavior? I recommend Preact, with the parity test as the
-   guard.
-2. Package name: `@onerollstudios/crate-elements`, or something else?
-3. Shadow DOM with `part`s and theme variables, as proposed. Is giving up
-   class-based restyling acceptable?
-4. Event names: `crate-retry` and so on, or plain names like `retry`? Plain
-   names are shorter but can collide with the host app's own events.
-5. Which non-React stack to test besides plain HTML: Vue (proposed), Svelte, or
-   Angular?
+1. `preact/compat`.
+2. `@onerollstudios/crate-elements`.
+3. Shadow DOM, with `::part()` on the key pieces.
+4. Prefixed events: `crate-retry`, `crate-cancel`, `crate-approve`, `crate-deny`, bubbling and composed.
+5. Plain HTML and Vue.

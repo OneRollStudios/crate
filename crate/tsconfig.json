@@ -40,6 +40,7 @@
     "design",
     "scripts/fixtures",
     "tests",
-    "cli"
+    "cli",
+    "elements"
   ]
 }
