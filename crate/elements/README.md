@@ -2,8 +2,6 @@
 
 Crate's wait states for AI products as Web Components: `<crate-thinking>`, `<crate-tool-call>`, `<crate-agent-state>`, and the rest. They work in Vue, Svelte, Angular, plain HTML, or any other framework. They are built from the same source as Crate's React components, follow your app's theme, and need no build step.
 
-> Not on npm yet. Until the first release, build it from this folder with `npm install && npm run build`.
-
 ## Install
 
 ```bash
