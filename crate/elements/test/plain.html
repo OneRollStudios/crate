@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Crate elements: plain HTML test</title>
+  <style>
+    /* A host theme: the elements must pick these up. */
+    .themed { --primary: rgb(200, 0, 0); --radius: 12px; }
+    /* Theme variables explicitly unset: the elements fall back to shadcn's defaults. */
+    .bare { --primary: initial; --radius: initial; }
+    crate-error::part(button) { outline: 3px solid rgb(1, 2, 3); }
+  </style>
+</head>
+<body>
+  <section class="themed">
+    <crate-thinking id="thinking"></crate-thinking>
+    <crate-thinking id="thinking-long" elapsed-ms="25000"></crate-thinking>
+    <crate-streaming text="Here is what I found"></crate-streaming>
+    <crate-tool-call id="tool" accent tool-name="searchDocs"></crate-tool-call>
+    <crate-stalled text="Here is what I found so far"></crate-stalled>
+    <crate-error id="error" message="The connection dropped."></crate-error>
+    <crate-done accent></crate-done>
+    <crate-reasoning-trace text="Checking which components fit."></crate-reasoning-trace>
+    <crate-sources id="sources"></crate-sources>
+    <crate-agent-plan id="plan"></crate-agent-plan>
+    <crate-approval id="approval" expires-in="30"></crate-approval>
+    <crate-queue position="3"></crate-queue>
+    <crate-file-processing filename="report.pdf" size="2.4 MB" stage="reading" progress="40"></crate-file-processing>
+    <crate-agent-state id="agent" status="thinking"></crate-agent-state>
+  </section>
+  <section class="bare">
+    <crate-tool-call id="bare-tool" accent tool-name="searchDocs"></crate-tool-call>
+  </section>
+  <crate-provider id="provider" locale="fr">
+    <crate-thinking id="localized"></crate-thinking>
+  </crate-provider>
+  <script type="module">
+    import "../dist/index.js";
+    document.getElementById("sources").sources = [{ title: "Crate docs", url: "https://crate.onerollstudios.com/llms.txt" }];
+    document.getElementById("plan").steps = [{ label: "Read the request", state: "complete" }, { label: "Draft the answer", state: "active" }];
+    document.getElementById("approval").title = "Send this email?";
+    document.getElementById("provider").labels = { thinking: "Réflexion…" };
+    window.events = [];
+    for (const type of ["crate-retry", "crate-cancel", "crate-approve", "crate-deny"]) {
+      document.addEventListener(type, (event) => window.events.push({ type, target: event.target.id, composed: event.composed, bubbles: event.bubbles }));
+    }
+    window.ready = true;
+  </script>
+</body>
+</html>
