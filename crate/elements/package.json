@@ -1,6 +1,6 @@
 {
   "name": "@onerollstudios/crate-elements",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Crate's AI wait states as Web Components, for Vue, Svelte, Angular, plain HTML, or any framework.",
   "license": "MIT",
   "type": "module",
