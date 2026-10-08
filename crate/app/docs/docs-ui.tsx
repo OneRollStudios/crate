@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import docsData from "@/lib/docs.generated.json";
 import { CopyButton } from "./copy-button";
+import { ThemeToggle } from "./theme-toggle";
 import type { PlaygroundProp } from "./playground";
 
 type Cell = string | { code: string };
@@ -29,7 +30,7 @@ export const docs = docsData as Doc[];
 // categories below still shows up, under "More".
 export type Category = { key: string; title: string; names: string[]; links?: { title: string; description: string; href: string; preview: string }[] };
 const categoryList: Category[] = [
-  { key: "start", title: "Start Here", names: ["use-agent-status", "agent-state", "crate-provider"] },
+  { key: "start", title: "Start Here", names: ["use-agent-status", "agent-state", "crate-provider", "crate-skill"] },
   { key: "before", title: "Before It Answers", names: ["thinking", "queue", "file-processing"] },
   { key: "while", title: "While It Works", names: ["reasoning-trace", "tool-call", "agent-plan", "streaming", "sources"] },
   { key: "needs", title: "When It Needs You, or Breaks", names: ["approval", "stalled", "error"] },
@@ -46,7 +47,6 @@ const categoryList: Category[] = [
       preview: "<crate-thinking></crate-thinking>",
     }],
   },
-  { key: "agents", title: "For Coding Agents", names: ["crate-skill"] },
 ];
 const placed = new Set(categoryList.flatMap((category) => category.names));
 const unplaced = docs.filter((doc) => !placed.has(doc.name)).map((doc) => doc.name);
@@ -60,7 +60,7 @@ export const categoryOf = (doc: Doc) => categories.find((category) => category.n
 export type Card = { id: string; title: string; parts: { heading: string | null; blocks: Block[] }[] };
 const cardOrder: { title: string; id: string; sections: string[] }[] = [
   { title: "Install", id: "install", sections: ["Install", "Import"] },
-  { title: "Usage Example", id: "usage-example", sections: ["Example"] },
+  { title: "Usage", id: "usage", sections: ["Example"] },
   { title: "Props", id: "props", sections: ["Props", "Types"] },
   { title: "Functions", id: "functions", sections: ["Functions", "Types"] },
   { title: "Signature", id: "signature", sections: ["Signature"] },
@@ -198,6 +198,7 @@ export function DocsHeader() {
         <Link href="/docs/">Docs</Link>
         <a href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={14} /></a>
       </nav>
+      <ThemeToggle />
     </header>
   );
 }

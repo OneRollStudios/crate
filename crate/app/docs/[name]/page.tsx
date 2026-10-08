@@ -1,10 +1,13 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CardView, DocCard, DocsHeader, DocsSidebar, OnThisPage, cardsFor, categoryOf, docs, docsIn } from "../docs-ui";
+import { DocView } from "../doc-view";
 import { Playground } from "../playground";
+import { SITE_URL } from "@/lib/config";
 import { samples } from "../samples";
-import "../docs.css";
 
 export const dynamicParams = false;
 
@@ -22,6 +25,9 @@ export default async function DocPage({ params }: { params: Promise<{ name: stri
   const { name } = await params;
   const doc = docs.find((item) => item.name === name);
   if (!doc) notFound();
+  // The same page as Markdown, from the generated /llms docs (written before next build).
+  const mdPath = `/llms/${doc.name}.md`;
+  const markdown = readFileSync(join(process.cwd(), "public", mdPath), "utf8");
   const category = categoryOf(doc);
   const cards = cardsFor(doc);
   const related = category ? docsIn(category).filter((item) => item.name !== doc.name) : [];
@@ -40,6 +46,7 @@ export default async function DocPage({ params }: { params: Promise<{ name: stri
           <p className="docs-breadcrumb"><Link href="/docs/">Docs</Link>{category ? <> / {category.title}</> : null}</p>
           <h1>{doc.title}</h1>
           <p className="docs-lead">{doc.description}</p>
+          <DocView markdown={markdown} mdPath={mdPath} mdUrl={`${SITE_URL}${mdPath}`} subject={doc.title}>
           <div className="docs-cards">
             {doc.playground ? (
               <DocCard id="preview" title="Preview and Playground">
@@ -57,7 +64,7 @@ export default async function DocPage({ params }: { params: Promise<{ name: stri
               </DocCard>
             ) : null}
           </div>
-          <p className="docs-note">For coding agents: <a href={`/llms/${doc.name}.md`}>{`/llms/${doc.name}.md`}</a>, generated from the same source.</p>
+          </DocView>
         </main>
         <OnThisPage items={toc} />
       </div>
