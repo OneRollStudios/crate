@@ -3,7 +3,9 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import docsData from "@/lib/docs.generated.json";
+import type { BlueprintKind } from "./blueprints";
 import { CopyButton } from "./copy-button";
+import { DocsNav } from "./docs-nav";
 import type { PlaygroundProp } from "./playground";
 
 type Cell = string | { code: string };
@@ -27,17 +29,18 @@ export const docs = docsData as Doc[];
 // How the docs are grouped and laid out. Only presentation: every page and
 // section still comes from lib/docs.generated.json, so a doc missing from the
 // categories below still shows up, under "More".
-export type Category = { key: string; title: string; names: string[]; links?: { title: string; description: string; href: string; preview: string }[] };
+export type Category = { key: BlueprintKind; title: string; blurb: string; names: string[]; links?: { title: string; description: string; href: string; preview: string }[] };
 const categoryList: Category[] = [
-  { key: "start", title: "Start Here", names: ["use-agent-status", "agent-state", "crate-provider"] },
-  { key: "before", title: "Before It Answers", names: ["thinking", "queue", "file-processing"] },
-  { key: "while", title: "While It Works", names: ["reasoning-trace", "tool-call", "agent-plan", "streaming", "sources"] },
-  { key: "needs", title: "When It Needs You, or Breaks", names: ["approval", "stalled", "error"] },
-  { key: "done", title: "When It\u2019s Done", names: ["done"] },
-  { key: "adapters", title: "Adapters", names: ["agent-stream", "openai-agents-adapter", "langchain-adapter"] },
+  { key: "start", title: "Start Here", blurb: "The hook that reads your AI stream, the wrapper that shows the right state, and the provider for labels and language.", names: ["use-agent-status", "agent-state", "crate-provider"] },
+  { key: "before", title: "Before It Answers", blurb: "From the moment a request is sent until the first words arrive.", names: ["thinking", "queue", "file-processing"] },
+  { key: "while", title: "While It Works", blurb: "Reasoning, tool calls, plans, the streaming reply, and its sources.", names: ["reasoning-trace", "tool-call", "agent-plan", "streaming", "sources"] },
+  { key: "needs", title: "When It Needs You, or Breaks", blurb: "Approvals before the agent acts, stalls, and errors with a retry that retries.", names: ["approval", "stalled", "error"] },
+  { key: "done", title: "When It\u2019s Done", blurb: "A small check, then it gets out of the way.", names: ["done"] },
+  { key: "adapters", title: "Adapters", blurb: "Turn other AI backends\u2019 streams into the events useAgentStatus reads.", names: ["agent-stream", "openai-agents-adapter", "langchain-adapter"] },
   {
     key: "web",
     title: "Web Components",
+    blurb: "Crate outside React: every component as a custom element.",
     names: [],
     links: [{
       title: "Crate Elements",
@@ -46,11 +49,11 @@ const categoryList: Category[] = [
       preview: "<crate-thinking></crate-thinking>",
     }],
   },
-  { key: "agents", title: "For Coding Agents", names: ["crate-skill"] },
+  { key: "agents", title: "For Coding Agents", blurb: "Teach your coding agent when and how to add Crate.", names: ["crate-skill"] },
 ];
 const placed = new Set(categoryList.flatMap((category) => category.names));
 const unplaced = docs.filter((doc) => !placed.has(doc.name)).map((doc) => doc.name);
-export const categories: Category[] = unplaced.length ? [...categoryList, { key: "more", title: "More", names: unplaced }] : categoryList;
+export const categories: Category[] = unplaced.length ? [...categoryList, { key: "more", title: "More", blurb: "Other Crate docs.", names: unplaced }] : categoryList;
 export const docsIn = (category: Category) => category.names.map((name) => docs.find((doc) => doc.name === name)).filter((doc): doc is Doc => Boolean(doc));
 export const categoryOf = (doc: Doc) => categories.find((category) => category.names.includes(doc.name));
 
@@ -193,11 +196,7 @@ export function DocsHeader() {
   return (
     <header className="docs-header">
       <Link href="/" className="docs-logo" aria-label="Crate home">crate<span className="logo-period">.</span></Link>
-      <nav aria-label="Docs navigation">
-        <Link href="/#crates">Components</Link>
-        <Link href="/docs/">Docs</Link>
-        <a href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={14} /></a>
-      </nav>
+      <DocsNav />
     </header>
   );
 }
