@@ -10,3 +10,7 @@ export function registryUrl(name: string) {
 export function installCommand(name: string) {
   return `npx shadcn@latest add ${registryUrl(name)}`;
 }
+
+// The "Notify Me and Vote" form for the next crate. Placeholder until the form
+// exists: replace with the form's URL.
+export const NEXT_CRATE_FORM_URL = "#vote-next-crate";

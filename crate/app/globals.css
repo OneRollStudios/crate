@@ -20,7 +20,7 @@
 
 
 /* Brand entrance: no progress fiction, no scroll lock, no focus capture. */
-.hero-promise{color:#607913}
+.hero-promise{color:#5a7212}
 .crate-preloader{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#0a0e1a;color:#f6f4ed;pointer-events:none;animation:preloader-failsafe 2.8s step-end forwards;transition:clip-path .65s cubic-bezier(.76,0,.24,1);clip-path:inset(0 0 0 0)}
 .crate-preloader.is-leaving{clip-path:inset(0 0 100% 0)}
 .preloader-lockup{display:flex;align-items:center;gap:25px;transform:translateY(-15px)}
@@ -65,8 +65,8 @@
 .lab-note{margin:0;padding:12px 18px;border-bottom:1px solid #3c4934;font-size:13px;line-height:1.5;color:#bac5b2}
 .lab-panel-yours{position:relative;transition:background .25s,color .25s,box-shadow .2s}
 .lab-panel-yours .lab-panel-name{color:var(--foreground);font-weight:600}
-.lab-panel-yours[data-changed]{box-shadow:inset 0 0 0 5px #d4ff3d}
-.lab-panel-yours{outline:2px solid #d4ff3d;outline-offset:-2px}
+.lab-panel-yours[data-changed]{box-shadow:inset 0 0 0 5px #8b5cf6}
+.lab-panel-yours{outline:2px solid #8b5cf6;outline-offset:-2px}
 .lab-code{margin:0;padding:16px 18px;border-top:1px solid #3c4934;color:#d7e6c6;font:12px/1.7 ui-monospace,monospace;overflow-x:auto;white-space:pre}
 .lab-footer{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:20px 40px}
 .lab-footer .stack-tags{margin-top:0}
@@ -86,3 +86,41 @@
 @media(min-width:701px) and (min-height:741px) and (prefers-reduced-motion:no-preference){.category-card{top:var(--card-top,calc(24px + var(--card-index)*22px))}}
 .category-0{background:#fdfdf9}.category-1{background:#f7f9f0}.category-2{background:#f1f5e7}
 @media(max-width:700px){.component-stack{--stack-gap:23px}.category-card{box-shadow:0 2px 8px #1e32121f}}
+
+/* Catalog previews: every component sits on its own neutral surface, whatever
+   the card's color, so its text keeps at least 4.5:1. The Done preview stays
+   fully visible here (the component itself fades to .25 after its message). */
+.row-preview{background:#fff;border:1px solid #d3dac6;border-radius:6px;padding:14px 16px;--background:#fff;--foreground:#0a0e1a;--muted:#eef1e8;--muted-foreground:#4c5845;--border:#d5dcc8;color:#0a0e1a}
+.row-preview .crate-done{opacity:1!important;animation:none!important}
+
+/* Make It Yours: the live card is the main one, larger than the examples. */
+.lab-panels{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.lab-panel-yours{grid-row:1/span 3;padding:28px 30px;min-height:330px}
+.lab-panel-yours .lab-panel-name{font-size:15px;margin-bottom:22px}
+.lab-panel-yours>div{zoom:1.2}
+.lab-panel:not(.lab-panel-yours){min-height:110px}
+@media(max-width:980px){.lab-panels{grid-template-columns:repeat(3,minmax(0,1fr))}.lab-panel-yours{grid-column:1/-1;grid-row:auto;min-height:220px}}
+@media(max-width:700px){.lab-panels{grid-template-columns:minmax(0,1fr)}.lab-panel-yours>div{zoom:1.1}}
+
+/* Hero: four live components side by side, all on the page's demo clock. */
+.hero-network{grid-template-rows:auto auto;align-items:stretch}
+.hero-network .demo-card{min-height:150px;--background:#fff;--muted:#eef1e8;--muted-foreground:#4c5845;--border:#d5dcc8}
+
+/* "What Should We Build Next?": the candidate crates and the vote link. */
+.crate-shelf>.next-crates{display:block;padding:26px 0 4px;border-bottom:0}
+.next-crates h3{font-size:22px;font-weight:500;letter-spacing:-.02em}
+.next-crates>p{font-size:15px;line-height:1.6;color:#4f5b44;margin-top:8px;max-width:520px}
+.next-crates ul{list-style:none;margin:18px 0 22px;padding:0;display:grid;gap:0}
+.next-crates li{display:grid;grid-template-columns:minmax(150px,190px) 1fr;gap:6px 18px;padding:11px 0;border-top:1px solid #dfe5d4;font-size:14px;line-height:1.5}
+.next-crates li strong{font-size:15px;font-weight:500}
+.next-crates li span{color:#4f5b44}
+@media(max-width:700px){.next-crates li{grid-template-columns:1fr;gap:2px}}
+
+/* Small text that fell just under 4.5:1 on its card color. */
+.category-count{color:#4b5a3f}
+.category-3 .row-description,.category-3 .category-count{color:#3f4c33}
+.done-graphic p span{color:#3c5523}
+.crate-shelf>a>span.available{color:#36501a}
+.lab-panel-yours{display:flex;flex-direction:column}.lab-panel-yours>div{margin-block:auto}
+.hero-network .plan-card{border-color:#cbd2ba}.hero-network .plan-card .card-caption{color:#4f5c40}.hero-network .plan-card .card-caption>span:last-child{color:#5d6a4c}.hero-network .plan-card>div[aria-live]>div:first-child{color:#0a0e1a}
+.coming h2>span{color:#5c684c}
