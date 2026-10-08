@@ -72,6 +72,8 @@ export default function Home(){
  const [tick,setTick]=useState(0);const [playing,setPlaying]=useState(true);const [open,setOpen]=useState<Kind|null>(null);
  useEffect(()=>{const media=window.matchMedia("(prefers-reduced-motion: reduce)");if(media.matches)setPlaying(false);const change=()=>{if(media.matches)setPlaying(false)};media.addEventListener("change",change);return()=>media.removeEventListener("change",change)},[]);
  useEffect(()=>{if(!playing)return;const timer=window.setInterval(()=>setTick(v=>v+1),2600);return()=>window.clearInterval(timer)},[playing]);
+ // Catalog stack: each card sticks at its stacking offset, or higher when it is taller than the window (an open row, a short screen), so its bottom is always reachable before the next card covers it.
+ useEffect(()=>{const cards=[...document.querySelectorAll<HTMLElement>(".category-card")];const fit=()=>cards.forEach((card,i)=>card.style.setProperty("--card-top",`${Math.min(24+i*22,window.innerHeight-card.offsetHeight-16)}px`));fit();const observer=new ResizeObserver(fit);cards.forEach(card=>observer.observe(card));window.addEventListener("resize",fit);return()=>{observer.disconnect();window.removeEventListener("resize",fit)}},[]);
  return <><CratePreloader/><main className={playing?"":"paused"}>
  <a className="skip-link" href="#crates">Skip to Components</a>
  <header className="nav"><a href="#top" aria-label="Crate home"><Logo/></a><nav aria-label="Main navigation"><a href="#crates">Components</a><a href="/docs/">Docs</a><a href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={14}/></a></nav><a className="button primary nav-cta" href="#install">Install Crate #1 <ArrowUpRight size={17}/></a></header>
