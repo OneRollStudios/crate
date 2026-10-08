@@ -123,3 +123,16 @@ npm run test:vue    # a fresh Vite + Vue app (needs network access)
 ```
 
 `scripts/build.mjs` generates each element's attributes, properties, and events from `crate/lib/docs.generated.json`, the same prop data as the docs, and fails if the bundle grows past its size budget.
+
+## Releasing
+
+Releases are staged from GitHub Actions (`.github/workflows/publish-elements.yml`) with npm Trusted Publishing and staged publishing: no npm token is stored, every version carries npm provenance, and nothing goes live until a maintainer approves it with 2FA.
+
+Releases go out in a weekly batch:
+
+1. Bump `version` in `crate/elements/package.json` in a pull request, and merge it. Changes to the React components and their prop data ship in the elements too, so bump it when those change.
+2. Every Monday at 04:30 UTC, the weekly release run (`.github/workflows/release.yml`) sees that the version isn't on npm yet and runs Publish Elements in stage mode. It builds and tests the package, then stages it with `npm stage publish`.
+3. The run opens a "Releases to approve" issue, labeled `human`, with the version, what changed since the last release, and the stage ID. If that issue is still open from an earlier week, it adds the new releases to it as a comment instead.
+4. A maintainer approves the staged version on npmjs.com (2FA), or runs `npm stage approve <stage-id>`. `npm stage download <stage-id>` fetches it to inspect first, and `npm stage reject <stage-id>` discards it.
+
+To release outside the weekly batch, a maintainer can run **Weekly release** or **Publish Elements** (mode "stage") from the Actions tab, or push an `elements-v<version>` tag from `main`. Mode "dry-run" checks a release without staging anything.

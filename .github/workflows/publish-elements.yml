@@ -1,4 +1,6 @@
 name: Publish Elements
+# The weekly release run finds the run it started by its request ID.
+run-name: ${{ inputs.request_id && format('Publish Elements ({0})', inputs.request_id) || 'Publish Elements' }}
 
 # Stages crate/elements (@onerollstudios/crate-elements) on npm, the same way
 # publish-cli.yml stages the CLI: npm Trusted Publishing (a short-lived OIDC
@@ -10,10 +12,12 @@ name: Publish Elements
 # names this repository and this workflow file (publish-elements.yml).
 # Renaming this file breaks publishing until that setting is updated.
 #
-# Release: bump "version" in crate/elements/package.json in a PR, merge it,
-# then run this workflow on main with mode "stage", or push a matching tag:
-# git tag elements-v0.1.1 && git push origin elements-v0.1.1
-# Then approve the staged version on npmjs.com.
+# Release: bump "version" in crate/elements/package.json in a PR and merge it. The
+# weekly release run (release.yml, Mondays 04:30 UTC) starts this workflow in
+# "stage" mode for every version that isn't on npm yet, and opens a "Releases
+# to approve" issue with the approve commands. A maintainer can also run this
+# workflow by hand ("dry-run" checks everything without staging) or push an
+# elements-v<version> tag; agents don't, unless a maintainer asks.
 #
 # "pack" builds, tests, and packs on Linux and uploads the .tgz as a workflow
 # artifact, without publishing: for the first version, which has to be
@@ -28,6 +32,10 @@ on:
         type: choice
         options: [dry-run, stage, pack]
         default: dry-run
+      request_id:
+        description: "Set by the weekly release run (release.yml) to find this run. Leave empty."
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -122,6 +130,21 @@ jobs:
               echo "Stage ID: \`$stage_id\`. To inspect it first: \`npm stage download $stage_id\`. To discard it: \`npm stage reject $stage_id\`."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+          # For the weekly release run, which lists the stage ID in its issue.
+          VERSION="$version" STAGE_ID="$stage_id" node -e '
+            const { name } = require("./package.json");
+            const info = { name, version: process.env.VERSION, stageId: process.env.STAGE_ID || null };
+            require("node:fs").writeFileSync("stage.json", JSON.stringify(info) + "\n");
+          '
+
+      - name: Upload the stage info
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'stage' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage-info
+          path: crate/elements/stage.json
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Explain a failed stage
         if: failure()

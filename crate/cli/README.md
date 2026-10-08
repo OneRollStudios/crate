@@ -52,9 +52,11 @@ The end-to-end run (real `shadcn init` and `add`, then a build and a browser che
 
 Releases are staged from GitHub Actions (`.github/workflows/publish-cli.yml`) with npm Trusted Publishing and staged publishing. No npm token is stored anywhere, every version carries npm provenance linking it to this repository and commit, and nothing goes live until a maintainer approves it with 2FA.
 
+Releases go out in a weekly batch:
+
 1. Bump `version` in `crate/cli/package.json` in a pull request, and merge it.
-2. From an up-to-date `main`, push a matching tag: `git tag cli-v0.1.1 && git push origin cli-v0.1.1`.
-3. The workflow checks that the tag matches the version, that the version isn't on npm yet, and that the tests pass, then stages the version with `npm stage publish`. The run's summary shows the stage ID.
+2. Every Monday at 04:30 UTC, the weekly release run (`.github/workflows/release.yml`) sees that the version isn't on npm yet and runs Publish CLI in stage mode. It checks that the tests pass, then stages the version with `npm stage publish`.
+3. The run opens a "Releases to approve" issue, labeled `human`, with the version, what changed since the last release, and the stage ID. If that issue is still open from an earlier week, it adds the new releases to it as a comment instead.
 4. A maintainer approves the staged version on npmjs.com (2FA), or runs `npm stage approve <stage-id>`. Only then can people install it. `npm stage download <stage-id>` fetches the staged tarball to inspect first, and `npm stage reject <stage-id>` discards it.
 
-To check a release without staging anything, run **Publish CLI** from the Actions tab with "dry-run" ticked.
+To release outside the weekly batch, a maintainer can run **Weekly release** or **Publish CLI** (mode "stage") from the Actions tab, or push a `cli-v<version>` tag from `main`. To check a release without staging anything, run **Publish CLI** with mode "dry-run".
