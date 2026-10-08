@@ -1,0 +1,51 @@
+name: Weekly release
+
+# Releases are batched weekly. Every Monday at 04:30 UTC (10:00 IST), for
+# @onerollstudios/crate (crate/cli) and @onerollstudios/crate-elements
+# (crate/elements): if the version in package.json on main isn't on npm yet,
+# this starts the package's own publish workflow (publish-cli.yml or
+# publish-elements.yml, the only workflows npm's Trusted Publisher accepts) in
+# "stage" mode. If anything was staged, it opens one "Releases to approve"
+# issue labeled "human" with each package, version, what changed since the
+# last release, and the npm stage approve command. If nothing is new, it does
+# nothing. The script is crate/scripts/weekly-release.mjs.
+#
+# Run it by hand from the Actions tab only when a maintainer asks for a release
+# outside the weekly batch.
+on:
+  schedule:
+    - cron: "30 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write # Start the publish workflows and read their runs.
+  issues: write # Open the "Releases to approve" issue.
+
+concurrency:
+  group: weekly-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      # Full history, to list what changed since each last release.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Stage new versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: node crate/scripts/weekly-release.mjs
