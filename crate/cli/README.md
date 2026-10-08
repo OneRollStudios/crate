@@ -56,7 +56,7 @@ Releases go out in a weekly batch:
 
 1. Bump `version` in `crate/cli/package.json` in a pull request, and merge it.
 2. Every Monday at 04:30 UTC, the weekly release run (`.github/workflows/release.yml`) sees that the version isn't on npm yet and runs Publish CLI in stage mode. It checks that the tests pass, then stages the version with `npm stage publish`.
-3. The run opens a "Releases to approve" issue, labeled `human`, with the version, what changed since the last release, and the stage ID.
+3. The run opens a "Releases to approve" issue, labeled `human`, with the version, what changed since the last release, and the stage ID. If that issue is still open from an earlier week, it adds the new releases to it as a comment instead.
 4. A maintainer approves the staged version on npmjs.com (2FA), or runs `npm stage approve <stage-id>`. Only then can people install it. `npm stage download <stage-id>` fetches the staged tarball to inspect first, and `npm stage reject <stage-id>` discards it.
 
 To release outside the weekly batch, a maintainer can run **Weekly release** or **Publish CLI** (mode "stage") from the Actions tab, or push a `cli-v<version>` tag from `main`. To check a release without staging anything, run **Publish CLI** with mode "dry-run".

@@ -7,8 +7,9 @@ name: Weekly release
 # publish-elements.yml, the only workflows npm's Trusted Publisher accepts) in
 # "stage" mode. If anything was staged, it opens one "Releases to approve"
 # issue labeled "human" with each package, version, what changed since the
-# last release, and the npm stage approve command. If nothing is new, it does
-# nothing. The script is crate/scripts/weekly-release.mjs.
+# last release, and the npm stage approve command. If that issue is still open
+# from an earlier week, it adds the new releases as a comment instead. If
+# nothing is new, it does nothing. The script is crate/scripts/weekly-release.mjs.
 #
 # Run it by hand from the Actions tab only when a maintainer asks for a release
 # outside the weekly batch.
@@ -20,7 +21,7 @@ on:
 permissions:
   contents: read
   actions: write # Start the publish workflows and read their runs.
-  issues: write # Open the "Releases to approve" issue.
+  issues: write # Open or comment on the "Releases to approve" issue.
 
 concurrency:
   group: weekly-release

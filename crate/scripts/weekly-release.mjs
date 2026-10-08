@@ -2,8 +2,8 @@
 // For each package, if the version in its package.json on main isn't on npm
 // yet, it stages that version through the package's own publish workflow (npm's
 // Trusted Publisher only accepts publish-cli.yml and publish-elements.yml), then
-// opens one "Releases to approve" issue with the approve command for each. If
-// no version is new, it does nothing.
+// opens one "Releases to approve" issue with the approve command for each (or
+// comments on the one still open). If no version is new, it does nothing.
 // Needs GH_TOKEN (actions: write, issues: write) and GH_REPO. Run from anywhere:
 //   node crate/scripts/weekly-release.mjs [--dry-run]
 // --dry-run prints what it would stage and the changes, and stages nothing.
@@ -124,6 +124,15 @@ const body = [
 ].join("\n");
 const file = join(mkdtempSync(join(tmpdir(), "release-issue-")), "issue.md");
 writeFileSync(file, body);
-console.log(run("gh", ["issue", "create", "--title", "Releases to approve", "--label", "human", "--body-file", file]));
+// One open issue at a time, like the live check: if last week's is still open,
+// this week's releases go into it as a comment.
+const title = "Releases to approve";
+const open = JSON.parse(run("gh", ["issue", "list", "--state", "open", "--label", "human", "--search", `"${title}" in:title`, "--json", "number,title"]));
+const existing = open.find((issue) => issue.title === title)?.number;
+console.log(
+  existing
+    ? run("gh", ["issue", "comment", String(existing), "--body-file", file])
+    : run("gh", ["issue", "create", "--title", title, "--label", "human", "--body-file", file]),
+);
 // A failed stage fails the run too, so it shows up in the Actions tab.
 if (staged < sections.length) process.exit(1);

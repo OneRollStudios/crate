@@ -37,7 +37,8 @@ Read ROADMAP.md for direction.
 - Releases are weekly. Every Monday at 04:30 UTC, .github/workflows/release.yml
   stages each package whose version on main isn't on npm yet
   (@onerollstudios/crate from crate/cli, @onerollstudios/crate-elements from
-  crate/elements) and opens a "Releases to approve" issue for a human.
+  crate/elements) and opens a "Releases to approve" issue for a human (or
+  comments on the one still open).
 - Bump a package's version in a PR when it has changes worth releasing; the
   weekly run picks it up after merge.
 - Never stage or publish a release yourself (running a publish workflow,
