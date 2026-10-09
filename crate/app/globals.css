@@ -51,16 +51,16 @@
 @media(max-width:1100px){.lab-panels{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.lab-heading h2{font-size:53px}.lab-heading p{font-size:18px}.lab-panels{grid-template-columns:minmax(0,1fr)}.lab-panel{min-height:150px}.lab-range input{width:100%}.lab-control.lab-range{flex:1 1 160px}}
 @media(prefers-reduced-motion:reduce){.lab-panel{transition:none}}
-/* Pixel intro (app/pixel-motion.tsx): first visit per session, while the page loads, 800ms at most. The page renders underneath; this only covers it, and a failsafe hides it if the script never finishes. */
+/* Pixel intro (app/pixel-motion.tsx): first visit per session, while the page loads, about 850ms at most. The page renders underneath; this only covers it, and a failsafe hides it if the script never finishes. */
 .px-intro{display:none}
 html[data-intro] .px-intro{display:block;position:fixed;inset:0;z-index:1000;pointer-events:none;background:#f6f4ed;animation:px-intro-failsafe 0s 1.5s forwards}
 .px-intro canvas{display:block;width:100%;height:100%}
 @keyframes px-intro-failsafe{to{visibility:hidden}}
-/* Pixel page transition: the old page drops out in 24px cells that flash ORS green, then the new page fills in. The keyframes (px-out, px-in) are built by the head script. */
+/* Pixel page transition: the old page drops out in 48px cells that flash ORS green, then the new page fills in. The keyframes (px-out, px-in) are built by the head script. */
 @media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
 ::view-transition-image-pair(root){background:#d4ff3d}
-::view-transition-old(root),::view-transition-new(root){mix-blend-mode:normal;-webkit-mask-size:192px 192px;mask-size:192px 192px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
-::view-transition-old(root){animation:px-out .36s step-end both}
-::view-transition-new(root){animation:px-in .36s step-end both}
+::view-transition-old(root),::view-transition-new(root){mix-blend-mode:normal;-webkit-mask-size:384px 384px;mask-size:384px 384px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+::view-transition-old(root){animation:px-out .56s step-end both}
+::view-transition-new(root){animation:px-in .56s step-end both}
 @media(prefers-color-scheme:dark){html[data-intro] .px-intro{background:#0a0e1a}}
 @media(prefers-reduced-motion:reduce){.px-intro{display:none!important}::view-transition-group(*),::view-transition-image-pair(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
