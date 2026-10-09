@@ -20,26 +20,7 @@
 
 .category-card:has(.is-open){position:relative;top:auto}
 
-/* Brand entrance: no progress fiction, no scroll lock, no focus capture. */
 .hero-promise{color:#607913}
-.crate-preloader{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#0a0e1a;color:#f6f4ed;pointer-events:none;animation:preloader-failsafe 2.8s step-end forwards;transition:clip-path .65s cubic-bezier(.76,0,.24,1);clip-path:inset(0 0 0 0)}
-.crate-preloader.is-leaving{clip-path:inset(0 0 100% 0)}
-.preloader-lockup{display:flex;align-items:center;gap:25px;transform:translateY(-15px)}
-.preloader-mark{display:grid;grid-template-columns:repeat(2,22px);grid-template-rows:repeat(2,22px);gap:4px;transform:rotate(0)}
-.preloader-mark i{background:#d4ff3d;display:block;animation:crate-piece .9s cubic-bezier(.22,1,.36,1) both}
-.preloader-mark i:nth-child(1){--piece-x:-28px;--piece-y:-28px}
-.preloader-mark i:nth-child(2){--piece-x:28px;--piece-y:-28px;animation-delay:.09s}
-.preloader-mark i:nth-child(3){--piece-x:-28px;--piece-y:28px;animation-delay:.18s}
-.preloader-mark i:nth-child(4){--piece-x:28px;--piece-y:28px;animation-delay:.27s;background:#a8cc30}
-.preloader-word{overflow:hidden;padding-bottom:8px}
-.preloader-word>span{display:block;font-family:var(--ors-font-heading);font-size:78px;font-weight:700;letter-spacing:-.065em;line-height:1.1;animation:crate-word .9s cubic-bezier(.22,1,.36,1) .18s both}
-.preloader-period{color:#d4ff3d}
-.preloader-credit{position:absolute;bottom:35px;left:0;right:0;text-align:center;font-size:12px;letter-spacing:.04em;color:#b8bfaf}
-@keyframes crate-piece{from{opacity:0;transform:translate(var(--piece-x),var(--piece-y)) scale(.7)}to{opacity:1;transform:translate(0,0) scale(1)}}
-@keyframes crate-word{from{opacity:0;transform:translateY(105%)}to{opacity:1;transform:translateY(0)}}
-@keyframes preloader-failsafe{to{visibility:hidden;opacity:0}}
-@media(max-width:700px){.preloader-word>span{font-size:64px}.preloader-mark{grid-template-columns:repeat(2,18px);grid-template-rows:repeat(2,18px);gap:3px}.preloader-lockup{gap:20px}}
-@media(prefers-reduced-motion:reduce){.crate-preloader{display:none}}
 .network-single{display:block}
 .problem-grid-single{grid-template-columns:minmax(0,1fr)}
 .problem-grid-single .problem-copy{max-width:760px}
@@ -70,3 +51,16 @@
 @media(max-width:1100px){.lab-panels{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.lab-heading h2{font-size:53px}.lab-heading p{font-size:18px}.lab-panels{grid-template-columns:minmax(0,1fr)}.lab-panel{min-height:150px}.lab-range input{width:100%}.lab-control.lab-range{flex:1 1 160px}}
 @media(prefers-reduced-motion:reduce){.lab-panel{transition:none}}
+/* Pixel intro (app/pixel-motion.tsx): first visit per session, while the page loads, about 850ms at most. The page renders underneath; this only covers it, and a failsafe hides it if the script never finishes. */
+.px-intro{display:none}
+html[data-intro] .px-intro{display:block;position:fixed;inset:0;z-index:1000;pointer-events:none;background:#f6f4ed;animation:px-intro-failsafe 0s 1.5s forwards}
+.px-intro canvas{display:block;width:100%;height:100%}
+@keyframes px-intro-failsafe{to{visibility:hidden}}
+/* Pixel page transition: the old page drops out in 48px cells that flash ORS green, then the new page fills in. The keyframes (px-out, px-in) are built by the head script. */
+@media(prefers-reduced-motion:no-preference){@view-transition{navigation:auto}}
+::view-transition-image-pair(root){background:#d4ff3d}
+::view-transition-old(root),::view-transition-new(root){mix-blend-mode:normal;-webkit-mask-size:384px 384px;mask-size:384px 384px;-webkit-mask-repeat:repeat;mask-repeat:repeat}
+::view-transition-old(root){animation:px-out .56s step-end both}
+::view-transition-new(root){animation:px-in .56s step-end both}
+@media(prefers-color-scheme:dark){html[data-intro] .px-intro{background:#0a0e1a}}
+@media(prefers-reduced-motion:reduce){.px-intro{display:none!important}::view-transition-group(*),::view-transition-image-pair(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}

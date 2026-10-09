@@ -114,7 +114,7 @@ async function runViewport(browser, baseURL, name, viewport, colorScheme) {
       if (message.type() === "error" && !message.text().startsWith("Failed to load resource:")) errors.push(message.text());
     });
     await page.goto(baseURL, { waitUntil: "networkidle" });
-    await page.locator(".crate-preloader").waitFor({ state: "hidden" });
+    await page.locator(".px-intro").waitFor({ state: "hidden" });
     await page.screenshot({ path: `${screenshotDir}/${name}-${colorScheme}.png`, fullPage: true });
     await checkLayout(page, `${name}-${colorScheme}`);
 
@@ -173,7 +173,7 @@ async function captureHeroStates(browser, baseURL) {
     const page = await context.newPage();
     page.setDefaultTimeout(15000);
     await page.goto(baseURL, { waitUntil: "networkidle" });
-    await page.locator(".crate-preloader").waitFor({ state: "hidden" });
+    await page.locator(".px-intro").waitFor({ state: "hidden" });
     const network = page.locator(".demo-board .network");
     await network.scrollIntoViewIfNeeded();
     // The hero shows one demo: the approval card (one job per section).
