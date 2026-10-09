@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SITE_URL } from "@/lib/config";
+import { PixelHead, PixelIntro } from "./pixel-motion";
+import { PixelTransitions } from "./pixel-transitions";
 
 const title = "Crate | Ready-made components for AI products.";
 const description = "Ready-made UI components for AI products. Explore 12 wait states, install with one command, and make every small moment count.";
@@ -38,5 +40,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  // suppressHydrationWarning: the head script marks <html data-intro> before React loads.
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head><PixelHead /></head>
+      <body><PixelIntro />{children}<PixelTransitions /></body>
+    </html>
+  );
 }

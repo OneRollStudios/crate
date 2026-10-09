@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { CratePreloader } from "@/components/crate-preloader";
 import { ThemeLab } from "./theme-lab";
 import { ArrowUpRight, ArrowRight, Check, Copy, Plus, Minus, Pause, Play, RotateCcw, Terminal, Code2, Box, GitBranch, Braces } from "lucide-react";
 import { AgentPlan, Approval, Done, ErrorState, FileProcessing, Queue, ReasoningTrace, Sources, Stalled, Streaming, Thinking, ToolCall } from "@/components/agent-wait-states";
@@ -72,7 +71,7 @@ export default function Home(){
  const [tick,setTick]=useState(0);const [playing,setPlaying]=useState(true);const [open,setOpen]=useState<Kind|null>(null);
  useEffect(()=>{const media=window.matchMedia("(prefers-reduced-motion: reduce)");if(media.matches)setPlaying(false);const change=()=>{if(media.matches)setPlaying(false)};media.addEventListener("change",change);return()=>media.removeEventListener("change",change)},[]);
  useEffect(()=>{if(!playing)return;const timer=window.setInterval(()=>setTick(v=>v+1),2600);return()=>window.clearInterval(timer)},[playing]);
- return <><CratePreloader/><main className={playing?"":"paused"}>
+ return <><main className={playing?"":"paused"}>
  <a className="skip-link" href="#crates">Skip to Components</a>
  <header className="nav"><a href="#top" aria-label="Crate home"><Logo/></a><nav aria-label="Main navigation"><a href="#crates">Components</a><a href="/docs/">Docs</a><a href="https://github.com/OneRollStudios/crate" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={14}/></a></nav><a className="button primary nav-cta" href="#install">Install Crate #1 <ArrowUpRight size={17}/></a></header>
  <section className="hero" id="top"><div className="shell hero-grid"><div className="hero-copy">
